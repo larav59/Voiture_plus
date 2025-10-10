@@ -21,4 +21,4 @@ Le superviseur industriel est une application web développée en JavaScript, HT
 ## Architecture technique
 
 - Frontend : HTML, CSS, JavaScript
-- Backend : PHP (traitement des requêtes, échanges avec la centrale)
+- Backend : Node (API)

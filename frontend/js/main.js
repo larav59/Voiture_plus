@@ -1,80 +1,120 @@
+/************* DONNÉES GLOBALES (à remplacer par un appel API) *************/
+
+var VEHICLE_DATA = [
+    {
+        id: 'car1',
+        name: 'Voiture 1',
+        carIcon: { url: 'images/car/car_red.png', size: [80, 60] },
+        pinIcon: { url: 'images/pin/pin_red.png', size: [40, 45] },
+        carPosition: [500, 800],
+        destinationPosition: [600, 900],
+        color: 'red'
+    },
+    {
+        id: 'car2',
+        name: 'Voiture 2',
+        carIcon: { url: 'images/car/car_yellow.png', size: [100, 60] },
+        pinIcon: { url: 'images/pin/pin_yellow.png', size: [40, 45] },
+        carPosition: [1000, 1200],
+        destinationPosition: [1100, 1300],
+        color: 'yellow'
+    }
+];
+
 $(document).ready(function () {
-    var img = new Image();
-    img.src = "images/plan.jpg";
 
-    img.onload = function() {
-        var imageWidth = img.width;
-        var imageHeight = img.height;
-
-        var bounds = [[0, 0], [imageHeight, imageWidth]];
-
-        var map = L.map('map', {
-            crs: L.CRS.Simple,
-            minZoom: -2,
-            attributionControl: false
-        });
-
-        L.imageOverlay("images/plan.jpg", bounds).addTo(map);
-        map.fitBounds(bounds);
-
-        // Définir une icône voiture
-        var car1Icon = L.icon({
-            iconUrl: 'images/car_red.png',       // chemin vers ton icône
-            iconSize: [80, 60],       // taille de l’icône
-            iconAnchor: [20, 20],     // point de l'icône qui correspond à la position [x,y]
-            popupAnchor: [0, -20]     // position du popup par rapport à l’icône
-        });
-        var car2Icon = L.icon({
-            iconUrl: 'images/car_yellow.png',       // chemin vers ton icône
-            iconSize: [100, 60],       // taille de l’icône
-            iconAnchor: [20, 20],     // point de l'icône qui correspond à la position [x,y]
-            popupAnchor: [0, -20]     // position du popup par rapport à l’icône
-        });
-
-        // Créer les marqueurs
-        var car1Marker = L.marker([500, 800], { icon: car1Icon }).bindPopup("Voiture 1");
-        var car2Marker = L.marker([1000, 1200], { icon: car2Icon }).bindPopup("Voiture 2");
-
-        // Définir une icône destination
-        var pin1Icon = L.icon({
-            iconUrl: 'images/pin_red.png',       // chemin vers ton icône
-            iconSize: [70, 60],       // taille de l’icône
-            iconAnchor: [20, 20],     // point de l'icône qui correspond à la position [x,y]
-            popupAnchor: [0, -20]     // position du popup par rapport à l’icône
-        });
-        var pin2Icon = L.icon({
-            iconUrl: 'images/pin_yellow.png',       // chemin vers ton icône
-            iconSize: [40, 45],       // taille de l’icône
-            iconAnchor: [20, 20],     // point de l'icône qui correspond à la position [x,y]
-            popupAnchor: [0, -20]     // position du popup par rapport à l’icône
-        });
-        
-        // Créer les marqueurs
-        var pin1Marker = L.marker([500, 800], { icon: pin1Icon, draggable: true }).bindPopup("Destination voiture 1");
-        var pin2Marker = L.marker([1000, 1200], { icon: pin2Icon, draggable: true }).bindPopup("Destination voiture 2");
-
-        // Créer des LayerGroups
-        var car1Layer = L.layerGroup([car1Marker, pin1Marker]);
-        var car2Layer = L.layerGroup([car2Marker, pin2Marker]);
-
-        // Ajouter les deux au départ
-        car1Layer.addTo(map);
-        car2Layer.addTo(map);
-
-        var layerControl = L.control.layers(null, null, { position: 'topright' }).addTo(map);
-
-        layerControl.addOverlay(car1Layer, "Voiture 1");
-        layerControl.addOverlay(car2Layer, "Voiture 2");
+    const params = {
+        imageUrl: "images/plan.jpg",
+        minZoom: -2
     };
 
+    var img = new Image();
+    img.src = params.imageUrl;
+    
+    img.onload = function() {
+        var bounds = [[0, 0], [img.height, img.width]];
+        
+        var map = L.map('map', {
+            crs: L.CRS.Simple,
+            minZoom: params.minZoom,
+            attributionControl: false
+        });
+        
+        L.imageOverlay(params.imageUrl, bounds).addTo(map);
+        map.fitBounds(bounds);
+
+        const vehicles = setupVehicles(map, VEHICLE_DATA);
+        console.log("Carte initialisée avec", vehicles.length, "véhicules");
+    }
 });
 
-pin1Marker.on('moveend', function(e) {
-    var pos = e.target.getLatLng();
-    console.log("Nouvelle position pin1:", pos.lat, pos.lng);
-});
+/************* FONCTIONS UTILITAIRES *************/
 
-pin2Marker.on('moveend', function(e) {
-    var pos = e.target.getLatLng();
-    console.log("Nouvelle position pin2:", pos.lat, pos.lng);
-});
+function createIcon(iconConfig) {
+    return L.icon({
+        iconUrl: iconConfig.url,
+        iconSize: iconConfig.size,
+        iconAnchor: [20, 20],
+        popupAnchor: [0, -20]
+    });
+}
+
+function createMarker(position, icon, popupText, draggable) {
+    return L.marker(position, { 
+        icon: icon, 
+        draggable: draggable || false 
+    }).bindPopup(popupText);
+}
+
+function setupPinListener(pinMarker, vehicleId) {
+    pinMarker.on('moveend', function(e) {
+        var pos = e.target.getLatLng();
+        console.log("Nouvelle position " + vehicleId + ":", pos.lat, pos.lng);
+    });
+}
+
+function createVehicleLayer(vehicleConfig) {
+    var carIcon = createIcon(vehicleConfig.carIcon);
+    var pinIcon = createIcon(vehicleConfig.pinIcon);
+    
+    var carMarker = createMarker(
+        vehicleConfig.carPosition, 
+        carIcon, 
+        vehicleConfig.name
+    );
+    
+    var pinMarker = createMarker(
+        vehicleConfig.destinationPosition, 
+        pinIcon, 
+        "Destination " + vehicleConfig.name.toLowerCase(),
+        true // draggable
+    );
+    
+    setupPinListener(pinMarker, vehicleConfig.id);
+    
+    return {
+        layer: L.layerGroup([carMarker, pinMarker]),
+        name: vehicleConfig.name,
+        carMarker: carMarker,
+        pinMarker: pinMarker
+    };
+}
+
+/************* SETUP PRINCIPAL *************/
+
+function setupVehicles(map, vehicleData) {
+    var layerControl = L.control.layers(null, null, { 
+        position: 'topright' 
+    }).addTo(map);
+    
+    var vehicleLayers = [];
+    
+    vehicleData.forEach(function(vehicleConfig) {
+        var vehicleLayer = createVehicleLayer(vehicleConfig);
+        vehicleLayer.layer.addTo(map);
+        layerControl.addOverlay(vehicleLayer.layer, vehicleLayer.name);
+        vehicleLayers.push(vehicleLayer);
+    });
+    
+    return vehicleLayers;
+}
