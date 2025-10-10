@@ -1,0 +1,45 @@
+<!-- 
+
+Ce fichier contient le squelette de l'application
+On y trouve la page principale de l'application
+Tout les traitements sont faits dans les fichiers js
+
+-->
+<head>
+    <!-- integration des fichiers css associes -->
+    <link href="libs/bootstrap-5.3.8-dist/css/bootstrap.css" rel="stylesheet" type="text/css"/>
+    <link href="libs/leaflet/dist/leaflet.css" rel="stylesheet" type="text/css"/>
+    <link rel="stylesheet" href="style.css">
+    <!-- fin de l'integration -->
+
+    <!-- integration des fichiers js associes -->
+    <script src="libs/jquery-3.4.1.min.js"></script>
+    <script type="text/javascript" src="libs/bootstrap-5.3.8-dist/js/bootstrap.js"></script>
+    <script type="text/javascript" src="libs/leaflet/dist/leaflet.js"></script>
+    <script src="js/main.js"></script>
+    <!-- fin de l'integration -->
+
+    <meta charset="utf-8">
+    <title>Superviseur Voiture +</title>
+</head>
+
+
+<body>
+
+    <nav class="navbar navbar-expand-lg p-2 px-5 mb-3 bg-white border-bottom shadow-sm">
+        <img src="images/logo.png" width="150px" height="50px" alt="">
+
+        <div class="collapse navbar-collapse">
+            <ul class="navbar-nav ms-5">
+                <li class="nav-item">
+                    <a class="nav-link" href="main.html">Home</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="m-5">
+   
+        <div id="map" class="m-2"></div>
+    </div>
+</body>
