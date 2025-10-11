@@ -19,7 +19,7 @@ export class WebApiServer {
     private app: Application;
     private port: number;
     private route: Router;
-    private errorHandler?: any;
+    private errorHandler?: (err: any, req: Request, res: Response, next: NextFunction) => void;
     private middlewares: any[];
     private logger: Logger;
     private appDataSource?: DataSource;
@@ -63,7 +63,7 @@ export class WebApiServer {
         });
 
         // Middleware d'erreurs global
-        if(!this.errorHandler) {
+        if(this.errorHandler) {
             this.app.use(this.errorHandler);
         }
     }
