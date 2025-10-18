@@ -128,3 +128,15 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+# central-command-unit
+central-command-unit/bin/
+central-command-unit/lib/
+central-command-unit/obj/
+central-command-unit/docs/
+central-command-unit/*.so
+central-command-unit/*.a
+central-command-unit/*.o
+
+# env 
+.vscode
