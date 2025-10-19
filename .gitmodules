@@ -1,0 +1,3 @@
+[submodule "central-command-unit/external/inih"]
+	path = central-command-unit/external/inih
+	url = https://github.com/benhoyt/inih.git
