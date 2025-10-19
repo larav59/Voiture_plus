@@ -20,7 +20,7 @@ void test_register(const char *name, test_function_t function, const char *descr
 	if(testCount >= testCapacity) {
 		size_t newCapacity = testCapacity == 0 ? 1 : testCapacity * 2;
 		testTable = realloc(testTable, newCapacity * sizeof(test_entry_t));
-		CHECK_ALLOC(testTable);
+		CHECK_ALLOC_RAW(testTable);
 		testCapacity = newCapacity;
 	}
 	testTable[testCount++] = (test_entry_t){name, description, function};

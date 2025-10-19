@@ -35,7 +35,7 @@ bool fifo_is_empty(fifo_t *fifo) {
  */
 void fifo_push(fifo_t *fifo, void *data) {
 	fifo_node_t *node = malloc(sizeof(fifo_node_t));
-	CHECK_ALLOC(node);
+	CHECK_ALLOC_(node);
 	node->data = data;
 	node->next = NULL;
 
