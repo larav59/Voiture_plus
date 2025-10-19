@@ -4,8 +4,10 @@ OBJ_DIR        := obj
 BIN_DIR        := bin
 LIB_DIR        := lib
 TEST_DIR       := tests
+MK_LIB_DIR     := mk-lib
+EXTERNAL_DIR   := external
 
-SERVICES       := broker conflict-manager heartbeat route-planner railway-synchronizer
+SERVICES       := #broker conflict-manager heartbeat route-planner railway-synchronizer
 
 TARGET_LIBA    := $(LIB_DIR)/libcore.a
 TARGET_LIBSO   := $(LIB_DIR)/libcore.so
@@ -15,10 +17,26 @@ CC             ?= gcc
 AR             ?= ar
 LDFLAGS        ?= -L$(LIB_DIR)
 CFLAGS         ?= -Wall -Wextra -g
-LIBS           ?= -lpthread -lcore
+LIBS           ?= 
+
+EXT_LIB_TARGETS :=
+EXT_LIBS        :=
+EXT_CFLAGS	    :=
+
+EXT_LIBS_MK    := $(wildcard $(MK_LIB_DIR)/*.mk)
 
 
-PROJECT_CFLAGS := -I$(INC_DIR) -MMD -MP -fPIC
+# Règles principales
+.PHONY: all debug release external-libs core services tests test-run clean distclean docs
+all: core tests docs
+
+
+-include $(EXT_LIBS_MK)
+
+$(info External Libraries to build: $(EXT_LIB_TARGETS))
+
+PROJECT_LIBS   := -lpthread -lcore $(EXT_LIBS)
+PROJECT_CFLAGS := -I$(INC_DIR) $(EXT_CFLAGS) -MMD -MP -fPIC
 
 
 SRC_CORE       := $(shell find $(SRC_DIR)/core -name "*.c")
@@ -46,17 +64,10 @@ OBJ_TESTS      := $(patsubst $(TEST_DIR)/%.c,$(OBJ_DIR)/%.o,$(SRC_TESTS))
 # On les inclut ici pour que make puisse les utiliser et recompiler les fichiers .o concernés quand un header change
 # Note: le - devant include sert à ignorer les erreurs si le fichier .d n'existe pas encore (par exemple lors du premier build)
 
--include $(shell find $(OBJ_DIR) -name "*.d")
-
-
-# Règles principales
-.PHONY: all debug release core services tests test-run clean distclean docs
-
-all: core tests docs
-
+-include $(shell find $(OBJ_DIR) -name "*.d") 
 
 # Libcore (static et shared)
-core: $(TARGET_LIBA) $(TARGET_LIBSO)
+core: external-libs $(TARGET_LIBA) $(TARGET_LIBSO)
 
 $(TARGET_LIBA): $(OBJ_CORE)
 	@mkdir -p $(LIB_DIR)
@@ -71,20 +82,20 @@ $(TARGET_LIBSO): $(OBJ_CORE)
 
 
 # Services
-services: $(SERVICES:%=$(BIN_DIR)/%)
+services: external-libs $(SERVICES:%=$(BIN_DIR)/%)
 
 # Edition de liens des services avec les objets correspondants et la libcore.a
 $(BIN_DIR)/%: $(wildcard $(OBJ_DIR)/%/*.o) $(TARGET_LIBA)
 	@mkdir -p $(BIN_DIR)
-	$(CC) $^ -o $@ $(LDFLAGS) $(LIBS)
+	@$(CC) $^ -o $@ $(LDFLAGS) $(LIBS) $(PROJECT_LIBS)
 	@echo "LD Service $@"
 
 # Lanceur de test unitaires
-tests: $(TARGET_TESTS)
+tests: external-libs $(TARGET_TESTS)
 
 $(TARGET_TESTS): $(OBJ_CORE) $(OBJ_TESTS)
 	@mkdir -p $(BIN_DIR)
-	@$(CC) $^ -o $@ $(LDFLAGS) $(LIBS)
+	@$(CC) $^ -o $@ $(LDFLAGS) $(LIBS) $(PROJECT_LIBS)
 	@echo "UT $@"
 
 # Run tests
@@ -105,6 +116,9 @@ $(OBJ_DIR)/%.o: $(TEST_DIR)/%.c
 	@$(CC) $(CFLAGS) $(PROJECT_CFLAGS) -c $< -o $@
 
 
+# Construction des bibliothèques externes
+external-libs: $(EXT_LIB_TARGETS)
+
 # Documentation
 docs:
 	@mkdir -p docs
@@ -114,7 +128,7 @@ docs:
 
 # Nettoyage
 clean:
-	rm -rf $(BIN_DIR) $(LIB_DIR) $(OBJ_DIR) 
+	rm -rf $(BIN_DIR) $(LIB_DIR) $(OBJ_DIR)
 
 # Pour le debug des variables Makefile
 print-%:
