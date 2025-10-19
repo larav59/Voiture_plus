@@ -14,8 +14,8 @@ var VEHICLE_DATA = [
         name: 'Voiture 1',
         carIcon: { url: 'images/car/car_red.png', size: [80, 60] },
         pinIcon: { url: 'images/pin/pin_red.png', size: [40, 45] },
-        carPosition: [500, 800],
-        destinationPosition: [600, 900],
+        carPosition: [300, 800],
+        destinationPosition: [315, 900],
         color: 'red'
     },
     {
@@ -23,9 +23,30 @@ var VEHICLE_DATA = [
         name: 'Voiture 2',
         carIcon: { url: 'images/car/car_yellow.png', size: [100, 60] },
         pinIcon: { url: 'images/pin/pin_yellow.png', size: [40, 45] },
-        carPosition: [1000, 1200],
-        destinationPosition: [1100, 1300],
+        carPosition: [850, 1100],
+        destinationPosition: [700, 250],
         color: 'yellow'
+    }
+];
+
+var MAP_DATA = [
+    {
+        id: 'trainStation',
+        name: 'Gare',
+        icon: { url: 'images/train_station.png', size: [60, 60] },
+        position: [190, 750],
+    },
+    {
+        id: 'carPark1',
+        name: 'Parking 1',
+        icon: { url: 'images/car_park.png', size: [40, 40] },
+        position: [590, 240],
+    },
+    {
+        id: 'carPark2',
+        name: 'Parking 2',
+        icon: { url: 'images/car_park.png', size: [40, 40] },
+        position: [925, 1170],
     }
 ];
 
@@ -33,7 +54,11 @@ $(document).ready(function () {
 
     const params = {
         imageUrl: "images/plan.png",
-        minZoom: -2
+        minZoom: -2,
+        maxZoom: 2,
+        zoomDelta: 0.1,
+        zoomSmap: 0.1,
+        wheelPxPerZoomLevel: 300
     };
 
     var img = new Image();
@@ -45,14 +70,22 @@ $(document).ready(function () {
         var map = L.map('map', {
             crs: L.CRS.Simple,
             minZoom: params.minZoom,
+            maxZoom: params.maxZoom,
+            zoomDelta: params.zoomDelta,
+            zoomSnap: params.zoomSnap,
+            wheelPxPerZoomLevel: params.wheelPxPerZoomLevel,
             attributionControl: false
         });
         
         L.imageOverlay(params.imageUrl, bounds).addTo(map);
         map.fitBounds(bounds);
+        map.setZoom(-0.25);
 
         const vehicles = setupVehicles(map, VEHICLE_DATA);
         console.log("Carte initialisée avec", vehicles.length, "véhicules");
+
+        const mapPoints = setupMapPoints(map, MAP_DATA);
+        console.log("Points fixes chargés:", mapPoints.length);
     }
 });
 
@@ -122,7 +155,48 @@ function setupVehicles(map, vehicleData) {
         vehicleLayer.layer.addTo(map);
         layerControl.addOverlay(vehicleLayer.layer, vehicleLayer.name);
         vehicleLayers.push(vehicleLayer);
+
+        const option = $('<option>').val(vehicleConfig.id).html(vehicleConfig.name);
+        $('#vehicleSelect').append(option);
     });
     
     return vehicleLayers;
 }
+
+function setupMapPoints(map, mapData) {
+    var markers = [];
+    
+    mapData.forEach(function(point) {
+        var icon = createIcon(point.icon);
+        var marker = createMarker(point.position, icon, point.name, false);
+        marker.addTo(map);
+        markers.push(marker);
+
+        const option = $('<option>').val(point.id).html(point.name);
+        $('#destinationSelect, .step-select').append(option);
+    });
+    
+    return markers;
+}
+
+/************* INTERACTIONS *************/
+
+$('#addStepBtn').on('click', function() {
+
+    const maxStep = 1;
+    let stepCount = $('.step-item').length - 1; //step clonable
+    if (stepCount >= maxStep) return;
+
+    const step = stepCount+1;
+    
+    const stepItem= $('#stepClonable').clone().removeAttr('id').removeClass('d-none');
+    $('#stepsContainer').append(stepItem);
+    
+    if (step == maxStep)
+        $('#addStepBtn').prop('disabled', true);
+});
+
+$(document).on('click', '.remove-step', function() {
+    $(this).closest('.step-item').remove();
+    $('#addStepBtn').prop('disabled', false);
+});

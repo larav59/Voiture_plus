@@ -20,14 +20,66 @@
         <div class="collapse navbar-collapse">
             <ul class="navbar-nav ms-5">
                 <li class="nav-item">
-                    <a class="nav-link" href="main.html">Home</a>
+                    <a class="nav-link" href="index.html">Accueil</a>
                 </li>
             </ul>
         </div>
     </nav>
 
-    <div class="m-5">
+    <div class="m-5 row">
    
-        <div id="map" class="m-2"></div>
+        <div id="map" class="m-2 col-md-8">
+        </div>
+
+        <div id="trajet" class="m-2 col">
+
+            <div class="card mb-3">
+                <div class="card-header">
+                    Définir un trajet
+                </div>
+                
+
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="vehicleSelect" class="form-label">Véhicule</label>
+                        <select class="form-select" id="vehicleSelect">
+                        </select>
+                    </div>
+
+                    <p class="fw-semibold">Trajet :</p>
+
+                    <div class="mb-3 text-center">
+
+                        <div class="mb-3 step-item row mx-3 d-none" id="stepClonable">
+                            <select class="col form-select step-select"></select>
+                            <button type="button" class="col-auto btn text-danger p-2 remove-step"> ✕ </button>
+                        </div>
+
+                        <div id="stepsContainer">
+                            <!-- Les étapes seront ajoutées ici -->
+                        </div>
+
+                        <button type="button" class="btn btn-outline-secondary btn-sm text-justify" id="addStepBtn">
+                            <i class="bi bi-plus-circle"></i> Ajouter une étape
+                        </button>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="destinationSelect" class="form-label">Destination finale</label>
+                        <select class="form-select" id="destinationSelect">
+                        </select>
+                    </div>
+
+                    
+
+                    <div class="d-grid">
+                        <button type="button" class="btn btn-primary" id="calculateTrajetBtn">
+                            Calculer le trajet
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
     </div>
 </body>
