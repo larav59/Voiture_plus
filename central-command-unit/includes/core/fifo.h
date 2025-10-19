@@ -10,9 +10,6 @@
 #ifndef FIFO_H
 #define FIFO_H
 
-#include <stdlib.h>
-#include <stdbool.h>
-
 typedef struct fifo_node {
 	void *data;
 	struct fifo_node *next;

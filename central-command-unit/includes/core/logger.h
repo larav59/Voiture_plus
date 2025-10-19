@@ -8,10 +8,8 @@
 #ifndef LOGGER_H
 #define LOGGER_H
 
-#include <stdio.h>
-#include <stdarg.h>
-#include "fifo.h"
 #include "common.h"
+#include "fifo.h"
 
 /**
  * @enum log_level_t
@@ -19,10 +17,11 @@
  * Définit la criticité des messages de journalisation.
  */
 typedef enum {
-    LOG_LEVEL_DEBUG,   /**< Messages de debugging */
-    LOG_LEVEL_INFO,    /**< Messages d'information */
-    LOG_LEVEL_WARNING, /**< Messages d'avertissement */
-    LOG_LEVEL_ERROR    /**< Messages d'erreur */
+    LOG_LEVEL_DEBUG,    /**< Messages de debugging */
+    LOG_LEVEL_INFO,     /**< Messages d'information */
+    LOG_LEVEL_WARNING,  /**< Messages d'avertissement */
+    LOG_LEVEL_ERROR,    /**< Messages d'erreur */
+    LOG_LEVEL_FATAL,    /**< Messages d'erreur fatale */
 } log_level_t;
 
 /**
@@ -86,10 +85,12 @@ void logger_destroy(void);
 #define LOG_INFO_SYNC(format, ...)     logger_log_sync(LOG_LEVEL_INFO, format, ##__VA_ARGS__)
 #define LOG_WARNING_SYNC(format, ...)  logger_log_sync(LOG_LEVEL_WARNING, format, ##__VA_ARGS__)
 #define LOG_ERROR_SYNC(format, ...)    logger_log_sync(LOG_LEVEL_ERROR, format, ##__VA_ARGS__)
+#define LOG_FATAL_SYNC(format, ...)    logger_log_sync(LOG_LEVEL_FATAL, format, ##__VA_ARGS__)
 
 #define LOG_DEBUG_ASYNC(format, ...)   logger_log_async(LOG_LEVEL_DEBUG, format, ##__VA_ARGS__)
 #define LOG_INFO_ASYNC(format, ...)    logger_log_async(LOG_LEVEL_INFO, format, ##__VA_ARGS__)
 #define LOG_WARNING_ASYNC(format, ...) logger_log_async(LOG_LEVEL_WARNING, format, ##__VA_ARGS__)
 #define LOG_ERROR_ASYNC(format, ...)   logger_log_async(LOG_LEVEL_ERROR, format, ##__VA_ARGS__)
+#define LOG_FATAL_ASYNC(format, ...)   logger_log_async(LOG_LEVEL_FATAL, format, ##__VA_ARGS__)
 
 #endif // LOGGER_H
