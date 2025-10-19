@@ -31,7 +31,7 @@
 
 
 // Vérifications critiques
-#define CHECK_CRITICAL(cond, msg) \
+#define CHECK_CRITICAL_RAW(cond, msg) \
     do { \
         if (!(cond)) { \
             ERROR("%s at %s:%d\n", msg, __FILE__, __LINE__); \
@@ -40,13 +40,13 @@
     } while(0)
 
 // Allocation mémoire
-#define CHECK_ALLOC(ptr) CHECK_CRITICAL((ptr) != NULL, "Memory allocation failed")
+#define CHECK_ALLOC_RAW(ptr) CHECK_CRITICAL_RAW((ptr) != NULL, "Memory allocation failed")
 
 // POSIX semaphore
-#define CHECK_SEM(ret) CHECK_CRITICAL((ret) == 0, "Semaphore error")
+#define CHECK_SEM_RAW(ret) CHECK_CRITICAL_RAW((ret) == 0, "Semaphore error")
 
 // POSIX pthread
-#define CHECK_PTHREAD(ret) CHECK_CRITICAL((ret) == 0, "Pthread error")
+#define CHECK_PTHREAD_RAW(ret) CHECK_CRITICAL_RAW((ret) == 0, "Pthread error")
 
 
 

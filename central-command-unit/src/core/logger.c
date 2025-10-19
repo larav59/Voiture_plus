@@ -16,58 +16,17 @@ typedef struct {
 	log_level_t level;
 } log_node_t;
 
-// Variable globale pour le niveau de journalisation
+// Etat du logger
 log_level_t currentLogLevel = LOG_LEVEL_INFO;
+static log_callback_t logCallback = NULL;
+bool loggerInitialized = false; // Utile pour les macros de vérification
 
-// Mode Synchrone
-static log_callback_t logCallbackSync = NULL;
-
-// Mode asynchrone
+// Gestion du mode asynchrone
 static sem_t logSem; // Sémaphore pour signaler la présence de nouveaux messages
 static fifo_t logFifo; // File d'attente FIFO pour les messages de log
 static pthread_t loggerThread; // Thread de journalisation
-static log_callback_t logCallbackAsync = NULL; // Callback pour le mode asynchrone
 static int loggerThreadRunning = 0; // Indicateur d'exécution du thread
 
-/**
- * @brief Initialise le système de journalisation synchrone.
- * @param level Le niveau de journalisation à utiliser. Les messages avec un niveau inférieur seront ignorés.
- * @param callback La fonction de rappel pour traiter les messages de journalisation.
- * @note Par défaut, le niveau est LOG_LEVEL_INFO.
- * @note Si aucun callback n'est défini, les messages seront affichés sur la sortie standard.
- */
-void logger_init_sync(log_level_t level, log_callback_t callback) {
-	currentLogLevel = level;
-	logCallbackSync = callback;
-}
-
-
-/**
- * @brief Journalise un message en mode synchrone.
- * @param level Niveau de criticité du message.
- * @param format Chaîne de format (comme le printf).
- * @param ... Arguments pour le format.
- * @note Si le niveau du message est inférieur au niveau configuré, il est ignoré.
- */
-void logger_log_sync(log_level_t level, const char *format, ...) {
-	if(level < currentLogLevel) {
-		return;
-	}
-	char message[LOG_MESSAGE_LENGTH];
-	va_list args;
-	va_start(args, format);
-	vsnprintf(message, LOG_MESSAGE_LENGTH, format, args);
-	va_end(args);
-
-	if(logCallbackSync) {
-		logCallbackSync(level, message);
-	} else {
-		fprintf(stderr, "[%d] %s\n", level, message);
-	}
-}
-
-
-// Mode asynchrone
 
 /**
  * @private
@@ -77,12 +36,27 @@ void logger_log_sync(log_level_t level, const char *format, ...) {
  */
 static void *logger_thread_function(void *arg) {
 	UNUSED(arg);
-	while(loggerThreadRunning) {
+	while(1) {
 		sem_wait(&logSem);
+		if(!loggerThreadRunning) break;
 		log_node_t *node = fifo_pop(&logFifo);
 		if(node) {
-			if(logCallbackAsync) {
-				logCallbackAsync(node->level, node->msg);
+			if(logCallback) {
+				logCallback(node->level, node->msg);
+			} else {
+				fprintf(stderr, "[%d] %s\n", node->level, node->msg);
+			}
+			free(node->msg);
+			free(node);
+		}
+	}
+
+	// Nettoyage des messages restants
+	while(!fifo_is_empty(&logFifo)) {
+		log_node_t *node = fifo_pop(&logFifo);
+		if(node) {
+			if(logCallback) {
+				logCallback(node->level, node->msg);
 			} else {
 				fprintf(stderr, "[%d] %s\n", node->level, node->msg);
 			}
@@ -94,20 +68,46 @@ static void *logger_thread_function(void *arg) {
 }
 
 /**
- * @brief Initialise le système de journalisation asynchrone (thread + FIFO).
+ * @brief  Initialise le système de log global (callback + thread async prêt)
  * @param level Niveau de journalisation global.
  * @param callback Fonction de rappel pour traiter les messages.
  * @note Les messages sont stockés dans une queue et traités par un thread dédié.
  */
-void logger_init_async(log_level_t level, log_callback_t callback) {
+void logger_init(log_level_t level, log_callback_t callback) {
 	currentLogLevel = level;
-	logCallbackAsync = callback;
-	sem_init(&logSem, 0, 0);
-	fifo_init(&logFifo);
-	loggerThreadRunning = 1;
+	logCallback = callback;
+	loggerInitialized = true;
 
-	pthread_create(&loggerThread, NULL, logger_thread_function, NULL);
-	pthread_detach(loggerThread);
+	fifo_init(&logFifo);
+	CHECK_SEM_RAW(sem_init(&logSem, 0, 0));
+
+	loggerThreadRunning = 1;
+	CHECK_PTHREAD_RAW(pthread_create(&loggerThread, NULL, logger_thread_function, NULL));
+}
+
+/**
+ * @brief Journalise un message en mode synchrone.
+ * @param level Niveau de criticité du message.
+ * @param format Chaîne de format (comme le printf).
+ * @param ... Arguments pour le format.
+ * @note Si le niveau du message est inférieur au niveau configuré, il est ignoré.
+ */
+void logger_log_sync(log_level_t level, const char *format, ...) {
+	if(!loggerInitialized || level < currentLogLevel) {
+		return;
+	}
+
+	char message[LOG_MESSAGE_LENGTH];
+	va_list args;
+	va_start(args, format);
+	vsnprintf(message, LOG_MESSAGE_LENGTH, format, args);
+	va_end(args);
+
+	if(logCallback) {
+		logCallback(level, message);
+	} else {
+		fprintf(stderr, "[%d] %s\n", level, message);
+	}
 }
 
 /**
@@ -122,7 +122,7 @@ void logger_log_async(log_level_t level, const char *format, ...) {
 		return;
 	}
 	char *message = malloc(LOG_MESSAGE_LENGTH);
-	CHECK_ALLOC(message);
+	CHECK_ALLOC_RAW(message);
 
 	va_list args;
 	va_start(args, format);
@@ -130,7 +130,7 @@ void logger_log_async(log_level_t level, const char *format, ...) {
 	va_end(args);
 
 	log_node_t *node = malloc(sizeof(log_node_t));
-	CHECK_ALLOC(node);
+	CHECK_ALLOC_RAW(node);
 	node->msg = message;
 	node->level = level;
 
@@ -138,15 +138,19 @@ void logger_log_async(log_level_t level, const char *format, ...) {
 	sem_post(&logSem);
 }
 
-// Macros pratiques
-#define LOG_DEBUG_SYNC(format, ...)    logger_log_sync(LOG_LEVEL_DEBUG, format, ##__VA_ARGS__)
-#define LOG_INFO_SYNC(format, ...)     logger_log_sync(LOG_LEVEL_INFO, format, ##__VA_ARGS__)
-#define LOG_WARNING_SYNC(format, ...)  logger_log_sync(LOG_LEVEL_WARNING, format, ##__VA_ARGS__)
-#define LOG_ERROR_SYNC(format, ...)    logger_log_sync(LOG_LEVEL_ERROR, format, ##__VA_ARGS__)
+/**
+ * @brief Libère les ressources du système de journalisation.
+ * @note Cette fonction doit être appelée pour nettoyer le thread et les sémaphores.
+ */
+void logger_destroy(void) {
+	if(!loggerInitialized) {
+		return;
+	}
 
-#define LOG_DEBUG_ASYNC(format, ...)   logger_log_async(LOG_LEVEL_DEBUG, format, ##__VA_ARGS__)
-#define LOG_INFO_ASYNC(format, ...)    logger_log_async(LOG_LEVEL_INFO, format, ##__VA_ARGS__)
-#define LOG_WARNING_ASYNC(format, ...) logger_log_async(LOG_LEVEL_WARNING, format, ##__VA_ARGS__)
-#define LOG_ERROR_ASYNC(format, ...)   logger_log_async(LOG_LEVEL_ERROR, format, ##__VA_ARGS__)
+	loggerThreadRunning = 0;
+	sem_post(&logSem);
+	pthread_join(loggerThread, NULL);
 
-
+	CHECK_SEM_RAW(sem_destroy(&logSem));
+	loggerInitialized = false;
+}

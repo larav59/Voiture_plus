@@ -39,19 +39,18 @@ extern log_level_t currentLogLevel;
 #define LOG_MESSAGE_LENGTH 1024
 
 
-// Mode synchron
+// Mode synchrone
 // En mode synchrone, les messages sont traités immédiatement
 // et les appels bloquent jusqu'à ce que le message soit traité par le callback.
 
 /**
- * @brief Initialise le système de journalisation synchrone.
+ * @brief Initialise le système de journalisation global (callback + thread async prêt).
  * @param level Le niveau de journalisation à utiliser. Les messages avec un niveau inférieur seront ignorés.
  * @param callback La fonction de rappel pour traiter les messages de journalisation.
  * @note Par défaut, le niveau est LOG_LEVEL_INFO.
  * @note Si aucun callback n'est défini, les messages seront affichés sur la sortie standard.
  */
-void logger_init_sync(log_level_t level, log_callback_t callback);
-
+void logger_init(log_level_t level, log_callback_t callback);
 
 /**
  * @brief Journalise un message en mode synchrone.
@@ -68,14 +67,6 @@ void logger_log_sync(log_level_t level, const char *format, ...);
 // et traités par un thread dédié, permettant aux appels de ne pas bloquer.
 
 /**
- * @brief Initialise le système de journalisation asynchrone (thread + FIFO).
- * @param level Niveau de journalisation global.
- * @param callback Fonction de rappel pour traiter les messages.
- * @note Les messages sont stockés dans une queue et traités par un thread dédié.
- */
-void logger_init_async(log_level_t level, log_callback_t callback);
-
-/**
  * @brief Journalise un message en mode asynchrone.
  * @param level Niveau de criticité du message.
  * @param format Chaîne de format (comme le printf).
@@ -83,6 +74,12 @@ void logger_init_async(log_level_t level, log_callback_t callback);
  * @note Cette fonction retourne immédiatement, le message sera traité par le thread de logging.
  */
 void logger_log_async(log_level_t level, const char *format, ...);
+
+/**
+ * @brief Libère les ressources du système de journalisation.
+ * @note Cette fonction doit être appelée pour nettoyer le thread et les sémaphores.
+ */
+void logger_destroy(void);
 
 // Macros pratiques
 #define LOG_DEBUG_SYNC(format, ...)    logger_log_sync(LOG_LEVEL_DEBUG, format, ##__VA_ARGS__)
