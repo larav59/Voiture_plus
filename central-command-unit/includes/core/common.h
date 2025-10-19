@@ -10,7 +10,10 @@
 #define COMMON_H
 
 #include <stdio.h>
+#include <stdarg.h>
 #include <stdlib.h>
+#include <stdbool.h>
+#include <stdint.h>
 #include <string.h>
 
 
