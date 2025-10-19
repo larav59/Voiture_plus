@@ -1,3 +1,11 @@
+/************* IMPORTS *************/
+import $ from 'jquery';
+import 'bootstrap/dist/css/bootstrap.min.css';
+
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+
+
 /************* DONNÉES GLOBALES (à remplacer par un appel API) *************/
 
 var VEHICLE_DATA = [
@@ -24,7 +32,7 @@ var VEHICLE_DATA = [
 $(document).ready(function () {
 
     const params = {
-        imageUrl: "images/plan.jpg",
+        imageUrl: "images/plan.png",
         minZoom: -2
     };
 
