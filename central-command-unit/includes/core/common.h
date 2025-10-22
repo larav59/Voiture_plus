@@ -15,6 +15,10 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
+#include <pthread.h>
+#include <semaphore.h>
+#include <unistd.h>
+#include <time.h>
 
 
 #ifdef DEBUG
