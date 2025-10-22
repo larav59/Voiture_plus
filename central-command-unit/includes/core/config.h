@@ -14,7 +14,7 @@
 #ifndef CORE_CONFIG_H
 #define CORE_CONFIG_H
 
-#include "core/core.h"
+#include "core/check.h"
 
 
 /**
@@ -22,11 +22,8 @@
  * Contient les paramètres réseau communs à tous les services.
  * @note IP au format chaine (ex:"192.168.1.1")
  * @note Port au format uint16_t (0-65535)
- * @
  */
 typedef struct {
-	char serviceIp[16];
-	uint16_t servicePort;
 	char brokerIp[16];
 	uint16_t brokerPort;
 } network_config_t;

@@ -7,8 +7,6 @@
  * @internal
  */
 typedef struct {
-    bool serviceIp;
-    bool servicePort;
     bool brokerIp;
     bool brokerPort;
     bool logLevel;
@@ -48,29 +46,22 @@ static int config_handler(void* user, const char* section, const char* name, con
     config_common_t* config = payload->common_config;
 
     #define MATCH(s, n) strcasecmp(section, s) == 0 && strcasecmp(name, n) == 0
-
-    if (MATCH("Network", "serviceIp")) {
-        strncpy(config->network.serviceIp, value, sizeof(config->network.serviceIp) - 1);
-        config->network.serviceIp[sizeof(config->network.serviceIp) - 1] = '\0';
-        payload->tracker.serviceIp = true;
-    } else if (MATCH("Network", "servicePort")) {
-        config->network.servicePort = (uint16_t)strtoul(value, NULL, 10);
-        payload->tracker.servicePort = true;
-    } else if (MATCH("Network", "brokerIp")) {
+    
+    if (MATCH("Network", "mqtt_broker_ip")) {
         strncpy(config->network.brokerIp, value, sizeof(config->network.brokerIp) - 1);
         config->network.brokerIp[sizeof(config->network.brokerIp) - 1] = '\0';
         payload->tracker.brokerIp = true;
-    } else if (MATCH("Network", "brokerPort")) {
+    } else if (MATCH("Network", "mqtt_broker_port")) {
         config->network.brokerPort = (uint16_t)strtoul(value, NULL, 10);
         payload->tracker.brokerPort = true;
-    } else if (MATCH("Logging", "logLevel")) {
+    } else if (MATCH("Logging", "log_Level")) {
         if (log_level_from_string(value, &config->logging.logLevel) == 0) {
             payload->tracker.logLevel = true;
         } else {
             LOG_ERROR_ASYNC("CONFIG: Invalid logLevel '%s' in configuration.", value);
             config->logging.logLevel = LOG_LEVEL_INFO; // Valeur par défaut en cas d'erreur
         }
-    } else if (MATCH("Logging", "topic")) {
+    } else if (MATCH("Logging", "log_topic")) {
         strncpy(config->logging.topic, value, sizeof(config->logging.topic) - 1);
         config->logging.topic[sizeof(config->logging.topic) - 1] = '\0';
         payload->tracker.topic = true;
@@ -89,7 +80,7 @@ static int config_handler(void* user, const char* section, const char* name, con
  */
 int parse_config_file(const char* filename, config_common_t* common, void* serviceConfig, service_config_parser_t parser) {
     if (!filename || !common) {
-        LOG_FATAL_SYNC("CONFIG: Invalid arguments to parse_config_file.");
+        LOG_ERROR_SYNC("CONFIG: Invalid arguments to parse_config_file.");
         return -1;
     }
 
@@ -107,17 +98,17 @@ int parse_config_file(const char* filename, config_common_t* common, void* servi
     int result = ini_parse(filename, config_handler, &payload);
 
     if (result < 0) {
-        LOG_FATAL_SYNC("CONFIG: Can't load '%s'", filename);
+        LOG_ERROR_SYNC("CONFIG: Can't load '%s'", filename);
         return -1;
     }
     if (result > 0) {
-        LOG_FATAL_SYNC("CONFIG: Parse error in '%s' at line %d", filename, result);
+        LOG_ERROR_SYNC("CONFIG: Parse error in '%s' at line %d", filename, result);
         return -1;
     }
 
     fields_tracker_t* t = &payload.tracker;
-    if (!t->serviceIp || !t->servicePort || !t->brokerIp || !t->brokerPort || !t->logLevel || !t->topic) {
-        LOG_FATAL_SYNC("CONFIG: One or more required fields are missing in '%s'.", filename);
+    if (!t->brokerIp || !t->brokerPort || !t->logLevel || !t->topic) {
+        LOG_ERROR_SYNC("CONFIG: One or more required fields are missing in '%s'.", filename);
         return -1;
     }
 
