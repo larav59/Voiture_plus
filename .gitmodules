@@ -1,3 +1,6 @@
 [submodule "central-command-unit/external/inih"]
 	path = central-command-unit/external/inih
 	url = https://github.com/benhoyt/inih.git
+[submodule "central-command-unit/external/mosquitto"]
+	path = central-command-unit/external/mosquitto
+	url = https://github.com/eclipse-mosquitto/mosquitto.git
