@@ -14,6 +14,7 @@
 
 <body>
 
+    <!-- Navbar -->
     <nav class="navbar navbar-expand-lg p-2 px-5 mb-3 bg-white border-bottom shadow-sm">
         <img src="images/logo.png" width="150px" height="50px" alt="">
 
@@ -25,25 +26,32 @@
             </ul>
         </div>
     </nav>
+    <!-- fin Navbar -->
 
     <div class="m-5 row">
    
+        <!-- Map -->
         <div id="map" class="m-2 col-md-8">
         </div>
+        <!-- fin Map -->
 
+        <!-- Formulaire -->
         <div id="trajet" class="m-2 col">
 
             <div class="card mb-3">
                 <div class="card-header">
-                    Définir un trajet
+                    Détails du trajet
                 </div>
                 
-
                 <div class="card-body">
-                    <div class="mb-3">
-                        <label for="vehicleSelect" class="form-label">Véhicule</label>
-                        <select class="form-select" id="vehicleSelect">
-                        </select>
+
+                    <div class="mb-3 row">
+                        <label class="form-label col-md-auto mt-2">Véhicule :</label>
+                        <div class="dropdown col">
+                            <button class="btn dropdown-toggle border" type="button" data-bs-toggle="dropdown" aria-expanded="false"></button>
+                            <ul id="vehicleSelect" class="dropdown-menu">
+                            </ul>
+                        </div>
                     </div>
 
                     <p class="fw-semibold">Trajet :</p>
@@ -51,12 +59,18 @@
                     <div class="mb-3 text-center">
 
                         <div class="mb-3 step-item row mx-3 d-none" id="stepClonable">
-                            <select class="col form-select step-select"></select>
-                            <button type="button" class="col-auto btn text-danger p-2 remove-step"> ✕ </button>
+                            <div class="dropdown col">
+                                <button class="btn dropdown-toggle border w-100" type="button" data-bs-toggle="dropdown" aria-expanded="false"></button>
+                                <ul class="step-select dropdown-menu w-100 text-center">
+                                </ul>
+                            </div>
+                            <button class="col-auto deleteBtn remove-step">
+                                <svg viewBox="0 0 15 17.5" height="17.5" width="15" xmlns="http://www.w3.org/2000/svg" class="icon"><path transform="translate(-2.5 -1.25)" d="M15,18.75H5A1.251,1.251,0,0,1,3.75,17.5V5H2.5V3.75h15V5H16.25V17.5A1.251,1.251,0,0,1,15,18.75ZM5,5V17.5H15V5Zm7.5,10H11.25V7.5H12.5V15ZM8.75,15H7.5V7.5H8.75V15ZM12.5,2.5h-5V1.25h5V2.5Z"></path></svg>
+                            </button>
                         </div>
 
                         <div id="stepsContainer">
-                            <!-- Les étapes seront ajoutées ici -->
+                            <!-- Les étapes du trajet seront ajoutées ici -->
                         </div>
 
                         <button type="button" class="btn btn-outline-secondary btn-sm text-justify" id="addStepBtn">
@@ -64,20 +78,23 @@
                         </button>
                     </div>
 
+                    <label class="form-label">Destination finale :</label>
                     <div class="mb-3">
-                        <label for="destinationSelect" class="form-label">Destination finale</label>
-                        <select class="form-select" id="destinationSelect">
-                        </select>
+                        <div class="dropdown">
+                            <button class="btn dropdown-toggle border w-100" type="button" data-bs-toggle="dropdown" aria-expanded="false"></button>
+                            <ul id="destinationSelect" class="dropdown-menu text-center w-100">
+                            </ul>
+                        </div>
                     </div>
-
-                    
-
-                    <div class="d-grid">
-                        <button type="button" class="btn btn-primary" id="calculateTrajetBtn">
+             
+                    <div class="text-center mt-4">
+                        <button id="calculTrajetBtn">
                             Calculer le trajet
                         </button>
                     </div>
+
                 </div>
+                <!-- fin Formulaire -->
 
             </div>
         </div>

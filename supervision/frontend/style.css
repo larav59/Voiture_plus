@@ -5,3 +5,48 @@ Ce fichier contient les elements de style des pages du site web
     width: 70%;
     height: 80vh;
 }
+
+/* style du bouton delete */
+.deleteBtn {
+    background-color: transparent;
+    position: relative;
+    border: none;
+}
+.icon {
+    transform: scale(1.1);
+    transition: .2s linear;
+}
+.deleteBtn:hover > .icon {
+    transform: scale(1.4);
+}
+.deleteBtn:hover > .icon path {
+    fill: rgb(168, 7, 7);
+}
+
+/* style du bouton de calcul de trajet */
+#calculTrajetBtn {
+    width: 15em;
+    height: 2.5em;
+    border-radius: 15em;
+    border: none;
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+
+}
+#calculTrajetBtn::before {
+    content: '';
+    width: 0;
+    height: 2.5em;
+    border-radius: 15em;
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-image: linear-gradient(to right, #0fd850 0%, #f9f047 100%);
+    transition: .5s ease;
+    display: block;
+    z-index: -1;
+}
+#calculTrajetBtn:hover::before {
+    width: 15em;
+}
