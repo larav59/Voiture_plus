@@ -52,7 +52,6 @@ void test_run(void);
  * - La macro déclare la signature de la fonction de test
  * - Crée une fonction qui est ensuite exécutée avant le main() grâce à l'attribut constructor.
  * - Puis on définit la fonction de test elle-même.
- * 
  * @example 
  * ```
  * REGISTER_TEST(test_example, "Exemple de test unitaire") {
@@ -82,7 +81,7 @@ void test_run(void);
         if (!(cond)) { \
             fprintf(stderr, COLOR_RED"[FAIL] %s (at %s:%d)"COLOR_RESET"\n", msg, __FILE__, __LINE__); \
         } else { \
-            /*fprintf(stdout, COLOR_GREEN"[PASS] %s"COLOR_RESET"\n", msg);*/ \
+            fprintf(stdout, COLOR_GREEN"[PASS] %s"COLOR_RESET"\n", msg);\
         } \
     } while(0)
 
