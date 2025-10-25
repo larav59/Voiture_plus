@@ -14,7 +14,7 @@ EXT_CFLAGS += -I$(MOSQ_PATH)/include -I$(MOSQ_PATH)/lib
 
 # Règle de construction
 $(MOSQ_SO_TARGET):
-	@echo "Building libmosquitto via submodule..."
+	@echo "SO EXT $@"
 	@$(MAKE) -C $(MOSQ_PATH)/lib WITH_SHARED_LIBRARIES=yes WITH_STATIC_LIBRARIES=no
 	@mkdir -p $(LIB_DIR)
 	@cp $(MOSQ_PATH)/lib/libmosquitto.so.* $(LIB_DIR)/ 2>/dev/null || true
