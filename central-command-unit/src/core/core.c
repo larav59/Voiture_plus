@@ -5,8 +5,9 @@
  * @author Lukas Grando
  * @date 2025-10-19
  */
-
  #include "core/core.h"
+ #include "core/logger_callbacks.h"
+
 
  static void print_usage(const char* program_name) {
 	printf(COLOR_YELLOW "Usage: %s [options]\n" COLOR_RESET, program_name);
@@ -32,7 +33,7 @@
 			print_usage(argv[0]);
 			exit(EXIT_SUCCESS);
 		} else if (strcmp(argv[i], "-v") == 0 || strcmp(argv[i], "--version") == 0) {
-			printf(COLOR_GREEN "%s LibCore v%d.%d.%d\n" COLOR_RESET, argv[0], VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH);
+			printf(COLOR_GREEN "%s Libcore v%d.%d.%d\n" COLOR_RESET, argv[0], VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH);
 			exit(EXIT_SUCCESS);
 		} else {
 			fprintf(stderr, COLOR_RED "Error: Unknown option %s\n" COLOR_RESET, argv[i]);
@@ -42,37 +43,13 @@
 	}
 }
 
-
-static void failback_logger_callback(log_level_t level, const char *message) {
-	switch (level)
-	{
-		case LOG_LEVEL_DEBUG:
-			printf("[DEBUG] %s", message);
-			break;
-		case LOG_LEVEL_INFO:
-			printf(COLOR_BLUE "[INFO] %s" COLOR_RESET, message);
-			break;
-		case LOG_LEVEL_WARNING:
-			printf(COLOR_YELLOW "[WARNING] %s" COLOR_RESET, message);
-			break;
-		case LOG_LEVEL_ERROR:
-			fprintf(stderr, COLOR_RED "[ERROR] %s" COLOR_RESET, message);
-			break;
-		case LOG_LEVEL_FATAL:
-			fprintf(stderr, COLOR_RED "[FATAL] %s" COLOR_RESET, message);
-			break;
-	}
-	return;
-}
-
 /**
  * @brief Initialise tous les sous systèmes du core
  * @details
  * - Parse la ligne de commande pour trouver le fichier de configuration
  * - Lit le fichier de configuration
  * - Initialise le client MQTT et se connecte.
- * - Initialise le logger avec un callback qui log sur la console et sur le topic MQTT dédiéabort
- * 
+ * - Initialise le logger avec un callback qui log sur la console et sur le topic MQTT dédié.
  * @param argc Nombre d'arguments
  * @param argv Tableau des arguments
  * @param commonConfig pointeur vers la structure commune de configuration
@@ -80,26 +57,53 @@ static void failback_logger_callback(log_level_t level, const char *message) {
  * @param serviceParser callback pour parser la section spécifique de la configuration du service
  * @return 0 en cas de succès et -1 en cas d'erreur fatale
  */
-int core_bootstrap(int argc, char** argv, config_common_t* commonConfig, void* serviceConfig, service_config_parser_t serviceParser) {
-	char *configPath = NULL;
-	parse_command_line(argc, argv, &configPath);
-	logger_init(FAILBACK_LOGGER_LEVEL, failback_logger_callback);
-	LOG_INFO_SYNC("CORE: Starting core bootstrap...");
+int core_bootstrap(
+    int argc, 
+    char** argv, 
+    config_common_t* commonConfig, 
+    void* serviceConfig, 
+    service_config_parser_t serviceParser,
+	char *lwtPayload,
+	char *lwtTopic
+) {
+    char *configPath = NULL;
+	// Failback logger
+	logger_init(FAILBACK_LOGGER_LEVEL, console_log_callback);
+    parse_command_line(argc, argv, &configPath);
 
-	int result = parse_config_file(configPath, commonConfig, serviceConfig, serviceParser);
+    LOG_INFO_SYNC("CORE: Starting core bootstrap...");
+
+    int result = parse_config_file(configPath, commonConfig, serviceConfig, serviceParser);
+    if(result != 0) {
+        LOG_FATAL_SYNC("CORE: Failed to open configuration file '%s'.", configPath);
+        return -1;
+    }
+    LOG_INFO_SYNC("CORE: Configuration file '%s' loaded successfully.", configPath);
+
+	result = mqtt_connect(
+		commonConfig->network.brokerIp, 
+		commonConfig->network.brokerPort, 
+		commonConfig->network.clientId,
+		lwtTopic,
+		lwtPayload
+	);
 
 	if(result != 0) {
-		LOG_FATAL_SYNC("CORE: Failed to open configuration file '%s'.", configPath);
-		return EXIT_FAILURE;
+		LOG_FATAL_SYNC("CORE: Failed to initialize MQTT client.");
+		return -1;
 	}
 
-	LOG_INFO_SYNC("CORE: Configuration file '%s' loaded successfully.", configPath);
+	if(mqtt_wait_for_connection(commonConfig->network.timeoutSec) != 0) {
+		LOG_FATAL_SYNC("CORE: MQTT connection timed out.");
+		return -1;
+	}
 
-	// Initialisation du client MQTT
-
-	// Initialisation du logger final
+	mqtt_log_callback_init(commonConfig->logging.topic, commonConfig->network.clientId);
 	logger_destroy();
-	logger_init(commonConfig->logging.logLevel, NULL);
+	logger_init(commonConfig->logging.logLevel, mqtt_log_callback);
+	LOG_INFO_SYNC("CORE: MQTT logger initialized successfully.");
+
+    return 0; // Succès
 }
 
 
@@ -113,11 +117,6 @@ int core_bootstrap(int argc, char** argv, config_common_t* commonConfig, void* s
  */
 void core_shutdown(void) {
 	LOG_INFO_SYNC("CORE: Shutting down core...");
-
-	// Libération des ressources
 	logger_destroy();
-
-	// TODO: Déconnexion du client MQTT
 	mqtt_disconnect();
-
 }

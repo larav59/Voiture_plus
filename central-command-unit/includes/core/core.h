@@ -37,13 +37,22 @@
  * 
  * @param argc Nombre d'arguments
  * @param argv Tableau des arguments
- * @param common_config pointeur vers la structure commune de configuration
- * @param service_config Pointeur vers la structure de configuration spécifique au service
- * @param service_parser callback pour parser la section spécifique de la configuration du service
+ * @param commonConfig pointeur vers la structure commune de configuration
+ * @param serviceConfig Pointeur vers la structure de configuration spécifique au service
+ * @param serviceParser callback pour parser la section spécifique de la configuration du service
+ * @param lwtPayload Payload du message Last Will Testament
+ * @param lwtTopic Topic du message Last Will Testament
  * @return 0 en cas de succès et -1 en cas d'erreur fatale
  */
-int core_bootstrap(int argc, char** argv, config_common_t* common_config, void* service_config, service_config_parser_t service_parser);
-
+int core_bootstrap(
+	int argc, 
+	char** argv, 
+	config_common_t* commonConfig, 
+	void* serviceConfig, 
+	service_config_parser_t serviceParser,
+	char *lwtPayload,
+	char *lwtTopic
+);
 
 /**
  * @brief Arrête tous les sous systèmes du core
