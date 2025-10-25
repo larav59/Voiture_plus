@@ -210,8 +210,6 @@ int mqtt_publish(const char* topic, const char* payload, mqtt_qos_enum_t qos, bo
 		LOG_ERROR_ASYNC("MQTT: Failed to publish message: %s", mosquitto_strerror(rc));
 		return -1;
 	}
-
-	LOG_DEBUG_ASYNC("MQTT: Published message to topic '%s'.", topic);
 	return 0;
 }
 

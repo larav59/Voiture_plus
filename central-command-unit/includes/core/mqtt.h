@@ -15,6 +15,7 @@
 #include "core/check.h"
 
 #define MQTT_KEEP_ALIVE_INTERVAL_SEC 60 //!< Intervalle de keep-alive en secondes
+#define MQTT_DEFAULT_TIMEOUT_SEC 5        //!< Timeout par défaut pour les opérations MQTT
 
 
 /**
