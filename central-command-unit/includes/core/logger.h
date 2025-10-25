@@ -80,6 +80,21 @@ void logger_log_async(log_level_t level, const char *format, ...);
  */
 void logger_destroy(void);
 
+/**
+ * @brief Convertit un niveau de log en chaîne de caractères.
+ * @param level Niveau de log.
+ * @return Chaîne représentant le niveau de log.
+ */
+const char* logger_level_to_string(log_level_t level);
+
+/**
+ * @brief Convertit une chaîne de caractères en niveau de log.
+ * @param levelStr Chaîne représentant le niveau de log.
+ * @return Niveau de log correspondant.
+ */
+log_level_t logger_string_to_level(const char* levelStr);
+
+
 // Macros pratiques
 #define LOG_DEBUG_SYNC(format, ...)    logger_log_sync(LOG_LEVEL_DEBUG, format, ##__VA_ARGS__)
 #define LOG_INFO_SYNC(format, ...)     logger_log_sync(LOG_LEVEL_INFO, format, ##__VA_ARGS__)

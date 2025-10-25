@@ -154,3 +154,40 @@ void logger_destroy(void) {
 	CHECK_SEM_RAW(sem_destroy(&logSem));
 	loggerInitialized = false;
 }
+
+/**
+ * @brief Convertit un niveau de log en chaîne de caractères.
+ * @param level Niveau de log.
+ * @return Chaîne représentant le niveau de log.
+ */
+const char* logger_level_to_string(log_level_t level) {
+    switch (level) {
+        case LOG_LEVEL_DEBUG:   return "DEBUG";
+        case LOG_LEVEL_INFO:    return "INFO";
+        case LOG_LEVEL_WARNING: return "WARNING";
+        case LOG_LEVEL_ERROR:   return "ERROR";
+        case LOG_LEVEL_FATAL:   return "FATAL";
+        default:                return "UNKNOWN";
+    }
+}
+
+/**
+ * @brief Convertit une chaîne de caractères en niveau de log.
+ * @param levelStr Chaîne représentant le niveau de log.
+ * @return Niveau de log correspondant.
+ */
+log_level_t logger_string_to_level(const char* levelStr) {
+	if (strcmp(levelStr, "DEBUG") == 0) {
+		return LOG_LEVEL_DEBUG;
+	} else if (strcmp(levelStr, "INFO") == 0) {
+		return LOG_LEVEL_INFO;
+	} else if (strcmp(levelStr, "WARNING") == 0) {
+		return LOG_LEVEL_WARNING;
+	} else if (strcmp(levelStr, "ERROR") == 0) {
+		return LOG_LEVEL_ERROR;
+	} else if (strcmp(levelStr, "FATAL") == 0) {
+		return LOG_LEVEL_FATAL;
+	} else {
+		return LOG_LEVEL_INFO; // Valeur par défaut
+	}
+}
