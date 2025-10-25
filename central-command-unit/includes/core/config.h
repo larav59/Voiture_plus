@@ -26,6 +26,8 @@
 typedef struct {
 	char brokerIp[16];
 	uint16_t brokerPort;
+	char clientId[64];
+	int timeoutSec;
 } network_config_t;
 
 typedef struct {

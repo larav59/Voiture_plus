@@ -46,6 +46,8 @@ TEST_REGISTER(test_config_success, "Test d'un fichier de configuration valide et
         "[Network]\n"
         "mqtt_broker_ip = 192.168.1.100\n"
         "mqtt_broker_port = 5672\n"
+        "mqtt_client_id = test_client\n"
+        "mqtt_timeout_sec = 10\n"
         "\n"
         "[Logging]\n"
         "log_level = DEBUG\n"
@@ -99,6 +101,8 @@ TEST_REGISTER(test_config_missing_key, "Test d'un fichier avec une clé obligato
         "[Network]\n"
         "mqtt_broker_ip = 192.168.1.100\n"
         /* mqtt_broker_port est manquant */
+        "mqtt_client_id = test_client\n"
+        "mqtt_timeout_sec = 10\n"
         "\n"
         "[Logging]\n"
         "log_level = INFO\n"
@@ -118,7 +122,10 @@ TEST_REGISTER(test_config_invalid_value, "Test avec une valeur invalide pour log
     const char* filename = "test_invalid.ini";
     const char* content =
         "[Network]\n"
-        "mqtt_broker_ip = 192.168.1.100\nmqtt_broker_port = 5672\n"
+        "mqtt_broker_ip = 192.168.1.100\n"
+        "mqtt_broker_port = 5672\n"
+        "mqtt_client_id = test_client\n"
+        "mqtt_timeout_sec = 10\n"
         "[Logging]\n"
         "log_level = GIBBERISH\n" // Valeur invalide
         "log_topic = services/test/logs\n";

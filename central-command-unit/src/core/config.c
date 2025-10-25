@@ -9,8 +9,10 @@
 typedef struct {
     bool brokerIp;
     bool brokerPort;
+    bool clientId;
     bool logLevel;
     bool topic;
+    bool timeoutSec;
 } fields_tracker_t;
 
 /**
@@ -54,6 +56,13 @@ static int config_handler(void* user, const char* section, const char* name, con
     } else if (MATCH("Network", "mqtt_broker_port")) {
         config->network.brokerPort = (uint16_t)strtoul(value, NULL, 10);
         payload->tracker.brokerPort = true;
+    } else if (MATCH("Network", "mqtt_client_id")) {
+        strncpy(config->network.clientId, value, sizeof(config->network.clientId) - 1);
+        config->network.clientId[sizeof(config->network.clientId) - 1] = '\0';
+        payload->tracker.clientId = true;
+    } else if(MATCH("Network", "mqtt_timeout_sec")) {
+        config->network.timeoutSec = (uint32_t)strtoul(value, NULL, 10);
+        payload->tracker.timeoutSec = true;
     } else if (MATCH("Logging", "log_Level")) {
         if (log_level_from_string(value, &config->logging.logLevel) == 0) {
             payload->tracker.logLevel = true;
@@ -107,7 +116,7 @@ int parse_config_file(const char* filename, config_common_t* common, void* servi
     }
 
     fields_tracker_t* t = &payload.tracker;
-    if (!t->brokerIp || !t->brokerPort || !t->logLevel || !t->topic) {
+    if (!t->brokerIp || !t->brokerPort || !t->clientId || !t->logLevel || !t->topic || !t->timeoutSec) {
         LOG_ERROR_SYNC("CONFIG: One or more required fields are missing in '%s'.", filename);
         return -1;
     }
