@@ -1,3 +1,5 @@
+.SECONDEXPANSION:
+
 SRC_DIR        := src
 INC_DIR        := includes
 OBJ_DIR        := obj
@@ -7,7 +9,7 @@ TEST_DIR       := tests
 MK_LIB_DIR     := mk-lib
 EXTERNAL_DIR   := external
 
-SERVICES       := #broker conflict-manager heartbeat route-planner railway-synchronizer
+SERVICES       := heartbeat
 
 TARGET_LIBA    := $(LIB_DIR)/libcore.a
 TARGET_LIBSO   := $(LIB_DIR)/libcore.so
@@ -16,7 +18,7 @@ TARGET_TESTS   := $(BIN_DIR)/unit_tests
 CC             ?= gcc
 AR             ?= ar
 LDFLAGS        ?= -L$(LIB_DIR)
-CFLAGS         ?= -Wall -Wextra -g
+CFLAGS         ?= -Wall -Wextra -g -DDEBUG
 LIBS           ?= 
 
 EXT_LIB_TARGETS :=
@@ -27,8 +29,9 @@ EXT_LIBS_MK    := $(wildcard $(MK_LIB_DIR)/*.mk)
 
 
 # Règles principales
+all: core services tests docs
 .PHONY: all debug release external-libs core services tests test-run clean distclean docs
-all: core tests docs
+
 
 
 -include $(EXT_LIBS_MK)
@@ -40,13 +43,11 @@ PROJECT_CFLAGS := -I$(INC_DIR) $(EXT_CFLAGS) -MMD -MP -fPIC
 
 
 SRC_CORE       := $(shell find $(SRC_DIR)/core -name "*.c")
-SRC_SERVICES   := $(foreach s,$(SERVICES),$(shell find $(SRC_DIR)/$(s) -name "*.c"))
+
+SERVICE_DIRS   := $(shell find $(SRC_DIR) -maxdepth 1 -type d -not -path "$(SRC_DIR)/core")
+SRC_SERVICES   := $(shell find $(SERVICE_DIRS) -name "*.c")
 SRC_SERVICES   := $(filter-out $(SRC_CORE),$(SRC_SERVICES)) # sécurité
 SRC_TESTS      := $(shell find $(TEST_DIR) -name "*.c")
-
-OBJ_CORE       := $(SRC_CORE:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
-OBJ_SERVICES   := $(SRC_SERVICES:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
-OBJ_TESTS      := $(SRC_TESTS:$(TEST_DIR)/%.c=$(OBJ_DIR)/%.o)
 
 ALL_SRC        := $(SRC_CORE) $(SRC_SERVICES) $(SRC_TESTS)
 
@@ -57,6 +58,11 @@ OBJ_ALL        := $(patsubst $(SRC_DIR)/%.c,$(OBJ_DIR)/%.o,$(filter $(SRC_DIR)/%
 OBJ_CORE       := $(patsubst $(SRC_DIR)/%.c,$(OBJ_DIR)/%.o,$(SRC_CORE))
 OBJ_SERVICES   := $(patsubst $(SRC_DIR)/%.c,$(OBJ_DIR)/%.o,$(SRC_SERVICES))
 OBJ_TESTS      := $(patsubst $(TEST_DIR)/%.c,$(OBJ_DIR)/%.o,$(SRC_TESTS))
+
+$(foreach s,$(SERVICES),\
+    $(eval OBJ_$(s) := $(patsubst $(SRC_DIR)/$(s)/%.c,$(OBJ_DIR)/$(s)/%.o,$(shell find $(SRC_DIR)/$(s) -name "*.c")))\
+)
+
 
 # Inclusion des dépendances automatiques
 # Quand on génère un fichier .o avec des règles joker pour gérer la compilation lors du changement d'header c'est assez compliqué
@@ -84,10 +90,10 @@ $(TARGET_LIBSO): $(OBJ_CORE)
 # Services
 services: external-libs $(SERVICES:%=$(BIN_DIR)/%)
 
-# Edition de liens des services avec les objets correspondants et la libcore.a
-$(BIN_DIR)/%: $(wildcard $(OBJ_DIR)/%/*.o) $(TARGET_LIBA)
+# Edition de liens des services avec les objets correspondants
+$(BIN_DIR)/%: $$(OBJ_%) $(TARGET_LIBSO)
 	@mkdir -p $(BIN_DIR)
-	@$(CC) $^ -o $@ $(LDFLAGS) $(LIBS) $(PROJECT_LIBS)
+	$(CC) $^ -o $@ $(LDFLAGS) $(PROJECT_LIBS) $(LIBS) 
 	@echo "LD Service $@"
 
 # Lanceur de test unitaires
