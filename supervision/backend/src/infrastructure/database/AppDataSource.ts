@@ -14,7 +14,7 @@ const AppDataSource = new DataSource({
 	entitySkipConstructor: true,
 	logging: mysqlConfig.logging,
 	entities: [
-		// Ajouter ici les entités
+		__dirname + "/../../domain/entities/*.ts"
 	],
 	subscribers: [],
 });
