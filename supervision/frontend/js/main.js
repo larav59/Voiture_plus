@@ -25,15 +25,15 @@ var VEHICLE_DATA = [
                 {
                     id: 1,
                     name: 'Parking 1',
-                    position_x: 550,
-                    position_y: 240,
+                    position_x: 1400,
+                    position_y: 885,
                     point_of_interest: 1,
                 },
                 {
                     id: 2,
                     name: 'Parking 2',
                     position_x: 220,
-                    position_y: 700,
+                    position_y: 685,
                     point_of_interest: 1,
                 }
             ]
@@ -41,7 +41,7 @@ var VEHICLE_DATA = [
         state: {
             id: 15,
             speed: 35,
-            angle: 50,
+            angle: 180,
             position_x: 1200,
             position_y: 700
         }
@@ -58,15 +58,15 @@ var VEHICLE_DATA = [
                 {
                     id: 2,
                     name: 'Parking 2',
-                    position_x: 925,
-                    position_y: 800,
+                    position_x: 220,
+                    position_y: 685,
                     point_of_interest: 1,
                 },
                 {
                     id: 3,
                     name: 'Gare',
                     position_x: 970,
-                    position_y: 165,
+                    position_y: 110,
                     point_of_interest: 1,
                 }
             ]
@@ -74,7 +74,7 @@ var VEHICLE_DATA = [
         state: {
             id: 15,
             speed: 35,
-            angle: 50,
+            angle: 0,
             position_x: 600,
             position_y: 170
         }
@@ -112,7 +112,7 @@ $(document).ready(function () {
         minZoom: -2,
         maxZoom: 2,
         zoomDelta: 0.1,
-        zoomSmap: 0.1,
+        zoomSnap: 0.1,
         wheelPxPerZoomLevel: 300
     };
 
@@ -192,24 +192,175 @@ var mapUtils = {
      * @param {L.Icon} icon - Icône du marqueur
      * @param {string} popupText - Texte du popup
      * @param {boolean} draggable - Le marqueur est-il déplaçable (défaut: false)
+     * * @param {boolean} popupPermanent - La popup est elle affihcée en permanence (défaut: false)
      * @returns {L.Marker} Marqueur Leaflet configuré
      */
-    createMarker: function(position, icon, popupText, draggable) {
-        return L.marker(position, { 
-                    icon: icon, 
-                    draggable: draggable || false 
-                }).bindPopup(popupText);
+    createMarker: function(position, icon, popupText, draggable = false, popupPermanent = false) {
+        var marker = L.marker(position, { 
+            icon: icon, 
+            draggable: draggable
+        });
+        
+        if (popupPermanent) {
+            marker.bindTooltip(popupText, {
+                permanent: true,
+                direction: 'top',
+                className: 'custom-tooltip',
+                offset: [10, -20]
+            });
+        }
+        else marker.bindPopup(popupText);
+        
+        return marker;
+    },
+    /**
+     * Génère le contenu HTML du tooltip d'un véhicule
+     * @param {Object} vehicle - Objet véhicule
+     * @returns {string} HTML du tooltip
+     */
+    generateVehicleTooltip :function(vehicle) {
+
+        let statusColor = '';
+        switch (vehicle.travel.status) {
+            case 'En attente':
+                statusColor = '#e7dd55';
+                break;
+            case 'En cours':
+                statusColor = '#7cd1f5';
+                break;
+            case 'Terminé':
+                statusColor = '#a0e249ff';
+                break;
+            case 'Annulé':
+                statusColor = '#f03030';
+                break;
+            default:
+                statusColor = vehicle.status;
+                break;
+        }
+
+        return `
+            <div class="card text-center">
+                <div class="card-header py-1 px-2">` +
+                    vehicle.name + `</span><span class="ms-2 pt-1 badge rounded-pill" style="background-color:`+statusColor+`">`+ vehicle.travel.status +`</span>
+                </div>
+                <div class="card-body px-2 py-1">
+                    <div>
+                        <img class="me-1" src="images/speed.png" width="20" height="13"/>` + 
+                        vehicle.state.speed +` cm/s
+                    </div>
+                    <div class="mt-1">
+                        <img class="me-1" src="images/angle.png" width="15" height="13"/>` +
+                        vehicle.state.angle +`°
+                    </div>
+                </div>
+            </div>`;
+    },
+    /**
+     * Crée un filtre contenant tous les marqueurs d'un véhicule (voiture + noeuds du trajet)
+     * @param {Object} vehicle - véhicule avec propriétés id, name, state, travel
+     * @param {L.Map} map - Instance Leaflet de la carte
+     * @returns {Object} Objet avec layer (L.LayerGroup) et name (string)
+     */
+    createVehicleLayer: function (vehicle, map, circles) {
+
+        let markers = [];
+
+        // Flèche (direction et angle du véhicule)
+        var arrowIcon = L.divIcon({
+            html: '<div style="transform: rotate(' + vehicle.state.angle + 'deg);"> → </div>',
+            className: 'arrow-marker',
+            iconSize: [30, 30],
+            iconAnchor: [0, 10]
+        });
+        var arrowMarker = L.marker(
+            [vehicle.state.position_y, vehicle.state.position_x],
+            {icon: arrowIcon}
+        );
+        markers.push(arrowMarker);
+
+        // Véhicule (petite icone de voiture)
+        const carIcon = mapUtils.createIcon(vehicle.id, 'car');
+        const carMarker = mapUtils.createMarker(
+            [vehicle.state.position_y, vehicle.state.position_x],
+            carIcon, 
+            mapUtils.generateVehicleTooltip(vehicle),
+            false,
+            true // permanent
+        );
+        markers.push(carMarker);
+        mapUtils.setupClickListener(carMarker, vehicle.id);
+
+        // Noeuds du trajet
+        vehicle.travel.nodes.forEach(function(node) {
+            
+            const isFinaleDestination = vehicle.travel.nodes.at(-1).id === node.id;
+            const type = isFinaleDestination ? 'pin' : 'point';
+
+            const nodeIcon = mapUtils.createIcon(node.id, type, vehicle.id);
+
+            const nodeMarker = mapUtils.createMarker(
+                [node.position_y, node.position_x],
+                nodeIcon, 
+                'Destination '+vehicle.name,
+                true // draggable
+            );        
+            markers.push(nodeMarker);
+
+            mapUtils.setupNodeDropListener(nodeMarker, map, circles, node.name);
+            mapUtils.setupClickListener(nodeMarker, vehicle.id);
+        });
+        
+        return {
+            layer: L.layerGroup(markers),
+            name: vehicle.name
+        };
+    },
+    /**
+     * Crée et ajoute un cercle rouge sur la carte autour de la position d’un noeud.
+     * @param {Object} node - Objet représentant le noeud.
+     * @returns {L.Circle} Cercle Leaflet ajouté à la carte
+     **/
+    setupMapNodeArea: function (node) {
+        
+        const circle = L.circle([node.position_y, node.position_x], {
+            color: 'red',
+            fillColor: '#f03',
+            fillOpacity: 0.3,
+            radius: 80 // rayon du cercle
+        });
+
+        return circle;
+    },
+    /**
+     * Configure un listener pour mettre à jour le formulaire au click d'un véhicule
+     * @param {L.Marker} carMarker - Le marqueur de voiture
+     * @param {number} id - véhicule id
+     */
+    setupClickListener: function(carMarker, id) {
+
+        carMarker.on('click', function() {
+            $('#vehicleSelect .dropdown-item[value='+id+']').trigger('click');
+        });
     },
     /**
      * Configure un listener pour empêcher un déplacement en dehors des cercles autorisés
      * @param {L.Marker} pinMarker - Le marqueur draggable
+     * @param {L.Map} map - Instance Leaflet de la carte
      * @param {Array<L.Circle>} circles - Tableau de cercles Leaflet autorisés
      * @param {string} name - Nom affiché pour les logs
      */
-    setupNodeListener: function(pinMarker, circles, name) {
+    setupNodeDropListener: function(pinMarker, map, circles, name) {
         let lastValidPos = pinMarker.getLatLng();
 
+        // Afficher les cercles au début du drag
+        pinMarker.on('movestart', function() {
+            circles.forEach(circle => circle.addTo(map));
+        });
+
         pinMarker.on('moveend', function(e) {
+            circles.forEach(circle => circle.remove());
+
             const newPos = e.target.getLatLng();
             let isInsideAnyCircle = false;
 
@@ -236,65 +387,6 @@ var mapUtils = {
                 pinMarker.setLatLng(lastValidPos);
             }
         });
-    },
-    /**
-     * Crée un filtre contenant tous les marqueurs d'un véhicule (voiture + noeuds du trajet)
-     * @param {Object} vehicle - véhicule avec propriétés id, name, state, travel
-     * @returns {Object} Objet avec layer (L.LayerGroup) et name (string)
-     */
-    createVehicleLayer: function (vehicle, circles) {
-
-        let markers = [];
-
-        // Voitures
-        const carIcon = mapUtils.createIcon(vehicle.id, 'car');
-        const carMarker = mapUtils.createMarker(
-            [vehicle.state.position_y, vehicle.state.position_x],
-            carIcon, 
-            vehicle.name
-        );
-        markers.push(carMarker);
-
-        // Noeuds du trajet
-        vehicle.travel.nodes.forEach(function(node) {
-            
-            const isFinaleDestination = vehicle.travel.nodes.at(-1).id === node.id;
-            const type = isFinaleDestination ? 'pin' : 'point';
-
-            const nodeIcon = mapUtils.createIcon(node.id, type, vehicle.id);
-
-            const nodeMarker = mapUtils.createMarker(
-                [node.position_y, node.position_x],
-                nodeIcon, 
-                'Destination '+vehicle.name,
-                true // draggable
-            );        
-            markers.push(nodeMarker);
-
-            mapUtils.setupNodeListener(nodeMarker, circles, node.name);
-        });
-        
-        return {
-            layer: L.layerGroup(markers),
-            name: vehicle.name
-        };
-    },
-    /**
-     * Crée et ajoute un cercle rouge sur la carte autour de la position d’un noeud.
-     * @param {L.Map} map - Instance Leaflet de la carte
-     * @param {Object} node - Objet représentant le noeud.
-     * @returns {L.Circle} Cercle Leaflet ajouté à la carte
-     **/
-    setupMapNodeArea: function (map, node) {
-        
-        const circle = L.circle([node.position_y, node.position_x], {
-            color: 'red',
-            fillColor: '#f03',
-            fillOpacity: 0.3,
-            radius: 80 // rayon du cercle
-        }).addTo(map);
-
-        return circle;
     }
 };
 
@@ -311,7 +403,7 @@ function setupVehicles(map, vehicleData, circles) {
     
     vehicleData.forEach(function(vehicle) {
         // Map
-        const vehicleLayer = mapUtils.createVehicleLayer(vehicle, circles);
+        const vehicleLayer = mapUtils.createVehicleLayer(vehicle, map, circles);
         vehicleLayer.layer.addTo(map);
         layerControl.addOverlay(vehicleLayer.layer, vehicleLayer.name);
         vehicleLayers.push(vehicleLayer);
@@ -326,7 +418,7 @@ function setupVehicles(map, vehicleData, circles) {
                 statusColor = '#7cd1f5';
                 break;
             case 'Terminé':
-                statusColor = '#9ae249';
+                statusColor = '#a0e249ff';
                 break;
             case 'Annulé':
                 statusColor = '#f03030';
@@ -336,9 +428,10 @@ function setupVehicles(map, vehicleData, circles) {
                 break;
         }
 
-        const option = '<li class="dropdown-item" value="'+ vehicle.id +'">'+
-                            vehicle.name +'<span class="ms-3 badge rounded-pill" style="background-color:'+statusColor+'">'+ vehicle.travel.status +'</span>' +
-                        '</li>';
+        const option = $('<li>').addClass('dropdown-item')
+                                .val(vehicle.id)
+                                .html(vehicle.name +'<span class="ms-3 badge rounded-pill" style="background-color:'+statusColor+'">'+ vehicle.travel.status +'</span>')
+                                .data('vehicle', vehicle);
 
         $('#vehicleSelect').append(option);
     });
@@ -356,13 +449,12 @@ function setupMapNodes(map, mapData) {
         const marker = mapUtils.createMarker(
             [node.position_y, node.position_x],
             icon,
-            node.name,
-            false
+            node.name
         );
         marker.addTo(map);
         markers.push(marker);
 
-        const circle = mapUtils.setupMapNodeArea(map, node);
+        const circle = mapUtils.setupMapNodeArea(node);
         circles.push(circle);
 
         const option = '<li class="dropdown-item" value="'+ node.id +'">'+
@@ -379,7 +471,7 @@ function setupMapNodes(map, mapData) {
 /************* INTERACTIONS *************/
 
 /*
-* Mise à jour du bouton de sélection de véhicule au click d'une option
+* Mise à jour du bouton de sélection (dropdown) au click d'une option
 */
 $(document).on('click', '.dropdown-item', function() {
     const selectBtn =  $(this).closest('.dropdown').find('.dropdown-toggle');
@@ -392,7 +484,7 @@ $(document).on('click', '.dropdown-item', function() {
 $(document).on('click', '#addStepBtn', function() {
 
     const maxStep = 1;
-    let stepCount = $('.step-item').length - 1; //step clonable
+    let stepCount = $('#stepsContainer').find('.step-item').length;
     if (stepCount >= maxStep) return;
 
     const step = stepCount+1;
@@ -410,4 +502,35 @@ $(document).on('click', '#addStepBtn', function() {
 $(document).on('click', '.remove-step', function() {
     $(this).closest('.step-item').remove();
     $('#addStepBtn').prop('disabled', false);
+});
+
+/*
+* Mise à jour du formulaire au click d'un véhicule
+*/
+$(document).on('click', '#vehicleSelect .dropdown-item', function() {
+
+    const vehicle = $(this).data('vehicle');
+    const destinations = vehicle.travel.nodes.filter(function(node) { return node.point_of_interest; });
+
+    $('#stepsContainer').empty();
+    $('#addStepBtn').prop('disabled', false);
+
+    for(const node of destinations){
+        if(destinations.at(-1).id === node.id) { // Destination finale
+            $('#destinationSelect .dropdown-item[value='+node.id+']').trigger('click');
+        }
+        else { // Etape
+            $('#addStepBtn').trigger('click');
+            $('.step-select:last').find('.dropdown-item[value='+node.id+']').trigger('click');
+        }
+    }
+
+    if(vehicle.travel.status == 'Terminé' || vehicle.travel.status == 'Annulé'){
+        $('#calculTravelBtn').show();
+        $('#editTravelBtn').hide();
+    }
+    else {
+        $('#calculTravelBtn').hide();
+        $('#editTravelBtn').show();
+    }
 });

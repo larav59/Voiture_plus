@@ -24,7 +24,10 @@ Ce fichier contient les elements de style des pages du site web
 }
 
 /* style du bouton de calcul de trajet */
-#calculTrajetBtn {
+#editTravelBtn {
+    display: none;
+}
+#calculTravelBtn, #editTravelBtn {
     width: 15em;
     height: 2.5em;
     border-radius: 15em;
@@ -34,7 +37,7 @@ Ce fichier contient les elements de style des pages du site web
     z-index: 1;
 
 }
-#calculTrajetBtn::before {
+#calculTravelBtn::before {
     content: '';
     width: 0;
     height: 2.5em;
@@ -47,6 +50,32 @@ Ce fichier contient les elements de style des pages du site web
     display: block;
     z-index: -1;
 }
-#calculTrajetBtn:hover::before {
+#editTravelBtn::before {
+    content: '';
+    width: 0;
+    height: 2.5em;
+    border-radius: 15em;
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-image: linear-gradient(to right, #0fa2d8 0%, #7cf5fe 100%);
+    transition: .5s ease;
+    display: block;
+    z-index: -1;
+}
+#calculTravelBtn:hover::before, #editTravelBtn:hover::before {
     width: 15em;
+}
+
+.arrow-marker {
+    font-size: 50px;
+    color: red;
+}
+
+.leaflet-tooltip.custom-tooltip {
+    background: white !important;
+    opacity: 0.95 !important;
+    border-radius: 10px !important;
+    box-shadow: 3px 3px 3px rgba(0,0,0,0.4) !important;
+    padding: 4px;
 }
