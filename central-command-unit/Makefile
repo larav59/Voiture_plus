@@ -93,7 +93,7 @@ services: external-libs $(SERVICES:%=$(BIN_DIR)/%)
 # Edition de liens des services avec les objets correspondants
 $(BIN_DIR)/%: $$(OBJ_%) $(TARGET_LIBSO)
 	@mkdir -p $(BIN_DIR)
-	$(CC) $^ -o $@ $(LDFLAGS) $(PROJECT_LIBS) $(LIBS) 
+	@$(CC) $^ -o $@ $(LDFLAGS) $(PROJECT_LIBS) $(LIBS) 
 	@echo "LD Service $@"
 
 # Lanceur de test unitaires
