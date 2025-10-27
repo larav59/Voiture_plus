@@ -9,7 +9,7 @@
  * @date 2025-10-24
  */
 
-#include "core/telemetry_message.h"
+#include "core/mqtt_messages/telemetry_message.h"
 
 #ifdef DEBUG
 	// En mode debug, on formate le JSON pour qu'il soit lisible

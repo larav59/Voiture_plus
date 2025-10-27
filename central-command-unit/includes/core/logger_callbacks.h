@@ -8,7 +8,7 @@
 
 #include "core/logger.h"
 #include "core/mqtt.h"
-#include "core/telemetry_message.h"
+#include "core/mqtt_messages/telemetry_message.h"
 
 /**
  * @brief Callback de log qui écrit sur la console avec couleurs.
