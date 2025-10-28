@@ -11,14 +11,6 @@
 
 #include "core/mqtt_messages/telemetry_message.h"
 
-#ifdef DEBUG
-	// En mode debug, on formate le JSON pour qu'il soit lisible
-	#define CJSON_PRINT(x) cJSON_Print(x)
-#else
-	// En mode release, on compacte pour optimiser la taille
-	#define CJSON_PRINT(x) cJSON_PrintUnformatted(x)
-#endif
-
 /**
  * @brief Sérialise un message de télémétrie en JSON.
  * @param msg Pointeur vers le message de télémétrie à sérialiser.
@@ -29,19 +21,18 @@ char *telemetry_message_serialize_json(const telemetry_message_t *msg) {
 	cJSON *root = cJSON_CreateObject();
 	if(!root) return NULL;
 
-	if(!cJSON_AddStringToObject(root, "origin", msg->origin)) goto error_cleanup;
-	if(!cJSON_AddNumberToObject(root, "timestamp", (double) msg->timestamp)) goto error_cleanup;
-	if(!cJSON_AddStringToObject(root, "level", logger_level_to_string(msg->level))) goto error_cleanup;
-	if(!cJSON_AddStringToObject(root, "message", msg->message)) goto error_cleanup;
-
-	char *json_str = CJSON_PRINT(root);
-	cJSON_Delete(root);
-
-	return json_str;
-
-	error_cleanup:
+	if(!cJSON_AddStringToObject(root, "origin", msg->origin)) 
+	if(!cJSON_AddNumberToObject(root, "timestamp", (double) msg->timestamp)) 
+	if(!cJSON_AddStringToObject(root, "level", logger_level_to_string(msg->level)))
+	if(!cJSON_AddStringToObject(root, "message", msg->message)) {
 		cJSON_Delete(root);
 		return NULL;
+	}
+
+	char *json = CJSON_PRINT(root);
+	cJSON_Delete(root);
+
+	return json;
 }
 
 /**
