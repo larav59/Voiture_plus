@@ -20,6 +20,7 @@
 #include <semaphore.h>
 #include <unistd.h>
 #include <time.h>
+#include "cJSON.h"
 
 
 #ifdef DEBUG
@@ -27,11 +28,13 @@
     #define UNIMPLEMENTED(func) fprintf(stderr, "[DEBUG] Unimplemented: %s\n", func) //!< Fonction non implémentée
     #define OBSOLETE(func)      fprintf(stderr, "[DEBUG] Obsolete: %s\n", func) //!< Fonction obsolète
     #define DEBUG_PRINT(...)    fprintf(stderr, "[DEBUG] " __VA_ARGS__) //!< Affichage debug
+    #define CJSON_PRINT(x) cJSON_Print(x) //!< Formatage JSON en mode debug
 #else
     #define UNUSED(x) (void)(x) //!< Supprime les warnings pour variables non utilisées
     #define UNIMPLEMENTED(func)
     #define OBSOLETE(func)
     #define DEBUG_PRINT(...)
+    #define CJSON_PRINT(x) cJSON_PrintUnformatted(x) //!< Formatage JSON en mode release
 #endif
 
 

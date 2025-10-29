@@ -91,7 +91,7 @@ $(TARGET_LIBSO): $(OBJ_CORE)
 services: external-libs $(SERVICES:%=$(BIN_DIR)/%)
 
 # Edition de liens des services avec les objets correspondants
-$(BIN_DIR)/%: $$(OBJ_%) $(TARGET_LIBSO)
+$(BIN_DIR)/%: $$(OBJ_%)
 	@mkdir -p $(BIN_DIR)
 	@$(CC) $^ -o $@ $(LDFLAGS) $(PROJECT_LIBS) $(LIBS) 
 	@echo "LD Service $@"
