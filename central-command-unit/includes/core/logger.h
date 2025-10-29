@@ -8,7 +8,7 @@
 #ifndef LOGGER_H
 #define LOGGER_H
 
-#include "common.h"
+#include "core/common.h"
 #include "fifo.h"
 
 /**
