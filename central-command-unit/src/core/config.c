@@ -63,7 +63,7 @@ static int config_handler(void* user, const char* section, const char* name, con
     } else if(MATCH("Network", "mqtt_timeout_sec")) {
         config->network.timeoutSec = (uint32_t)strtoul(value, NULL, 10);
         payload->tracker.timeoutSec = true;
-    } else if (MATCH("Logging", "log_Level")) {
+    } else if (MATCH("Logging", "log_level")) {
         if (log_level_from_string(value, &config->logging.logLevel) == 0) {
             payload->tracker.logLevel = true;
         } else {
