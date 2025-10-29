@@ -1,5 +1,5 @@
 /**
- * @file logger.h
+ * @file logger.c
  * @brief Module de journalisation pour les différents services (sync et async).
  * @author Lukas
  * @date 2025-10-18
