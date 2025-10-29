@@ -1,5 +1,5 @@
 /**
- * @file core.h
+ * @file core.c
  * @brief Bootstrap central pour les services MQTT
  * Fournit les fonctions et structures de base pour initialiser et gérer les services MQTT.
  * @author Lukas Grando
