@@ -21,18 +21,19 @@ char *telemetry_message_serialize_json(const telemetry_message_t *msg) {
 	cJSON *root = cJSON_CreateObject();
 	if(!root) return NULL;
 
-	if(!cJSON_AddStringToObject(root, "origin", msg->origin)) 
-	if(!cJSON_AddNumberToObject(root, "timestamp", (double) msg->timestamp)) 
-	if(!cJSON_AddStringToObject(root, "level", logger_level_to_string(msg->level)))
-	if(!cJSON_AddStringToObject(root, "message", msg->message)) {
-		cJSON_Delete(root);
-		return NULL;
-	}
+	if(!cJSON_AddStringToObject(root, "origin", msg->origin)) goto error_cleanup;
+	if(!cJSON_AddNumberToObject(root, "timestamp", (double) msg->timestamp)) goto error_cleanup;
+	if(!cJSON_AddStringToObject(root, "level", logger_level_to_string(msg->level))) goto error_cleanup;
+	if(!cJSON_AddStringToObject(root, "message", msg->message)) goto error_cleanup;
 
 	char *json = CJSON_PRINT(root);
 	cJSON_Delete(root);
 
 	return json;
+
+	error_cleanup:
+		cJSON_Delete(root);
+		return NULL;
 }
 
 /**
