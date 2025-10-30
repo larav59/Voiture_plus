@@ -1,5 +1,5 @@
 /**
- * @file set_safe_route_mode_request.h
+ * @file set_safe_route_mode_request.c
  * @brief Définitions du modèle de données pour la commande SET_SAFE_ROUTE_MODE_REQUEST.
  * @details
  * Adressé à : Route Planner Service
