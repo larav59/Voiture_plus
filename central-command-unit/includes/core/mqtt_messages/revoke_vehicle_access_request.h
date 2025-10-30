@@ -3,8 +3,8 @@
  * @brief Définitions du modèle de données pour la commande REVOKE_VEHICLE_ACCESS.
  * @details
  * Adressé à : Conflict Manager Service
- * La commande est envoyé pour annuler les demande de ressource en cours d'un véhicule.
- * Le gestionnaire de conflit va également bloqué la ressource actuellement utilisé par le véhicule pour éviter les accidents.
+ * La commande est envoyée pour annuler les demandes de ressource en cours d'un véhicule.
+ * Le gestionnaire de conflit va également bloquer la ressource actuellement utilisée par le véhicule pour éviter les accidents.
  */
 
 #ifndef REVOKE_VEHICLE_ACCESS_H
