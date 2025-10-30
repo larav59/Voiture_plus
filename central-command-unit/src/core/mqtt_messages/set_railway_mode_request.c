@@ -1,5 +1,5 @@
 /**
- * @file set_railway_mode_request.h
+ * @file set_railway_mode_request.c
  * @brief Définitions du modèle de données pour la commande SET_RAILWAY_MODE_REQUEST.
  * @details
  * Adressé à : Railway Service
