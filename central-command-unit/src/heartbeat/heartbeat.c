@@ -8,12 +8,29 @@
  */
 
 #include "core/core.h"
-// #include "heartbeat/heartbeat.h"
-
-
-
+#include "heartbeat/heartbeat_message_callback.h"
 
 int main(int argc, char **argv) {
 	config_common_t common_config;
-	core_bootstrap(argc, argv, &common_config);
+	signal_init();
+
+	if(core_bootstrap(argc, argv, &common_config, NULL, NULL, NULL, NULL) != 0) {
+		LOG_FATAL_SYNC("Failed to bootstrap core systems. Exiting.");
+		return EXIT_FAILURE;
+	}
+	LOG_INFO_ASYNC("Heartbeat Service started successfully.");
+
+	mqtt_subscribe("services/+/status", MQTT_QOS_AT_LEAST_ONCE);
+	mqtt_subscribe("vehicles/+/status", MQTT_QOS_AT_LEAST_ONCE);
+
+	
+	mqtt_set_message_callback(heartbeat_message_callback);
+
+	signal_wait_for_shutdown();
+
+	LOG_INFO_ASYNC("Shutdown signal received. Stopping Heartbeat Service...");
+	core_shutdown();
+	signal_cleanup();
+	
+	return 0;
 }
