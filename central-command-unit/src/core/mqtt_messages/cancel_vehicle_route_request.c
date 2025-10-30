@@ -3,7 +3,7 @@
  * @brief Définitions du modèle de données pour la commande CANCEL_VEHICLE_ROUTE_REQUEST.
  * @details
  * Adressé à : Route Planner Service
- * La commande est envoyé qu'on veut que le route planner annule le trajet en cours d'un véhicule.
+ * La commande est envoyée lorsqu'on veut que le route planner annule le trajet en cours d'un véhicule.
  */
 
 #include "core/mqtt_messages/cancel_vehicle_route_request.h"
