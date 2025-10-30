@@ -9,9 +9,9 @@
 #include "core/mqtt_messages/cancel_vehicle_route_request.h"
 
 /**
- * @brief Sérialise un message de télémétrie en JSON.
- * @param msg Pointeur vers le message de télémétrie à sérialiser.
- * @return Chaîne JSON représentant le message de télémétrie
+ * @brief Sérialise un message de demande d'annulation de trajet véhicule en JSON.
+ * @param msg Pointeur vers le message de demande d'annulation de trajet véhicule à sérialiser.
+ * @return Chaîne JSON représentant le message de demande d'annulation de trajet véhicule
  * @warning La mémoire allouée pour la chaîne JSON doit être libérée par l'appelant.
  */
 char *cancel_vehicle_route_request_serialize_json(const cancel_vehicle_route_request_t *msg) {
