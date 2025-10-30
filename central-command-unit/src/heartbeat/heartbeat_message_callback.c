@@ -107,7 +107,7 @@ void heartbeat_message_callback(const char* topic, const char* payload) {
 	}
 
 	if(MATCH_SERVICE(topic, "railway-sync")) {
-		LOG_DEBUG_ASYNC("Railway synchronizer service is down.");
+		LOG_WARNING_ASYNC("Railway synchronizer service is down.");
 
 		// Prévenir le route-planner pour qu'il désactive le mode ferroviaire si nécessaire
 		set_railway_mode_request_t railwayModeRequest = {
