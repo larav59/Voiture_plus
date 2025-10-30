@@ -1,7 +1,7 @@
 /**
  * @file includes/core/signal.h
  * @brief Gestion des signaux pour les services.
- * @details Ce fichier contient les définition et les fonctions pour gérer l'arrêt propre des services via des signaux système.
+ * @details Ce fichier contient les définitions et les fonctions pour gérer l'arrêt propre des services via des signaux système.
  * @author Lukas Grando
  * @date 2025-10-30
  */
