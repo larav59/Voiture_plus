@@ -19,17 +19,17 @@ typedef struct {
 } cancel_vehicle_route_request_t;
 
 /**
- * @brief Sérialise un message de télémétrie en JSON.
- * @param msg Pointeur vers le message de télémétrie à sérialiser.
- * @return Chaîne JSON représentant le message de télémétrie
+ * @brief Sérialise un message de demande d'annulation de trajet véhicule en JSON.
+ * @param msg Pointeur vers le message de demande d'annulation de trajet véhicule à sérialiser.
+ * @return Chaîne JSON représentant le message de demande d'annulation de trajet véhicule
  * @warning La mémoire allouée pour la chaîne JSON doit être libérée par l'appelant.
  */
 char *cancel_vehicle_route_request_serialize_json(const cancel_vehicle_route_request_t *msg);
 
 /**
- * @brief Désérialise un message de télémétrie à partir d'une chaîne JSON.
- * @param json Chaîne JSON représentant le message de télémétrie.
- * @param msg Pointeur vers la structure de message de télémétrie à remplir.
+ * @brief Désérialise un message de demande d'annulation de trajet véhicule à partir d'une chaîne JSON.
+ * @param json Chaîne JSON représentant le message de demande d'annulation de trajet véhicule.
+ * @param msg Pointeur vers la structure de message de demande d'annulation de trajet véhicule à remplir.
  * @return 0 en cas de succès, -1 en cas d'erreur.
  */
 int cancel_vehicle_route_request_deserialize_json(const char *json, cancel_vehicle_route_request_t *msg);
