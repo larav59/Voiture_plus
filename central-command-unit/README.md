@@ -18,7 +18,29 @@ La CCU est structurée autour des principaux micro-services suivants :
 
  
 ### Moniteur de présence (Heartbeat)
-- Fonction : Surveille l'état des véhicules et des autres services agissant lorsque le LWT (Last Will and Testament) MQTT est déclenché. Puis alerte les services concernés pour gérer les situations de panne ou de perte de communication.
+
+- Objectif : Surveiller l'état des véhicules et des autres services agissant lorsque le LWT (Last Will and Testament) MQTT est déclenché. Puis alerte les services concernés pour gérer les situations de panne ou de perte de communication.
+
+Ce service pour l'instant agit en Fire-And-Forget, c'est à dire qu'il ne s'occupe pas de savoir si les commandes envoyées ont bien été reçues et exécutées par les véhicules ou autres services. A terme, un système de confirmation de réception et d'exécution des commandes sera mis en place.
+
+Il écoute les topics suivants :
+- `vehicles/+/status` : Pour surveiller l'état des véhicules.
+- `services/+/status` : Pour surveiller l'état des autres services de la CCU.
+
+Selon le topic du message reçu, il effectue les actions suivantes :
+- **Véhicule hors ligne** :
+  - Journalise un avertissement indiquant que le véhicule est hors ligne.
+  - Envoie une requête pour annuler le trajet en cours du véhicule.
+  - Envoie une requête pour révoquer l'accès aux zones critiques demandées par le véhicule.
+- **Service de gestion des conflits hors ligne** :
+  - Journalise un avertissement indiquant que le service de gestion des conflits est hors ligne.
+  - Envoie une requête pour activer le mode de trajet sécurisé, demandant au planificateur de trajets d'éviter les zones de conflit.
+- **Service de planification des trajets hors ligne** :
+  - Journalise un avertissement indiquant que le service de planification des trajets est hors ligne.
+  - A terme, envisager un mécanisme pour relancer le service.
+- **Service de synchronisation ferroviaire hors ligne** :
+  - Journalise un avertissement indiquant que le service de synchronisation ferroviaire est hors ligne.
+  - Envoie une requête pour désactiver le mode ferroviaire, demandant au planificateur de trajets de ne plus prendre en compte les passages à niveau ni les synchronisations avec les trains.
 
 ### Service de synchronisation ferroviaire (Railway Synchronizer)
 - Fonction : Donne l’autorisation pour le passage à niveau et reste à l’écoute des informations provenant de la centrale train.  

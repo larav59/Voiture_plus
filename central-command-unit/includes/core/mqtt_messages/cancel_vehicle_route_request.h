@@ -1,0 +1,37 @@
+/**
+ * @file cancel_vehicle_route_request.h
+ * @brief Définitions du modèle de données pour la commande CANCEL_VEHICLE_ROUTE_REQUEST.
+ * @details
+ * Adressé à : Route Planner Service
+ * La commande est envoyée lorsqu'on veut que le route planner annule le trajet en cours d'un véhicule
+ */
+
+#ifndef CANCEL_VEHICLE_ROUTE_REQUEST_H
+#define CANCEL_VEHICLE_ROUTE_REQUEST_H
+
+#include "core/mqtt_messages/command_header.h"
+#include "core/check.h"
+#include "cJSON.h"
+
+typedef struct {
+	command_header_t header;
+	int carId;
+} cancel_vehicle_route_request_t;
+
+/**
+ * @brief Sérialise un message de demande d'annulation de trajet véhicule en JSON.
+ * @param msg Pointeur vers le message de demande d'annulation de trajet véhicule à sérialiser.
+ * @return Chaîne JSON représentant le message de demande d'annulation de trajet véhicule
+ * @warning La mémoire allouée pour la chaîne JSON doit être libérée par l'appelant.
+ */
+char *cancel_vehicle_route_request_serialize_json(const cancel_vehicle_route_request_t *msg);
+
+/**
+ * @brief Désérialise un message de demande d'annulation de trajet véhicule à partir d'une chaîne JSON.
+ * @param json Chaîne JSON représentant le message de demande d'annulation de trajet véhicule.
+ * @param msg Pointeur vers la structure de message de demande d'annulation de trajet véhicule à remplir.
+ * @return 0 en cas de succès, -1 en cas d'erreur.
+ */
+int cancel_vehicle_route_request_deserialize_json(const char *json, cancel_vehicle_route_request_t *msg);
+
+#endif // CANCEL_VEHICLE_ROUTE_REQUEST_H

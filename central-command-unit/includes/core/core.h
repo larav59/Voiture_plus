@@ -12,10 +12,11 @@
 #include "core/check.h"
 #include "core/config.h"
 #include "core/mqtt.h"
+#include "core/signal.h"
 
 
 #define VERSION_MAJOR 1
-#define VERSION_MINOR 0
+#define VERSION_MINOR 1
 #define VERSION_PATCH 0
 
 #ifdef DEBUG
@@ -53,6 +54,13 @@ int core_bootstrap(
 	char *lwtPayload,
 	char *lwtTopic
 );
+
+/**
+ * @brief Enregistre la chaîne de version du service.
+ * @details Doit être appelée par main() avant core_bootstrap().
+ * @param serviceVersion Chaîne de version (ex: "Heartbeat v1.0.0").
+ */
+void core_set_service_version(const char* serviceVersion);
 
 /**
  * @brief Arrête tous les sous systèmes du core
