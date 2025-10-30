@@ -57,6 +57,7 @@ void heartbeat_message_callback(const char* topic, const char* payload) {
 		}
 		
 		mqtt_publish("services/route-planner/request", jsonPayload, MQTT_QOS_AT_MOST_ONCE, false);
+		LOG_INFO_ASYNC("Sent CANCEL_VEHICLE_ROUTE_REQUEST for vehicle ID %d to route-planner.", carId);
 		free(jsonPayload);
 
 		revoke_vehicle_access_t revokeAccess = {
@@ -71,9 +72,8 @@ void heartbeat_message_callback(const char* topic, const char* payload) {
 		}
 
 		mqtt_publish("services/conflict-manager/request", jsonPayload, MQTT_QOS_AT_MOST_ONCE, false);
+		LOG_INFO_ASYNC("Sent REVOKE_VEHICLE_ACCESS for vehicle ID %d to conflict-manager.", carId);
 		free(jsonPayload);
-
-		LOG_INFO_ASYNC("Sent CANCEL_VEHICLE_ROUTE_REQUEST for vehicle ID %d", carId);
 		return;
 	}
 
@@ -100,6 +100,7 @@ void heartbeat_message_callback(const char* topic, const char* payload) {
 		}
 
 		mqtt_publish("services/route-planner/request", jsonPayload, MQTT_QOS_AT_MOST_ONCE, false);
+		LOG_INFO_ASYNC("Sent SET_SAFE_ROUTE_MODE to route-planner.");
 		free(jsonPayload);
 
 		return;
@@ -120,6 +121,7 @@ void heartbeat_message_callback(const char* topic, const char* payload) {
 		}
 
 		mqtt_publish("services/route-planner/request", jsonPayload, MQTT_QOS_AT_MOST_ONCE, false);
+		LOG_INFO_ASYNC("Sent SET_RAILWAY_MODE to route-planner.");
 		free(jsonPayload);
 		return;
 	}
