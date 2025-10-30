@@ -7,7 +7,7 @@
  */
 
 #include "core/signal.h"
-#include <signal.h> // pour vscode (??)
+#include <signal.h>
 
 static sem_t shutdownSem;
 
