@@ -21,7 +21,7 @@
 #include <unistd.h>
 #include <time.h>
 #include "cJSON.h"
-#include "signal.h"
+#include <signal.h>
 
 
 #ifdef DEBUG
