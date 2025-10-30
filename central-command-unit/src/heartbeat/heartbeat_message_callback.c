@@ -10,7 +10,6 @@
 
 #define MATCH_SERVICE(topic, service) (strncmp(topic, "services/", 9) == 0 && strstr(topic, "/status") != NULL && strstr(topic, service) != NULL)
 
-
 static int extract_car_id_int(const char *topic, int *carId, const char *prefix) {
     const char *start = strstr(topic, prefix);
     if (!start) return -1;
@@ -36,7 +35,6 @@ static int extract_car_id_int(const char *topic, int *carId, const char *prefix)
  * @param payload Payload du message reçu.
  */
 void heartbeat_message_callback(const char* topic, const char* payload) {
-	// Pour l'instant on s'en fiche du payload car si on en reçoit un c'est que le service/véhicule est down
 	UNUSED(payload);
 
 	if(strncmp(topic, "vehicles/", 9) == 0 && strstr(topic, "/status") != NULL) {
@@ -45,10 +43,10 @@ void heartbeat_message_callback(const char* topic, const char* payload) {
 			LOG_WARNING_ASYNC("Failed to extract carId from topic: %s", topic);
 			return;
 		}
-		LOG_DEBUG_ASYNC("Received status from vehicle ID %d", carId);
+		LOG_WARNING_ASYNC("Vehicle ID %d is down.", carId);
 
 		cancel_vehicle_route_request_t cancelRequest = {
-			.header = create_command_header("CANCEL_VEHICLE_ROUTE_REQUEST"),
+			.header = create_command_header(ACTION_CANCEL_VEHICLE_ROUTE),
 			.carId = carId
 		};
 		char *jsonPayload = cancel_vehicle_route_request_serialize_json(&cancelRequest);
@@ -62,7 +60,7 @@ void heartbeat_message_callback(const char* topic, const char* payload) {
 		free(jsonPayload);
 
 		revoke_vehicle_access_t revokeAccess = {
-			.header = create_command_header("REVOKE_VEHICLE_ACCESS"),
+			.header = create_command_header(ACTION_REVOKE_VEHICLE_ACCESS),
 			.carId = carId
 		};
 		jsonPayload = revoke_vehicle_access_serialize_json(&revokeAccess);
@@ -81,17 +79,17 @@ void heartbeat_message_callback(const char* topic, const char* payload) {
 
 	if(MATCH_SERVICE(topic, "route-planner")) {
 		LOG_WARNING_ASYNC("Route Planner service is down.");
-		// A voir à réfléchir à un systeme pour relancer le service
+		// Réfléchir pour une future version un traitement plus avancé :
 		return;
 
 	} 
 
 	if(MATCH_SERVICE(topic, "conflict-manager")) {
-		LOG_DEBUG_ASYNC("Conflict Manager service is down.");
+		LOG_WARNING_ASYNC("Conflict Manager service is down.");
 
 		// Prévenir le route planner pour qu'il planifie des routes "safe" sans zone de conflit
 		set_safe_route_mode_request_t safeRouteModeRequest = {
-			.header = create_command_header("SET_SAFE_ROUTE_MODE"),
+			.header = create_command_header(ACTION_SET_SAFE_ROUTE_MODE),
 			.enabled = true
 		};
 		char *jsonPayload = set_safe_route_mode_request_serialize_json(&safeRouteModeRequest);
@@ -112,7 +110,7 @@ void heartbeat_message_callback(const char* topic, const char* payload) {
 
 		// Prévenir le route-planner pour qu'il désactive le mode ferroviaire si nécessaire
 		set_railway_mode_request_t railwayModeRequest = {
-			.header = create_command_header("SET_RAILWAY_MODE"),
+			.header = create_command_header(ACTION_SET_RAILWAY_MODE),
 			.enabled = false
 		};
 		char *jsonPayload = set_railway_mode_request_serialize_json(&railwayModeRequest);

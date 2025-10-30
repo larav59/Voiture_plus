@@ -11,6 +11,7 @@
 #define HEARTBEAT_MESSAGE_CALLBACK_H
 
 #include "core/mqtt.h"
+#include "core/action_codes.h"
 #include "core/mqtt_messages/cancel_vehicle_route_request.h"
 #include "core/mqtt_messages/revoke_vehicle_access_request.h"
 #include "core/mqtt_messages/set_safe_route_mode_request.h"

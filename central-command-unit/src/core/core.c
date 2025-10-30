@@ -8,6 +8,8 @@
  #include "core/core.h"
  #include "core/logger_callbacks.h"
 
+ static char registeredServiceVersion[50] = "??? Service v?.?.?";
+
 
  static void print_usage(const char* program_name) {
 	printf(COLOR_YELLOW "Usage: %s [options]\n" COLOR_RESET, program_name);
@@ -33,7 +35,8 @@
 			print_usage(argv[0]);
 			exit(EXIT_SUCCESS);
 		} else if (strcmp(argv[i], "-v") == 0 || strcmp(argv[i], "--version") == 0) {
-			printf(COLOR_GREEN "%s Libcore v%d.%d.%d\n" COLOR_RESET, argv[0], VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH);
+			printf(COLOR_GREEN "%s", registeredServiceVersion);
+			printf( " using libcore v%d.%d.%d\n" COLOR_RESET, VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH);
 			exit(EXIT_SUCCESS);
 		} else {
 			fprintf(stderr, COLOR_RED "Error: Unknown option %s\n" COLOR_RESET, argv[i]);
@@ -104,6 +107,17 @@ int core_bootstrap(
 	LOG_INFO_SYNC("CORE: MQTT logger initialized successfully.");
 
     return 0; // Succès
+}
+
+/**
+ * @brief Enregistre la chaîne de version du service.
+ * @details Doit être appelée par main() avant core_bootstrap().
+ * @param serviceVersion Chaîne de version (ex: "Heartbeat v1.0.0").
+ * @note La version du service doit tenir dans moins de 50 caractères. Sinon, elle sera tronquée.
+ */
+void core_set_service_version(const char* serviceVersion) {
+	strncpy(registeredServiceVersion, serviceVersion, sizeof(registeredServiceVersion) - 1);
+	registeredServiceVersion[sizeof(registeredServiceVersion) - 1] = '\0';
 }
 
 
