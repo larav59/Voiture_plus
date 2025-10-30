@@ -32,9 +32,9 @@ char *cancel_vehicle_route_request_serialize_json(const cancel_vehicle_route_req
 }
 
 /**
- * @brief Désérialise un message de télémétrie à partir d'une chaîne JSON.
- * @param json Chaîne JSON représentant le message de télémétrie.
- * @param msg Pointeur vers la structure de message de télémétrie à remplir.
+ * @brief Désérialise un message CANCEL_VEHICLE_ROUTE_REQUEST à partir d'une chaîne JSON.
+ * @param json Chaîne JSON représentant le message CANCEL_VEHICLE_ROUTE_REQUEST.
+ * @param msg Pointeur vers la structure de message CANCEL_VEHICLE_ROUTE_REQUEST à remplir.
  * @return 0 en cas de succès, -1 en cas d'erreur.
  */
 int cancel_vehicle_route_request_deserialize_json(const char *json, cancel_vehicle_route_request_t *msg) {
