@@ -36,7 +36,7 @@ Selon le topic du message reçu, il effectue les actions suivantes :
   - Journalise un avertissement indiquant que le service de gestion des conflits est hors ligne.
   - Envoie une requête pour activer le mode de trajet sécurisé, demandant au planificateur de trajets d'éviter les zones de conflit.
 - **Service de planification des trajets hors ligne** :
-  - Journalise un avertissement indiquant que le service de planification des trajets est
+  - Journalise un avertissement indiquant que le service de planification des trajets est hors ligne.
   - A terme, envisager un mécanisme pour relancer le service.
 - **Service de synchronisation ferroviaire hors ligne** :
   - Journalise un avertissement indiquant que le service de synchronisation ferroviaire est hors ligne.
