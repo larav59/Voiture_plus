@@ -12,6 +12,7 @@
 #include "core/check.h"
 #include "core/config.h"
 #include "core/mqtt.h"
+#include "core/signal.h"
 
 
 #define VERSION_MAJOR 1
