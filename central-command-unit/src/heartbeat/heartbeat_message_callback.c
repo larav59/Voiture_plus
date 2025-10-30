@@ -1,5 +1,5 @@
 /**
- * @file heartbeat_message_callback.h
+ * @file heartbeat_message_callback.c
  * @brief Callbacks pour les messages de heartbeat
  * @details
  * Définit les callbacks pour gérer les messages de heartbeat reçus via MQTT.
