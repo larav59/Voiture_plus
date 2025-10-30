@@ -7,7 +7,7 @@
  * Lorsqu'un service ne répond plus, le broker publie le message (LWT)
  */
 
-#include "heartbeat/hearbeat.h"
+#include "heartbeat/heartbeat.h"
 
 int main(int argc, char **argv) {
 	config_common_t common_config;
