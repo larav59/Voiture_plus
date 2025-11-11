@@ -13,10 +13,11 @@
 #include "core/config.h"
 #include "core/mqtt.h"
 #include "core/signal.h"
+#include "core/request_manager.h"
 
 
 #define VERSION_MAJOR 1
-#define VERSION_MINOR 1
+#define VERSION_MINOR 2
 #define VERSION_PATCH 0
 
 #ifdef DEBUG

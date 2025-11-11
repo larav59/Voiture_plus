@@ -106,6 +106,8 @@ int core_bootstrap(
 	logger_init(commonConfig->logging.logLevel, mqtt_log_callback);
 	LOG_INFO_SYNC("CORE: MQTT logger initialized successfully.");
 
+	request_manager_init();
+
     return 0; // Succès
 }
 
