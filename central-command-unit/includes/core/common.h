@@ -22,6 +22,7 @@
 #include <time.h>
 #include "cJSON.h"
 #include <signal.h>
+#include <math.h>
 
 
 #ifdef DEBUG
