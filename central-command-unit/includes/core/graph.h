@@ -64,6 +64,9 @@ typedef struct {
     int numNodes; //!< Nombre total de noeuds dans le tableau
 } graph_t;
 
+
+// TODO: à déplacer dans dijkstra.h ??
+
 /**
  * @brief Structure pour retourner le chemin trouvé.
  */
