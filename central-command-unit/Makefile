@@ -49,7 +49,11 @@ SRC_SERVICES   := $(shell find $(SERVICE_DIRS) -name "*.c")
 SRC_SERVICES   := $(filter-out $(SRC_CORE),$(SRC_SERVICES)) # sécurité
 SRC_TESTS      := $(shell find $(TEST_DIR) -name "*.c")
 
+SRC_SERVICES_MAIN := $(foreach s,$(SERVICES),$(SRC_DIR)/$(s)/$(s).c)
+SRC_SERVICES_LIB := $(filter-out $(SRC_SERVICES_MAIN), $(SRC_SERVICES))
 ALL_SRC        := $(SRC_CORE) $(SRC_SERVICES) $(SRC_TESTS)
+
+
 
 # src/<module>/<file>.c -> obj/<module>/<file>.o
 OBJ_ALL        := $(patsubst $(SRC_DIR)/%.c,$(OBJ_DIR)/%.o,$(filter $(SRC_DIR)/%,$(ALL_SRC))) \
@@ -57,6 +61,7 @@ OBJ_ALL        := $(patsubst $(SRC_DIR)/%.c,$(OBJ_DIR)/%.o,$(filter $(SRC_DIR)/%
 
 OBJ_CORE       := $(patsubst $(SRC_DIR)/%.c,$(OBJ_DIR)/%.o,$(SRC_CORE))
 OBJ_SERVICES   := $(patsubst $(SRC_DIR)/%.c,$(OBJ_DIR)/%.o,$(SRC_SERVICES))
+OBJ_SERVICES_LIB := $(patsubst $(SRC_DIR)/%.c,$(OBJ_DIR)/%.o,$(SRC_SERVICES_LIB))
 OBJ_TESTS      := $(patsubst $(TEST_DIR)/%.c,$(OBJ_DIR)/%.o,$(SRC_TESTS))
 
 $(foreach s,$(SERVICES),\
@@ -99,7 +104,7 @@ $(BIN_DIR)/%: $$(OBJ_%)
 # Lanceur de test unitaires
 tests: external-libs $(TARGET_TESTS)
 
-$(TARGET_TESTS): $(OBJ_CORE) $(OBJ_TESTS)
+$(TARGET_TESTS): $(OBJ_CORE) $(OBJ_SERVICES_LIB) $(OBJ_TESTS)
 	@mkdir -p $(BIN_DIR)
 	@$(CC) $^ -o $@ $(LDFLAGS) $(LIBS) $(PROJECT_LIBS)
 	@echo "UT $@"
