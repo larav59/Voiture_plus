@@ -88,6 +88,36 @@ int command_response_header_serialize(const command_response_header_t *header, c
  * @param header Pointeur vers la structure d'en-tête de réponse à remplir.
  * @return 0 en cas de succès, -1 si un champ est manquant/mauvais type.
  */
-int command_response_header_deserialize(const cJSON *root, command_response_header_t *header);
+int command_response_header_deserialize(const cJSON *root, command_response_header_t *header) {
+	const cJSON *commandItem = cJSON_GetObjectItemCaseSensitive(root, "commandId");
+	if (!cJSON_IsString(commandItem) || (commandItem->valuestring == NULL)) return -1;
+
+	strncpy(header->commandId, commandItem->valuestring, COMMAND_ID_LENGTH - 1);
+	header->commandId[COMMAND_ID_LENGTH - 1] = '\0';
+
+	const cJSON *successItem = cJSON_GetObjectItemCaseSensitive(root, "success");
+	if (!cJSON_IsBool(successItem)) return -1;
+
+	header->success = cJSON_IsTrue(successItem);
+
+	if (!header->success) {
+		const cJSON *errorItem = cJSON_GetObjectItemCaseSensitive(root, "errorMessage");
+		if (!cJSON_IsString(errorItem) || (errorItem->valuestring == NULL)) return -1;
+
+		strncpy(header->errorMessage, errorItem->valuestring, MAX_ERROR_MSG_LEN - 1);
+		header->errorMessage[MAX_ERROR_MSG_LEN - 1] = '\0';
+	} else {
+		header->errorMessage[0] = '\0';
+	}
+
+	const cJSON *timestampSItem = cJSON_GetObjectItemCaseSensitive(root, "timestamp_s");
+	const cJSON *timestampNsItem = cJSON_GetObjectItemCaseSensitive(root, "timestamp_ns");
+	if (!cJSON_IsNumber(timestampSItem) || !cJSON_IsNumber(timestampNsItem)) return -1;
+
+	header->timestamp.tv_sec = (time_t) timestampSItem->valuedouble;
+	header->timestamp.tv_nsec = (long) timestampNsItem->valuedouble;
+
+	return 0;
+}
 
 #endif // COMMAND_RESPONSE_HEADER_H
