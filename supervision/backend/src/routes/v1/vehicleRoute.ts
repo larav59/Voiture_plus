@@ -1,18 +1,23 @@
 
-import express from 'express';
+import express, { Router } from 'express';
 import { VehicleController } from '../../controllers/VehicleController';
+import { asyncHandlerMiddleware } from '../../middlewares/asyncHandlerMiddleware';
 
 
 const router = express.Router();
-const vehiculeController = new VehicleController();
+const vehicleController = new VehicleController();
+router.get("/ping", asyncHandlerMiddleware(vehicleController.ping.bind(vehicleController)));
 
-router.get("/ping", vehiculeController.ping);
+router.post("/echo", asyncHandlerMiddleware(vehicleController.echo.bind(vehicleController)));
 
-router.post("/echo", vehiculeController.echo);
+router.get("/status", vehicleController.status);
 
-router.get("/status", vehiculeController.status);
+router.get("/", asyncHandlerMiddleware(vehicleController.getVehicles.bind(vehicleController)));
 
-router.get("/", vehiculeController.getVehicules);
+router.post("/", asyncHandlerMiddleware(vehicleController.createVehicle.bind(vehicleController)));
+
+router.put("/:id", asyncHandlerMiddleware(vehicleController.updateVehicle.bind(vehicleController)));
+
 
 
 

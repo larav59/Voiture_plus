@@ -1,5 +1,16 @@
 import { DataSource } from "typeorm";
 import { mysqlConfig } from "../../config";
+import { Alarms } from "../../domain/entities/Alarms";
+import { AlarmsTypes } from "../../domain/entities/AlarmsTypes";
+import { Arcs } from "../../domain/entities/Arcs";
+import { Nodes } from "../../domain/entities/Nodes";
+import { NodesTypes } from "../../domain/entities/NodesTypes";
+import { Origins } from "../../domain/entities/Origins";
+import { States } from "../../domain/entities/States";
+import { Travels } from "../../domain/entities/Travels";
+import { TravelsNodes } from "../../domain/entities/TravelsNodes";
+import { Users } from "../../domain/entities/Users";
+import { Vehicles } from "../../domain/entities/Vehicles";
 
 
 const AppDataSource = new DataSource({
@@ -14,7 +25,17 @@ const AppDataSource = new DataSource({
 	entitySkipConstructor: true,
 	logging: mysqlConfig.logging,
 	entities: [
-		__dirname + "/../../domain/entities/*.ts"
+		Alarms,
+		AlarmsTypes,
+		Arcs,
+		Nodes,
+		NodesTypes,
+		Origins,
+		States,
+		Travels,
+		TravelsNodes,
+		Users,
+		Vehicles
 	],
 	subscribers: [],
 });

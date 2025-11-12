@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { Authenticated } from "../domain/auth/UserAuth";
 import { HttpStatusEnum } from "../infrastructure/webserver";
-import { NotImplemented } from "../infrastructure/webserver/errors/HttpError";
+import { NotFound, NotImplemented } from "../infrastructure/webserver/errors/HttpError";
 import { 
 	GetVehiclesRequest,
 	CreateVehiclesRequest,
@@ -16,15 +16,16 @@ export class VehicleController {
 	}
 
 	@Authenticated()
-	public async getVehicules(req: Request, res: Response) : Promise<void> {
+	public async getVehicles(req: Request, res: Response) : Promise<void> {
 		const request = GetVehiclesRequest.fromRequest(req);
 		const vehicleService = new VehicleService();
 
 		if (request.validate().hasErrors()) {
-			throw request.sendInvalidRequest(res,request);
+			throw new NotFound("Invalid Request",request.validate().getErrors());
 		}
 		const vehicles = await vehicleService.getVehicles(request.id, request.name);
-		return res.status(HttpStatusEnum.OK).json(vehicles);
+		res.status(HttpStatusEnum.OK).json(vehicles);
+		return;
 	}
 
 	@Authenticated()
@@ -33,11 +34,12 @@ export class VehicleController {
 		const vehicleService = new VehicleService();
 
 		if (request.validate().hasErrors()) {
-			throw request.sendInvalidRequest(res, request);
+			throw new NotFound("Invalid Request",request.validate().getErrors());
 		}
 
 		const vehicle = await vehicleService.createVehicle(request.name!);
-		return res.status(HttpStatusEnum.CREATED).json(vehicle);
+		res.status(HttpStatusEnum.OK).json(vehicle);
+		return;
 	}
 
 	@Authenticated()
@@ -46,14 +48,15 @@ export class VehicleController {
 		const vehicleService = new VehicleService();
 
 		if (request.validate().hasErrors()) {
-			throw request.sendInvalidRequest(res, request);
+			throw new NotFound("Invalid Request",request.validate().getErrors());
 		}
 
-		const vehicle = await vehicleService.updateVehicle(request.id!, request.name!);
+		const vehicle = await vehicleService.updateVehicle(request.id, request.name)
 		if (!vehicle) {
-			return res.status(HttpStatusEnum.NOT_FOUND).json({ message: "Vehicle not found" });
+			throw res.status(HttpStatusEnum.NOT_FOUND).json({ message: "Vehicle not found" });
 		}
-		return res.status(HttpStatusEnum.OK).json(vehicle);
+		res.status(HttpStatusEnum.OK).json(vehicle);
+		return ;
 	}
 
 	@Authenticated()

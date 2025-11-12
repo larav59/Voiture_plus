@@ -12,7 +12,7 @@ export class CreateVehiclesRequest extends BaseRequest<CreateVehiclesRequest> {
 	// Méthode pour la validation
 	public validate(): Validator<CreateVehiclesRequest> {
 		const validator = new Validator<CreateVehiclesRequest>(this);
-		validator.field("name").isRequired().isString().maxLength(100);
+		validator.field("name").isRequired().maxLength(100);
 		return validator;
 	}
 

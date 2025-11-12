@@ -13,9 +13,9 @@ export class VehicleService {
 	async getVehicles(id: number | null, name: string | null): Promise<Vehicles[]> {
 		const query = this.vehicleRepository.find({
 			where: {
-				...(id !== null ? { id } : {}),
-				...(name !== null ? { name: Like(`%${name}%`) } : {}),
-			},
+				...(id !== null ? { id: id } : {}),
+				...(name !== null ? { name: Like(`%${name}%`) } : {})
+			}
 		});
 		return query;
 	}

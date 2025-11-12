@@ -19,13 +19,13 @@ export class GetVehiclesRequest extends BaseRequest<GetVehiclesRequest> {
 	}
 
 	static fromRequest(req: any): GetVehiclesRequest {
-		const body = req.body
-		body.id = body.id !== undefined ? parseInt(body.id) : undefined;
-		body.name = body.name !== undefined ? String(body.name) : undefined;
+		const queryString = req.query;
+		queryString.id = queryString.id !== undefined ? parseInt(queryString.id) : undefined;
+		queryString.name = queryString.name !== undefined ? String(queryString.name) : undefined;
 
 		return new GetVehiclesRequest({
-			id: body.id,
-			name: body.name,
+			id: queryString.id,
+			name: queryString.name,
 		});
 	}
 }
