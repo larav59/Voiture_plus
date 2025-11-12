@@ -24,10 +24,10 @@ Ce fichier contient les elements de style des pages du site web
 }
 
 /* style du bouton de calcul de trajet */
-#editTravelBtn {
+#cancelTravelBtn {
     display: none;
 }
-#calculTravelBtn, #editTravelBtn {
+#calculTravelBtn, #cancelTravelBtn {
     width: 15em;
     height: 2.5em;
     border-radius: 15em;
@@ -63,7 +63,20 @@ Ce fichier contient les elements de style des pages du site web
     display: block;
     z-index: -1;
 }
-#calculTravelBtn:hover::before, #editTravelBtn:hover::before {
+#cancelTravelBtn::before {
+    content: '';
+    width: 0;
+    height: 2.5em;
+    border-radius: 15em;
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-image: linear-gradient(to right, #f31911df 0%, #f9ad08 100%);
+    transition: .5s ease;
+    display: block;
+    z-index: -1;
+}
+#calculTravelBtn:hover::before, #cancelTravelBtn:hover::before {
     width: 15em;
 }
 

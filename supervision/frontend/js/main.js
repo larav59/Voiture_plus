@@ -299,12 +299,16 @@ var mapUtils = {
 
             const nodeIcon = mapUtils.createIcon(node.id, type, vehicle.id);
 
-            const nodeMarker = mapUtils.createMarker(
+            let nodeMarker = mapUtils.createMarker(
                 [node.position_y, node.position_x],
                 nodeIcon, 
                 'Destination '+vehicle.name,
                 true // draggable
-            );        
+            );
+            nodeMarker.type = type;
+            nodeMarker.id = node.id;
+            nodeMarker.vehicleId = vehicle.id;
+     
             markers.push(nodeMarker);
 
             mapUtils.setupNodeDropListener(nodeMarker, map, circles, node.name);
@@ -329,6 +333,7 @@ var mapUtils = {
             fillOpacity: 0.3,
             radius: 80 // rayon du cercle
         });
+        circle.id = node.id;
 
         return circle;
     },
@@ -340,11 +345,11 @@ var mapUtils = {
     setupClickListener: function(carMarker, id) {
 
         carMarker.on('click', function() {
-            $('#vehicleSelect .dropdown-item[value='+id+']').trigger('click');
+            selectVehicle(id);
         });
     },
     /**
-     * Configure un listener pour empêcher un déplacement en dehors des cercles autorisés
+     * Configure un listener pour empêcher un déplacement en dehors des cercles autorisés et mettre à jour le trajet
      * @param {L.Marker} pinMarker - Le marqueur draggable
      * @param {L.Map} map - Instance Leaflet de la carte
      * @param {Array<L.Circle>} circles - Tableau de cercles Leaflet autorisés
@@ -353,16 +358,18 @@ var mapUtils = {
     setupNodeDropListener: function(pinMarker, map, circles, name) {
         let lastValidPos = pinMarker.getLatLng();
 
-        // Afficher les cercles au début du drag
+        // Drag d'un noeud
         pinMarker.on('movestart', function() {
-            circles.forEach(circle => circle.addTo(map));
+            circles.forEach(circle => circle.addTo(map)); // Afficher les cercles au début du drag
+            selectVehicle(pinMarker.vehicleId);
         });
 
+        // Drop d'un noeud
         pinMarker.on('moveend', function(e) {
-            circles.forEach(circle => circle.remove());
+            circles.forEach(circle => circle.remove()); // Cacher les cercles au drop 
 
             const newPos = e.target.getLatLng();
-            let isInsideAnyCircle = false;
+            let destination = null;
 
             // Vérifie la position par rapport à chaque cercle
             for (let circle of circles) {
@@ -374,14 +381,28 @@ var mapUtils = {
                 const distance = Math.sqrt(dx * dx + dy * dy);
 
                 if (distance <= radius) {
-                    isInsideAnyCircle = true;
+                    destination = circle;
                     break;
                 }
             }
 
-            if (isInsideAnyCircle) {
+            //Modification du trajet
+            if (destination != null) {
                 console.log(`${name} position valide :`, newPos.lat, newPos.lng);
                 lastValidPos = newPos;
+
+                selectVehicle(pinMarker.vehicleId);
+
+                if(pinMarker.type == 'pin') {
+                    selectOption('destinationSelect', destination.id);
+                }
+                else {
+                    const stepToUpdate = $('#stepsContainer .step-item').filter(function() {
+                        return $(this).data('id') == pinMarker.id;
+                    });
+
+                    stepToUpdate.find('.dropdown-item[value='+destination.id+']').trigger('click');
+                }
             } else {
                 console.warn(`${name} déplacé hors de toutes les zones autorisées, retour à la dernière position.`);
                 pinMarker.setLatLng(lastValidPos);
@@ -471,11 +492,59 @@ function setupMapNodes(map, mapData) {
 /************* INTERACTIONS *************/
 
 /*
+* Mise à jour du formulaire au click d'un véhicule
+*/
+$(document).on('click', '#vehicleSelect .dropdown-item', function() {
+
+    const vehicle = $(this).data('vehicle');
+    const destinations = vehicle.travel.nodes.filter(function(node) { return node.point_of_interest; });
+
+    $('#stepsContainer').empty();
+    $('#addStepBtn').prop('disabled', false);
+
+    for(const node of destinations){
+        if(destinations.at(-1).id === node.id) { // Destination finale
+            selectOption('destinationSelect', node.id);
+        }
+        else { // Etape
+            $('#addStepBtn').trigger('click');
+            $('.step-select:last').find('.dropdown-item[value='+node.id+']').trigger('click');
+        }
+    }
+
+    if(vehicle.travel.status == 'Terminé' || vehicle.travel.status == 'Annulé'){
+        $('#calculTravelBtn').show();
+        $('#cancelTravelBtn').hide();
+    }
+    else {
+        $('#calculTravelBtn').hide();
+        $('#cancelTravelBtn').show();
+    }
+});
+
+
+/*
+* Click sur une option d'un select (dropdown)
+*/
+function selectOption(select, value){
+    $('#'+select+' .dropdown-item[value='+value+']').trigger('click');
+}
+
+/*
+* Mise à jour du formulaire en sélectionnant un véhicule en particulier
+*/
+function selectVehicle(id) {
+    selectOption('vehicleSelect', id);
+}
+
+/*
 * Mise à jour du bouton de sélection (dropdown) au click d'une option
 */
 $(document).on('click', '.dropdown-item', function() {
     const selectBtn =  $(this).closest('.dropdown').find('.dropdown-toggle');
     selectBtn.html($(this).html());
+
+    $(this).closest('.step-item').data('id', $(this).val());
 });
 
 /*
@@ -505,32 +574,15 @@ $(document).on('click', '.remove-step', function() {
 });
 
 /*
-* Mise à jour du formulaire au click d'un véhicule
+* Sauvegarde d'un trajet
 */
-$(document).on('click', '#vehicleSelect .dropdown-item', function() {
+$(document).on('click', "#calculTravelBtn", function() {
+    //envoie post trajet
+});
 
-    const vehicle = $(this).data('vehicle');
-    const destinations = vehicle.travel.nodes.filter(function(node) { return node.point_of_interest; });
-
-    $('#stepsContainer').empty();
-    $('#addStepBtn').prop('disabled', false);
-
-    for(const node of destinations){
-        if(destinations.at(-1).id === node.id) { // Destination finale
-            $('#destinationSelect .dropdown-item[value='+node.id+']').trigger('click');
-        }
-        else { // Etape
-            $('#addStepBtn').trigger('click');
-            $('.step-select:last').find('.dropdown-item[value='+node.id+']').trigger('click');
-        }
-    }
-
-    if(vehicle.travel.status == 'Terminé' || vehicle.travel.status == 'Annulé'){
-        $('#calculTravelBtn').show();
-        $('#editTravelBtn').hide();
-    }
-    else {
-        $('#calculTravelBtn').hide();
-        $('#editTravelBtn').show();
-    }
+/*
+* Annuler d'un trajet
+*/
+$(document).on('click', "#cancelTravelBtn", function() {
+    //envoie put id trajet + status
 });
