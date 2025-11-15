@@ -110,23 +110,99 @@ bool graph_add_edge(graph_t* graph, int originNodeId, int targetNodeId, double w
 }
 
 /**
- * @brief Récupère un pointeur vers un noeud par son ID.
- * @details Fonction utilitaire rapide (accès O(1) grâce à l'index).
+ * @brief Récupère un pointeur vers un noeud par son index.
  * @param graph Le graphe.
- * @param nodeId L'ID du noeud.
- * @return Pointeur vers le node_t, ou NULL si l'ID est invalide.
+ * @param index L'index du noeud.
+ * @return Pointeur vers le node_t, ou NULL si l'index est invalide.
  */
-node_t* graph_get_node(graph_t* graph, int nodeId) {
-	if(nodeId < 0 || nodeId >= graph->numNodes) {
+node_t* graph_get_node(graph_t* graph, int index) {
+	if(index < 0 || index >= graph->numNodes) {
 		return NULL;
 	}
-	return &graph->nodes[nodeId];
+	return &graph->nodes[index];
 }
 
 /**
- * @brief Libère la mémoire d'un chemin retourné par Dijkstra.
+ * @brief Récupère un pointeur vers un noeud par son ID.
+ * @details Parcourt le tableau des noeuds pour trouver celui avec l'ID donné.
+ * @param graph Le graphe.
+ * @param nodeId L'ID du noeud à rechercher.
+ * @return Pointeur vers le node_t, ou NULL si l'ID n'existe pas.
+ */
+node_t *graph_get_node_by_id(graph_t *graph, int nodeId) {
+	for (int i = 0; i < graph->numNodes; i++) {
+		if (graph->nodes[i].id == nodeId) {
+			return &graph->nodes[i];
+		}
+	}
+	return NULL;
+}
+
+/**
+ * @brief Libère la mémoire d'un chemin
  */
 void path_destroy(path_t* path) {
 	if (!path) return;
 	free(path->nodes);
+}
+
+/**
+ * @brief Concatène un chemin (src) à la fin d'un chemin (dest).
+ * @details Modifie dest en place en réallouant son tableau de nœuds.
+ * Si le dernier nœud de dest est le même que le premier de src,
+ * le doublon est automatiquement supprimé.
+ * @param dest Le chemin à étendre (sera modifié).
+ * @param src Le chemin à ajouter à la fin.
+ * @note L'appelant est toujours responsable de détruire src (via path_destroy)
+ */
+void path_append(path_t* dest, const path_t* src) {
+	if(!dest || !src || src->length == 0) {
+		return;
+	}
+
+	int startIndex = 0;
+	int nodesToAdd = src->length;
+
+	// Gestion du doublon potentiel
+	if(dest->length > 0 && dest->nodes[dest->length - 1] == src->nodes[0]) {
+		startIndex = 1;
+		nodesToAdd -= 1;
+	}
+
+	if(nodesToAdd <= 0) {
+		return; 
+	}
+
+	int newLength = dest->length + nodesToAdd;
+	node_t** newNodes = (node_t**)realloc(dest->nodes, sizeof(node_t*) * newLength);
+	if(!newNodes) {
+		return;
+	}
+	dest->nodes = newNodes;
+	memcpy(dest->nodes + dest->length, src->nodes + startIndex,sizeof(node_t*) * nodesToAdd);
+	dest->length = newLength;
+}
+
+/**
+ * @brief Trouve l'arête (orientée) entre deux nœuds.
+ * @param graph Le graphe.
+ * @param originNodeId ID du nœud d'origine.
+ * @param targetNodeId ID du nœud de destination.
+ * @return Pointeur vers l'edge_t, ou NULL si non trouvée.
+ */
+edge_t* graph_get_edge(graph_t* graph, int originNodeId, int targetNodeId) {
+    node_t* originNode = graph_get_node(graph, originNodeId);
+    if (!originNode) {
+        return NULL;
+    }
+
+    edge_t* edge = originNode->edges;
+    while (edge) {
+        if (edge->targetNode->id == targetNodeId) {
+            return edge; // Trouvé !
+        }
+        edge = edge->nextEdge;
+    }
+
+    return NULL; // Pas d'arête directe
 }

@@ -9,6 +9,10 @@
 #include "core/common.h"
 #include "core/check.h"
 
+
+#define ERROR_PATH (path_t) { .nodes = NULL, .length = -1 }
+#define EMPTY_PATH (path_t) { .nodes = NULL, .length = 0 }
+
 /**
  * @brief Type de noeud sur la carte.
  * @details Permet au véhicule de savoir comment se comporter à ce noeud.
@@ -115,13 +119,21 @@ void graph_init_node(graph_t* graph, int nodeId, double x, double y, node_type_t
 bool graph_add_edge(graph_t* graph, int originNodeId, int targetNodeId, double weight, lane_rule_t rule);
 
 /**
- * @brief Récupère un pointeur vers un noeud par son ID.
- * @details Fonction utilitaire rapide (accès O(1) grâce à l'index).
+ * @brief Récupère un pointeur vers un noeud par son index.
  * @param graph Le graphe.
- * @param nodeId L'ID du noeud.
- * @return Pointeur vers le node_t, ou NULL si l'ID est invalide.
+ * @param index L'index du noeud.
+ * @return Pointeur vers le node_t, ou NULL si l'index est invalide.
  */
-node_t* graph_get_node(graph_t* graph, int nodeId);
+node_t* graph_get_node(graph_t* graph, int index);
+
+/**
+ * @brief Récupère un pointeur vers un noeud par son ID.
+ * @details Parcourt le tableau des noeuds pour trouver celui avec l'ID donné.
+ * @param graph Le graphe.
+ * @param nodeId L'ID du noeud à rechercher.
+ * @return Pointeur vers le node_t, ou NULL si l'ID n'existe pas.
+ */
+node_t *graph_get_node_by_id(graph_t *graph, int nodeId);
 
 /**
  * @brief Libère la mémoire d'un chemin retourné par Dijkstra.
@@ -129,6 +141,24 @@ node_t* graph_get_node(graph_t* graph, int nodeId);
  */
 void path_destroy(path_t* path);
 
+/**
+ * @brief Concatène un chemin (src) à la fin d'un chemin (dest).
+ * @details Modifie dest en place en réallouant son tableau de nœuds.
+ * Si le dernier nœud de dest est le même que le premier de src,
+ * le doublon est automatiquement supprimé.
+ * @param dest Le chemin à étendre (sera modifié).
+ * @param src Le chemin à ajouter à la fin.
+ * @note L'appelant est toujours responsable de détruire src (via path_destroy)
+ */
+void path_append(path_t* dest, const path_t* src);
 
+/**
+ * @brief Trouve l'arête (orientée) entre deux nœuds.
+ * @param graph Le graphe.
+ * @param originNodeId ID du nœud d'origine.
+ * @param targetNodeId ID du nœud de destination.
+ * @return Pointeur vers l'edge_t, ou NULL si non trouvée.
+ */
+edge_t* graph_get_edge(graph_t* graph, int originNodeId, int targetNodeId);
 
 #endif // GRAPH_H

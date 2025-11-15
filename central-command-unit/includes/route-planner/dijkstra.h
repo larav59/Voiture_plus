@@ -16,8 +16,6 @@
 
 #define DIJKSTRA_INFINITY (double) INFINITY
 
-#define ERROR_PATH (path_t) { .nodes = NULL, .length = -1 }
-
 typedef struct {
 	double gCost; // Cout du départ jusqu'au noeud actuel
 	node_t *previous; // Noeud précédent dans le chemin
