@@ -9,7 +9,7 @@ TEST_DIR       := tests
 MK_LIB_DIR     := mk-lib
 EXTERNAL_DIR   := external
 
-SERVICES       := heartbeat
+SERVICES       := heartbeat route-planner
 
 TARGET_LIBA    := $(LIB_DIR)/libcore.a
 TARGET_LIBSO   := $(LIB_DIR)/libcore.so
