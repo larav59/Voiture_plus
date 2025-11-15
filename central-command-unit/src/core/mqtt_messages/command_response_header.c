@@ -1,5 +1,5 @@
 /**
- * @file command_response_header.h
+ * @file command_response_header.c
  * @brief Définitions du modèle de données pour les en-têtes des réponses aux commandes.
  * @details
  * Ce fichier définit la structure commune `command_response_header_t` utilisée
@@ -9,26 +9,8 @@
  * @author Lukas Grando
  * @date 2025-10-28
  */
+#include "core/mqtt_messages/command_response_header.h"
 
-#ifndef COMMAND_RESPONSE_HEADER_H
-#define COMMAND_RESPONSE_HEADER_H
-
-#include "core/check.h"
-
-// TODO déplacer dans un fichier commun core/variables.h ou on a tous les #defines globaux
-#define COMMAND_ID_LENGTH 64
-#define MAX_ERROR_MSG_LEN 1024
-
-/**
- * @brief Structure commune pour l'en-tête des messages de réponse.
- * @details Doit être le premier membre des structures de réponses spécifiques.
- */
-typedef struct {
-    char commandId[COMMAND_ID_LENGTH];      /**< ID de la commande d'origine à laquelle on répond */
-    bool success;                           /**< Statut de succès (true = OK, false = Erreur) */
-    char errorMessage[MAX_ERROR_MSG_LEN];   /**< Message d'erreur (pertinent si success == false) */
-    struct timespec timestamp;              /**< Timestamp de création de la réponse */
-} command_response_header_t;
 
 /**
  * @brief Crée et initialise une structure d'en-tête de réponse.
@@ -39,7 +21,7 @@ typedef struct {
  * @return Une structure command_response_header_t initialisée.
  */
 command_response_header_t create_command_response_header(const char *originalCommandId, bool success, const char *errorMessage) {
-	command_response_header_t header;
+	command_response_header_t header = {0};
 	struct timespec ts;
 
 	strncpy(header.commandId, originalCommandId, COMMAND_ID_LENGTH - 1);
@@ -67,7 +49,7 @@ command_response_header_t create_command_response_header(const char *originalCom
  * @param root Pointeur vers l'objet cJSON racine.
  * @return 0 en cas de succès, -1 en cas d'échec.
  */
-int command_response_header_serialize(const command_response_header_t *header, cJSON *root) {
+int command_response_header_to_json(const command_response_header_t *header, cJSON *root) {
 	if(!cJSON_AddStringToObject(root, "commandId", header->commandId)) 
 	if(!cJSON_AddBoolToObject(root, "success", header->success))
 	if(!cJSON_AddNumberToObject(root, "timestamp_s", (double) header->timestamp.tv_sec)) 
@@ -78,6 +60,25 @@ int command_response_header_serialize(const command_response_header_t *header, c
 	}
 
 	return 0;
+}
+
+/**
+ * @brief Sérialise une structure d'en-tête de réponse en chaîne JSON.
+ * @param header Pointeur vers la structure d'en-tête de réponse à sérialiser.
+ * @return Chaîne JSON représentant l'en-tête de réponse, ou NULL en cas d'erreur.
+ * @warning La mémoire allouée pour la chaîne JSON doit être libérée par l'appelant.
+ */
+char *command_response_header_serialize(const command_response_header_t *header) {
+	cJSON *root = cJSON_CreateObject();
+	if(!root) return NULL;
+
+	if(command_response_header_to_json(header, root) != 0) {
+		cJSON_Delete(root);
+		return NULL;
+	}
+	char *json = CJSON_PRINT(root);
+	cJSON_Delete(root);
+	return json;
 }
 
 /**
@@ -119,5 +120,3 @@ int command_response_header_deserialize(const cJSON *root, command_response_head
 
 	return 0;
 }
-
-#endif // COMMAND_RESPONSE_HEADER_H

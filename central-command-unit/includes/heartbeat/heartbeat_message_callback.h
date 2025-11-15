@@ -10,6 +10,8 @@
 #ifndef HEARTBEAT_MESSAGE_CALLBACK_H
 #define HEARTBEAT_MESSAGE_CALLBACK_H
 
+#define HEARTBEAT_REPLY_TOPIC "services/heartbeat/response"
+
 #include "core/mqtt.h"
 #include "core/action_codes.h"
 #include "core/mqtt_messages/cancel_vehicle_route_request.h"

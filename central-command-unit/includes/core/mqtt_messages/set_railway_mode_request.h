@@ -24,14 +24,15 @@ typedef struct {
  * @return Chaîne JSON représentant le message de demande de définition du mode ferroviaire
  * @warning La mémoire allouée pour la chaîne JSON doit être libérée par l'appelant.
  */
-char *set_railway_mode_request_serialize_json(const set_railway_mode_request_t *msg);
+char *set_railway_mode_request_serialize(const set_railway_mode_request_t *msg);
 
 /**
  * @brief Désérialise un message de demande de définition du mode ferroviaire à partir d'une chaîne JSON.
- * @param json Chaîne JSON représentant le message de demande de définition du mode ferroviaire.
+ * @param root Pointeur vers l'objet cJSON représentant le message de demande de définition du mode ferroviaire.
  * @param msg Pointeur vers la structure de message de demande de définition du mode ferroviaire à remplir.
  * @return 0 en cas de succès, -1 en cas d'erreur.
+ * @warning Cette fonction s'occupe uniquement de désérialiser les données. Le header doit être désérialisé séparément.
  */
-int set_railway_mode_request_deserialize_json(const char *json, set_railway_mode_request_t *msg);
+int set_railway_mode_request_data_deserialize(cJSON *root, set_railway_mode_request_t *msg);
 
 #endif // SET_RAILWAY_MODE_REQUEST_H

@@ -122,7 +122,6 @@ int request_manager_process_response(const char* payload) {
 	HASH_FIND_STR(g_requestMap, responseHeader.commandId, found);
 	if(!found) {
 		sem_post(&g_rmAccessSem);
-		LOG_WARNING_ASYNC("Unexpected response received for request ID: %s", responseHeader.commandId);
 		cJSON_Delete(json);
 		return -1;
 	}

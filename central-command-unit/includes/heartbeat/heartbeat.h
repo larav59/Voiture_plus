@@ -12,5 +12,5 @@
 #include "heartbeat/heartbeat_message_callback.h"
 
 #define HEARTBEAT_SERVICE_VERSION "Heartbeat v1.0.0"
-
+#define HEARTBEAT_REPLY_TOPIC "services/heartbeat/response"
 #endif // HEARTBEAT_H
