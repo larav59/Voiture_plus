@@ -21,7 +21,7 @@
  * @param payload Le payload JSON brut de la réponse.
  * @param context Le pointeur "contexte" fourni lors de l'enregistrement.
  */
-typedef void (*response_callback_t)(const char* payload, void* context);
+typedef void (*response_callback_t)(const cJSON* root, const command_response_header_t* header, void* context);
 
 /**
  * @brief Initialise le gestionnaire de requêtes. Hashmap + semaphore.

@@ -130,11 +130,10 @@ int request_manager_process_response(const char* payload) {
 	HASH_DEL(g_requestMap, found);
 	sem_post(&g_rmAccessSem);
 	// Appeler le callback
-	if(found->callback) found->callback(payload, found->context);
+	if(found->callback) found->callback(json, &responseHeader, found->context);
 	
 	free(found);
 	cJSON_Delete(json);
 	LOG_DEBUG_ASYNC("Processed response for request ID: %s", responseHeader.commandId);
-	
 	return 0;
 }
