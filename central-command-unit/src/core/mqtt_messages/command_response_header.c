@@ -52,8 +52,8 @@ command_response_header_t create_command_response_header(const char *originalCom
 int command_response_header_to_json(const command_response_header_t *header, cJSON *root) {
 	if(!cJSON_AddStringToObject(root, "commandId", header->commandId)) 
 	if(!cJSON_AddBoolToObject(root, "success", header->success))
-	if(!cJSON_AddNumberToObject(root, "timestamp_s", (double) header->timestamp.tv_sec)) 
-	if(!cJSON_AddNumberToObject(root, "timestamp_ns", (double) header->timestamp.tv_nsec)) return -1;	
+	if(!cJSON_AddNumberToObject(root, "timestampSec", (double) header->timestamp.tv_sec)) 
+	if(!cJSON_AddNumberToObject(root, "timestampNsec", (double) header->timestamp.tv_nsec)) return -1;	
 
 	if (!header->success) {
 		if (!cJSON_AddStringToObject(root, "errorMessage", header->errorMessage)) return -1;
@@ -103,7 +103,9 @@ int command_response_header_deserialize(const cJSON *root, command_response_head
 
 	if (!header->success) {
 		const cJSON *errorItem = cJSON_GetObjectItemCaseSensitive(root, "errorMessage");
-		if (!cJSON_IsString(errorItem) || (errorItem->valuestring == NULL)) return -1;
+		if (!cJSON_IsString(errorItem) || (errorItem->valuestring == NULL)) {
+			strncpy(header->errorMessage, "Unknown error", MAX_ERROR_MSG_LEN - 1);
+		}
 
 		strncpy(header->errorMessage, errorItem->valuestring, MAX_ERROR_MSG_LEN - 1);
 		header->errorMessage[MAX_ERROR_MSG_LEN - 1] = '\0';
@@ -111,8 +113,8 @@ int command_response_header_deserialize(const cJSON *root, command_response_head
 		header->errorMessage[0] = '\0';
 	}
 
-	const cJSON *timestampSItem = cJSON_GetObjectItemCaseSensitive(root, "timestamp_s");
-	const cJSON *timestampNsItem = cJSON_GetObjectItemCaseSensitive(root, "timestamp_ns");
+	const cJSON *timestampSItem = cJSON_GetObjectItemCaseSensitive(root, "timestampSec");
+	const cJSON *timestampNsItem = cJSON_GetObjectItemCaseSensitive(root, "timestampNsec");
 	if (!cJSON_IsNumber(timestampSItem) || !cJSON_IsNumber(timestampNsItem)) return -1;
 
 	header->timestamp.tv_sec = (time_t) timestampSItem->valuedouble;
