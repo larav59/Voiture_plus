@@ -23,6 +23,7 @@
 #include "core/mqtt_messages/set_railway_mode_request.h"
 #include "core/mqtt_messages/set_safe_route_mode_request.h"
 #include "core/mqtt_messages/set_waypoints_request.h"
+#include "core/mqtt_messages/get_map_response.h"
 
 
 #define ROUTE_PLANNER_REPLY_TOPIC "services/route-planner/response"
@@ -40,5 +41,13 @@
  * @param payload Payload du message reçu.
  */
 void route_planner_message_callback(const char* topic, const char* payload);
+
+
+/**
+ * @brief Callback pour la réponse de la carte reçu.
+ * @param payload Payload du message reçu
+ * @param user_data Données utilisateur (non utilisées ici)
+ */
+void on_get_map_response(const cJSON *root, const command_response_header_t* header, void* context); 
 
 #endif // ROUTE_PLANNER_MESSAGE_CALLBACK_H
