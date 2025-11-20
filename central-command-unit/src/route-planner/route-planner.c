@@ -30,13 +30,14 @@ int main(int argc, char **argv) {
 	get_map_request_t mapRequest = {
 		.header = create_command_header(ACTION_GET_MAP_REQUEST, ROUTE_PLANNER_REPLY_TOPIC)
 	};
+	request_manager_register(mapRequest.header.commandId, on_get_map_response, NULL);
 
 	char *jsonPayload = get_map_request_serialize_json(&mapRequest);
 
 	if(!jsonPayload) {
 		LOG_ERROR_ASYNC("Could not serialize get_map_request message to JSON.");
 	} else {
-		mqtt_publish("services/api/request", jsonPayload, MQTT_QOS_EXACTLY_ONCE, false);
+		mqtt_publish("services/api/request", jsonPayload, MQTT_QOS_EXACTLY_ONCE, true); // on retient le message au cas ou l'api est offline lors de l'envoi
 		free(jsonPayload);
 	}
 

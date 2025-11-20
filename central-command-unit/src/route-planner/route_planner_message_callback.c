@@ -69,7 +69,6 @@ static void on_plan_route_request(const plan_route_request_t* request) {
 		return;
 	}
 
-	// Calcul du chemin complet en concaténant les segments entre chaque paire de noeuds
 	path_t totalPath = EMPTY_PATH;
 	for(int i = 0; i < request->nodeCount - 1; i++) {
 		int startNodeId = request->nodeIds[i];
@@ -106,7 +105,6 @@ static void on_plan_route_request(const plan_route_request_t* request) {
 		LOG_DEBUG_ASYNC("Planned segment from node %d to node %d, segment length: %d", startNodeId, endNodeId, segment.length);
 	}
 
-	// Envoie de la commande pour transmettre la route planifiée au véhicule
 	char carTopic[REPLY_TOPIC_LENGTH];
 	snprintf(carTopic, sizeof(carTopic), "vehicles/%d/request", request->carId);
 	set_waypoints_request_t waypointRequest = {
@@ -147,10 +145,26 @@ static void on_plan_route_request(const plan_route_request_t* request) {
 	} else {
 		LOG_ERROR_ASYNC("Failed to serialize success response for PLAN_ROUTE_REQUEST for carId %d", request->carId);
 	}
-
-
 }
 
+void on_get_map_response(const cJSON *root, const command_response_header_t *header, void *context) {
+	UNUSED(context);
+
+	get_map_response_t mapResponse = {
+		.header = *header,
+		.map = NULL
+	};
+
+	if(get_map_response_data_deserialize((cJSON *)root, &mapResponse) != 0) {
+		LOG_ERROR_ASYNC("Failed to deserialize get map response.");
+		return;
+	}
+
+	if(g_map) graph_destroy(g_map);
+	
+	g_map = mapResponse.map;
+	LOG_INFO_ASYNC("Map received with %d nodes.", g_map->numNodes);
+}
 
 void route_planner_message_callback(const char* topic, const char* payload) {
 	LOG_DEBUG_SYNC("Received message on topic: %s", topic);
