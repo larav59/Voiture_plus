@@ -1,8 +1,8 @@
 /**
  * @file route_planner_message_callback.h
- * @brief Callbacks pour les messages de heartbeat
+ * @brief Callbacks pour les messages de route-planner
  * @details
- * Définit les callbacks pour gérer les messages de heartbeat reçus via MQTT.
+ * Définit les callbacks pour gérer les messages de route-planner reçus via MQTT.
  * @author Lukas Grando
  */
 
