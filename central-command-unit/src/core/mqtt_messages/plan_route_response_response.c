@@ -20,12 +20,13 @@ char *plan_route_response_serialize(const plan_route_response_t *msg) {
 
     if (command_response_header_to_json(&msg->header, root) != 0) goto error;
 
+    cJSON_AddNumberToObject(root, "carId", msg->carId);
+
     if (msg->header.success && msg->nodeCount > 0 && msg->nodeIds) {
         cJSON *nodesArray = cJSON_CreateIntArray(msg->nodeIds, msg->nodeCount);
         if (!nodesArray) goto error;
         
         cJSON_AddItemToObject(root, "nodeIds", nodesArray);
-		cJSON_AddNumberToObject(root, "carId", msg->carId);
     }
 
     char *jsonString = CJSON_PRINT(root);
