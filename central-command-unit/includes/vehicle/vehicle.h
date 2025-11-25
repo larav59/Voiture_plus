@@ -1,0 +1,17 @@
+/**
+ * @file route-planner.h
+ * @brief fichier d'en-tête pour le service route planner
+ * @details
+ * Définit les structures et fonctions spécifiques au service route planner. ainsi que la version du service.
+ */
+
+#ifndef VEHICLE_H
+#define VEHICLE_H
+
+#include "core/core.h"
+#include "vehicle/vehicle_config.h"
+
+#define VEHICLE_VERSION "Vehicle v1.0.0"
+
+
+#endif // VEHICLE_H
