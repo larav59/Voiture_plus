@@ -62,7 +62,7 @@ char *get_map_response_serialize(const get_map_response_t *msg) {
 	}
 
 	finish:;
-		char *jsonString = cJSON_PrintUnformatted(root);
+		char *jsonString = CJSON_PRINT(root);
 		cJSON_Delete(root);
 		return jsonString;
 

@@ -133,18 +133,31 @@ static void on_plan_route_request(const plan_route_request_t* request) {
 		free(jsonPayload);
 		LOG_DEBUG_ASYNC("Planned route for carId %d with %d waypoints", request->carId, waypointRequest.waypointCount);
 	}
-	set_waypoints_request_destroy(&waypointRequest);
-	path_destroy(&totalPath);
 
-	// Todo envoyer à l'api la liste des nodes du chemin
-	command_response_header_t response = create_command_response_header(request->header.commandId, true, "Route planned successfully");
-	char *jsonResponse = command_response_header_serialize(&response);
+	plan_route_response_t response = {
+		.header = create_command_response_header(request->header.commandId, true, NULL),
+		.nodeIds = NULL,
+		.nodeCount = 0,
+		.carId = request->carId
+	};
+
+    int pathNodeIds[totalPath.length];    
+    for(int i = 0; i < totalPath.length; i++) {
+        pathNodeIds[i] = totalPath.nodes[i]->id;
+    }
+    response.nodeIds = pathNodeIds;
+    response.nodeCount = totalPath.length;
+
+	char *jsonResponse = plan_route_response_serialize(&response);
 	if(jsonResponse) {
 		mqtt_publish(request->header.replyTopic, jsonResponse, MQTT_QOS_AT_MOST_ONCE, false);
 		free(jsonResponse);
 	} else {
 		LOG_ERROR_ASYNC("Failed to serialize success response for PLAN_ROUTE_REQUEST for carId %d", request->carId);
 	}
+
+	set_waypoints_request_destroy(&waypointRequest);
+	path_destroy(&totalPath);
 }
 
 void on_get_map_response(const cJSON *root, const command_response_header_t *header, void *context) {

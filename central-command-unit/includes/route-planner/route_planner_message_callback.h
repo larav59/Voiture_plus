@@ -24,7 +24,7 @@
 #include "core/mqtt_messages/set_safe_route_mode_request.h"
 #include "core/mqtt_messages/set_waypoints_request.h"
 #include "core/mqtt_messages/get_map_response.h"
-
+#include "core/mqtt_messages/plan_route_response.h"
 
 #define ROUTE_PLANNER_REPLY_TOPIC "services/route-planner/response"
 #define ROUTE_PLANNER_REQUEST_TOPIC "services/route-planner/request"
