@@ -8,8 +8,8 @@
  * @date 2025-11-19
  */
 
-#ifndef MQTT_MESSAGES_GET_MAP_RESPONSE_H
-#define MQTT_MESSAGES_GET_MAP_RESPONSE_H
+#ifndef GET_MAP_RESPONSE_H
+#define GET_MAP_RESPONSE_H
 
 #include "core/common.h"
 #include "core/core.h"
