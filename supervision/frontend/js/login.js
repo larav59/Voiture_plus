@@ -17,16 +17,17 @@ $(document).on('click', '#connexionBtn', function() {
 
     $.ajax({
         type: 'POST',
-        dataType: 'json',
         url: window.API_URL+'/login',
-        data: {
+        dataType: 'json',
+        contentType: 'application/json',
+        data: JSON.stringify({
             'username' : username,
             'password' : password
-        },
+        }),
         success: function(data){
 
-            if(data.hash) {
-                sessionStorage.setItem('API_KEY', hash);
+            if(data.token) {
+                sessionStorage.setItem('API_KEY', data.token);
                 window.location.href = 'main.html';
             }
             else {
@@ -35,6 +36,7 @@ $(document).on('click', '#connexionBtn', function() {
         },
         error: function(e) {
             console.error(e);
+            $('#loginIncorrect').show();
         }
     });
 });
