@@ -50,10 +50,14 @@ int plan_route_response_data_deserialize(const cJSON *root, plan_route_response_
     const cJSON *nodesArray = cJSON_GetObjectItemCaseSensitive(root, "nodeIds");
 	const cJSON *carIdItem = cJSON_GetObjectItemCaseSensitive(root, "carId");
 
-	if (cJSON_IsNumber(carIdItem)) {
-		msg->carId = carIdItem->valueint;
+	if (msg->header.success) {
+		if (cJSON_IsNumber(carIdItem)) {
+			msg->carId = carIdItem->valueint;
+		} else {
+			return -1;
+		}
 	} else {
-		return -1;
+		// For error responses, carId may be absent; do not set msg->carId
 	}
     
     if (!cJSON_IsArray(nodesArray)) {
