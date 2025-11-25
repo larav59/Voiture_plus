@@ -15,9 +15,6 @@
 
 typedef struct {
 	command_header_t header;
-	int carId;
-	int *nodeIds;
-	int nodeCount;
 } get_map_request_t;
 
 /**
