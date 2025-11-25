@@ -7,7 +7,6 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
-
 /************* DONNÉES GLOBALES (à remplacer par un appel API) *************/
 
 var COLORS = ['green', 'blue', 'yellow', 'red', 'orange'];
@@ -113,7 +112,8 @@ $(document).ready(function () {
         maxZoom: 2,
         zoomDelta: 0.1,
         zoomSnap: 0.1,
-        wheelPxPerZoomLevel: 300
+        wheelPxPerZoomLevel: 300,
+        refreshTime : 1000  // 1000 ms = 1 seconde
     };
 
     var img = new Image();
@@ -137,10 +137,26 @@ $(document).ready(function () {
         map.setZoom(-0.5);
 
         const mapNodes = setupMapNodes(map, MAP_DATA);
-        console.log("Points fixes chargés:", mapNodes);
 
-        const vehicles = setupVehicles(map, VEHICLE_DATA, mapNodes.circles);
-        console.log("Carte initialisée avec", vehicles.length, "véhicules");
+        /*** Refresh de la map avec les véhicules ***/
+
+        let previousData, vehiclesData = null;
+        let isFirstRefresh = true;
+
+        setInterval(function() {
+            vehiclesData = getVehiclesData();
+
+            if (JSON.stringify(vehiclesData) !== JSON.stringify(previousData)) {
+
+                setupVehicles(map, vehiclesData, mapNodes.circles);
+                previousData = vehiclesData;
+
+                if(isFirstRefresh) {
+                    $('#vehicleSelect').find('.dropdown-item:last').trigger('click');
+                    isFirstRefresh = false;
+                }
+            }
+        }, params.refreshTime);
     }
 });
 
@@ -456,7 +472,6 @@ function setupVehicles(map, vehicleData, circles) {
 
         $('#vehicleSelect').append(option);
     });
-    $('#vehicleSelect').find('.dropdown-item:last').trigger('click');
     
     return vehicleLayers;
 }
@@ -487,6 +502,30 @@ function setupMapNodes(map, mapData) {
     $('#destinationSelect, #stepClonable .step-select').find('.dropdown-item:last').trigger('click');
     
     return {'markers':markers, 'circles': circles};
+}
+
+function getVehiclesData() {
+
+    let vehiclesData = null;
+
+    /*
+    $.ajax({
+        type: 'GET',
+        dataType: 'json',
+        url: window.API_URL+'/vehicles/informations',
+        data: {},
+        success: function(data){
+            vehiclesData = data;
+        },
+        error: function(e) {
+            console.error(e);
+        }
+    });
+    */
+
+    vehiclesData = VEHICLE_DATA;
+
+    return vehiclesData;
 }
 
 /************* INTERACTIONS *************/
@@ -521,7 +560,6 @@ $(document).on('click', '#vehicleSelect .dropdown-item', function() {
         $('#cancelTravelBtn').show();
     }
 });
-
 
 /*
 * Click sur une option d'un select (dropdown)
@@ -581,7 +619,7 @@ $(document).on('click', "#calculTravelBtn", function() {
 });
 
 /*
-* Annuler d'un trajet
+* Annulation d'un trajet
 */
 $(document).on('click', "#cancelTravelBtn", function() {
     //envoie put id trajet + status
