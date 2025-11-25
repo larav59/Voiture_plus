@@ -12,5 +12,4 @@
 #include "heartbeat/heartbeat_message_callback.h"
 
 #define HEARTBEAT_SERVICE_VERSION "Heartbeat v1.0.0"
-
 #endif // HEARTBEAT_H

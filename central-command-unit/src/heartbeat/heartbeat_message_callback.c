@@ -35,7 +35,9 @@ static int extract_car_id_int(const char *topic, int *carId, const char *prefix)
  * @param payload Payload du message reçu.
  */
 void heartbeat_message_callback(const char* topic, const char* payload) {
-	UNUSED(payload);
+	if(!strstr(payload, "offline")) {
+		return;
+	}
 
 	if(strncmp(topic, "vehicles/", 9) == 0 && strstr(topic, "/status") != NULL) {
 		int carId;
@@ -46,10 +48,10 @@ void heartbeat_message_callback(const char* topic, const char* payload) {
 		LOG_WARNING_ASYNC("Vehicle ID %d is down.", carId);
 
 		cancel_vehicle_route_request_t cancelRequest = {
-			.header = create_command_header(ACTION_CANCEL_VEHICLE_ROUTE),
+			.header = create_command_header(ACTION_CANCEL_VEHICLE_ROUTE, HEARTBEAT_REPLY_TOPIC),
 			.carId = carId
 		};
-		char *jsonPayload = cancel_vehicle_route_request_serialize_json(&cancelRequest);
+		char *jsonPayload = cancel_vehicle_route_request_serialize(&cancelRequest);
 
 		if(!jsonPayload) {
 			LOG_ERROR_ASYNC("Unable to serialize CANCEL_VEHICLE_ROUTE_REQUEST for vehicle ID %d", carId);
@@ -61,7 +63,7 @@ void heartbeat_message_callback(const char* topic, const char* payload) {
 		free(jsonPayload);
 
 		revoke_vehicle_access_t revokeAccess = {
-			.header = create_command_header(ACTION_REVOKE_VEHICLE_ACCESS),
+			.header = create_command_header(ACTION_REVOKE_VEHICLE_ACCESS, HEARTBEAT_REPLY_TOPIC),
 			.carId = carId
 		};
 		jsonPayload = revoke_vehicle_access_serialize_json(&revokeAccess);
@@ -89,10 +91,10 @@ void heartbeat_message_callback(const char* topic, const char* payload) {
 
 		// Prévenir le route planner pour qu'il planifie des routes "safe" sans zone de conflit
 		set_safe_route_mode_request_t safeRouteModeRequest = {
-			.header = create_command_header(ACTION_SET_SAFE_ROUTE_MODE),
+			.header = create_command_header(ACTION_SET_SAFE_ROUTE_MODE, HEARTBEAT_REPLY_TOPIC),
 			.enabled = true
 		};
-		char *jsonPayload = set_safe_route_mode_request_serialize_json(&safeRouteModeRequest);
+		char *jsonPayload = set_safe_route_mode_request_serialize(&safeRouteModeRequest);
 
 		if(!jsonPayload) {
 			LOG_ERROR_ASYNC("Unable to serialize SET_SAFE_ROUTE_MODE");
@@ -111,10 +113,10 @@ void heartbeat_message_callback(const char* topic, const char* payload) {
 
 		// Prévenir le route-planner pour qu'il désactive le mode ferroviaire si nécessaire
 		set_railway_mode_request_t railwayModeRequest = {
-			.header = create_command_header(ACTION_SET_RAILWAY_MODE),
+			.header = create_command_header(ACTION_SET_RAILWAY_MODE, HEARTBEAT_REPLY_TOPIC),
 			.enabled = false
 		};
-		char *jsonPayload = set_railway_mode_request_serialize_json(&railwayModeRequest);
+		char *jsonPayload = set_railway_mode_request_serialize(&railwayModeRequest);
 		if(!jsonPayload) {
 			LOG_ERROR_ASYNC("Unable to serialize SET_RAILWAY_MODE");
 			return;

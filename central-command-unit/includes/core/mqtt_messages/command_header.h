@@ -18,11 +18,12 @@
 
 #define ACTION_LENGTH 64
 #define COMMAND_ID_LENGTH 64
-
+#define REPLY_TOPIC_LENGTH 128
 
 typedef struct {
 	char commandId[COMMAND_ID_LENGTH];
 	char action[ACTION_LENGTH];
+	char replyTopic[REPLY_TOPIC_LENGTH];
 	struct timespec timestamp;
 } command_header_t;
 
@@ -30,11 +31,11 @@ typedef struct {
 /**
  * @brief Crée et initialise une structure d'en-tête de commande.
  * @param action Chaîne représentant l'action de la commande.
+ * @param replyTopic Chaîne représentant le topic de réponse.
  * @return Structure d'en-tête de commande initialisée.
  * @note la fonction génère un UUID pour commandId et initialise le timestamp courant.
  */
-command_header_t create_command_header(const char *action);
-
+command_header_t create_command_header(const char *action, const char *replyTopic);
 /**
  * @brief Remplit un objet cJSON avec les champs de l'en-tête.
  * @details Ajoute les clés "command_id", "action", "timestamp" à l'objet JSON racine.

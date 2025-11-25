@@ -121,7 +121,7 @@ int mqtt_connect(const char* brokerIp, int port, const char* clientId, const cha
 	}
 
 	if(lwtTopic && lwtPayload) {
-		rc = mosquitto_will_set(mosq, lwtTopic, strlen(lwtPayload), lwtPayload, MQTT_QOS_AT_MOST_ONCE, true);
+		rc = mosquitto_will_set(mosq, lwtTopic, strlen(lwtPayload), lwtPayload, MQTT_QOS_EXACTLY_ONCE, true);
 		if(rc != MOSQ_ERR_SUCCESS) {
 			LOG_ERROR_SYNC("MQTT: Failed to set LWT: %s", mosquitto_strerror(rc));
 			MQTT_FAILED_CLEANUP(mosq);

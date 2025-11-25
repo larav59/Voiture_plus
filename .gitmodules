@@ -7,3 +7,6 @@
 [submodule "central-command-unit/external/cJSON"]
 	path = central-command-unit/external/cJSON
 	url = https://github.com/DaveGamble/cJSON.git
+[submodule "central-command-unit/external/uthash"]
+	path = central-command-unit/external/uthash
+	url = https://github.com/troydhanson/uthash.git

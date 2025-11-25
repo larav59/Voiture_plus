@@ -24,14 +24,15 @@ typedef struct {
  * @return Chaîne JSON représentant le message de demande d'annulation de trajet véhicule
  * @warning La mémoire allouée pour la chaîne JSON doit être libérée par l'appelant.
  */
-char *cancel_vehicle_route_request_serialize_json(const cancel_vehicle_route_request_t *msg);
+char *cancel_vehicle_route_request_serialize(const cancel_vehicle_route_request_t *msg);
 
 /**
  * @brief Désérialise un message de demande d'annulation de trajet véhicule à partir d'une chaîne JSON.
- * @param json Chaîne JSON représentant le message de demande d'annulation de trajet véhicule.
+ * @param root Pointeur vers l'objet cJSON représentant le message de demande d'annulation de trajet véhicule.
  * @param msg Pointeur vers la structure de message de demande d'annulation de trajet véhicule à remplir.
  * @return 0 en cas de succès, -1 en cas d'erreur.
+ * @warning Cette fonction s'occupe uniquement de désérialiser les données. Le header doit être désérialisé séparément.
  */
-int cancel_vehicle_route_request_deserialize_json(const char *json, cancel_vehicle_route_request_t *msg);
+int cancel_vehicle_route_request_data_deserialize(cJSON *root, cancel_vehicle_route_request_t *msg);
 
 #endif // CANCEL_VEHICLE_ROUTE_REQUEST_H

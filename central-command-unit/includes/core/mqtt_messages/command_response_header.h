@@ -48,7 +48,15 @@ command_response_header_t create_command_response_header(const char *originalCom
  * @param root Pointeur vers l'objet cJSON racine.
  * @return 0 en cas de succès, -1 en cas d'échec.
  */
-int command_response_header_serialize(const command_response_header_t *header, cJSON *root);
+int command_response_header_to_json(const command_response_header_t *header, cJSON *root);
+
+/**
+ * @brief Sérialise une structure d'en-tête de réponse en chaîne JSON.
+ * @param header Pointeur vers la structure d'en-tête de réponse à sérialiser.
+ * @return Chaîne JSON représentant l'en-tête de réponse, ou NULL en cas d'erreur.
+ * @warning La mémoire allouée pour la chaîne JSON doit être libérée par l'appelant.
+ */
+char *command_response_header_serialize(const command_response_header_t *header);
 
 /**
  * @brief Remplit une structure d'en-tête de réponse à partir d'un objet cJSON.

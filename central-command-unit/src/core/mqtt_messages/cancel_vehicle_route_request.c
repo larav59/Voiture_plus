@@ -14,7 +14,7 @@
  * @return Chaîne JSON représentant le message de demande d'annulation de trajet véhicule
  * @warning La mémoire allouée pour la chaîne JSON doit être libérée par l'appelant.
  */
-char *cancel_vehicle_route_request_serialize_json(const cancel_vehicle_route_request_t *msg) {
+char *cancel_vehicle_route_request_serialize(const cancel_vehicle_route_request_t *msg) {
 	cJSON *root = cJSON_CreateObject();
 	if(!root) return NULL;
 	
@@ -22,6 +22,7 @@ char *cancel_vehicle_route_request_serialize_json(const cancel_vehicle_route_req
 	if(!cJSON_AddNumberToObject(root, "carId", msg->carId)) goto error_cleanup;
 	
 	char *json = CJSON_PRINT(root);
+	if(!json) goto error_cleanup;
 	
 	cJSON_Delete(root);
 	return json;
@@ -33,20 +34,14 @@ char *cancel_vehicle_route_request_serialize_json(const cancel_vehicle_route_req
 
 /**
  * @brief Désérialise un message CANCEL_VEHICLE_ROUTE_REQUEST à partir d'une chaîne JSON.
- * @param json Chaîne JSON représentant le message CANCEL_VEHICLE_ROUTE_REQUEST.
+ * @param root Pointeur vers l'objet cJSON représentant le message CANCEL_VEHICLE_ROUTE_REQUEST.
  * @param msg Pointeur vers la structure de message CANCEL_VEHICLE_ROUTE_REQUEST à remplir.
  * @return 0 en cas de succès, -1 en cas d'erreur.
  */
-int cancel_vehicle_route_request_deserialize_json(const char *json, cancel_vehicle_route_request_t *msg) {
-	if (!json || !msg) return -1;
-
-	cJSON *root = cJSON_Parse(json);
-	if (!root) return -1;
-
-	if (command_header_deserialize(root, &msg->header) != 0) goto error_cleanup;
+int cancel_vehicle_route_request_data_deserialize(cJSON *root, cancel_vehicle_route_request_t *msg) {
+	if (!root || !msg) return -1;
 
 	const cJSON *carIdItem = cJSON_GetObjectItemCaseSensitive(root, "carId");
-
 	if (!cJSON_IsNumber(carIdItem)) goto error_cleanup;
 
 	msg->carId = carIdItem->valueint;
