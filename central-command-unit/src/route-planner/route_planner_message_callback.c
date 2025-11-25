@@ -141,12 +141,12 @@ static void on_plan_route_request(const plan_route_request_t* request) {
 		.carId = request->carId
 	};
 
-    int pathNodeIds[totalPath.length];    
-    for(int i = 0; i < totalPath.length; i++) {
-        pathNodeIds[i] = totalPath.nodes[i]->id;
-    }
-    response.nodeIds = pathNodeIds;
-    response.nodeCount = totalPath.length;
+	int pathNodeIds[totalPath.length];    
+	for(int i = 0; i < totalPath.length; i++) {
+		pathNodeIds[i] = totalPath.nodes[i]->id;
+	}
+	response.nodeIds = pathNodeIds;
+	response.nodeCount = totalPath.length;
 
 	char *jsonResponse = plan_route_response_serialize(&response);
 	if(jsonResponse) {
