@@ -1,0 +1,61 @@
+<head>
+    <meta charset="utf-8">
+    <title>Superviseur Voiture +</title>
+
+    <!-- integration des fichiers css associes -->
+    <link rel="stylesheet" href="css/alarms.css">
+    <!-- fin de l'integration -->
+
+    <!-- integration des fichiers js associes -->
+    <script type="module" src="js/alarms.js"></script>
+    <!-- fin de l'integration -->
+</head>
+
+<script>
+    /***** VARIABLES GLOBALES *****/
+    window.API_URL = "http://169.254.87.118:80/api/v1";
+</script>
+
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg p-2 px-5 mb-3 bg-white border-bottom shadow-sm">
+        <img src="images/logo.png" width="150px" height="50px" alt="">
+
+        <div class="collapse navbar-collapse">
+            <ul class="navbar-nav ms-5">
+                <li class="nav-item ms-2">
+                    <a class="nav-link" href="index.html">Carte</a>
+                </li>
+                <li class="nav-item ms-3">
+                    <a class="nav-link" href="alarms.html">Alertes</a>
+                </li>
+            </ul>
+        </div>
+
+        <button id="logout" class="logout">
+            <div class="sign"><svg viewBox="0 0 512 512"><path d="M377.9 105.9L500.7 228.7c7.2 7.2 11.3 17.1 11.3 27.3s-4.1 20.1-11.3 27.3L377.9 406.1c-6.4 6.4-15 9.9-24 9.9c-18.7 0-33.9-15.2-33.9-33.9l0-62.1-128 0c-17.7 0-32-14.3-32-32l0-64c0-17.7 14.3-32 32-32l128 0 0-62.1c0-18.7 15.2-33.9 33.9-33.9c9 0 17.6 3.6 24 9.9zM160 96L96 96c-17.7 0-32 14.3-32 32l0 256c0 17.7 14.3 32 32 32l64 0c17.7 0 32 14.3 32 32s-14.3 32-32 32l-64 0c-53 0-96-43-96-96L0 128C0 75 43 32 96 32l64 0c17.7 0 32 14.3 32 32s-14.3 32-32 32z"></path></svg></div>
+            <div class="text">Logout</div>
+        </button>
+    </nav>
+    <!-- fin Navbar -->
+
+    <div class="container mt-5 pt-5">
+
+        <div class="alarm alert d-none p-3" role="alert" id="alarmToClone">
+            <h5 class="alert-heading">
+                <span class="criticity badge rounded-pill me-1"></span>
+                <span class="type"></span>
+            </h5>
+            <p class="description ms-4"></p>
+            <hr class="mt-0 mb-2">
+            <div class="d-flex justify-content-end">
+                <span class="origin fw-bold me-1"></span> : créé à <span class="createdAt ms-1"></span>
+            </div>
+        </div>
+   
+        <div id="alarmsContainer">
+            <!-- Les alertes seront ajoutées ici -->
+        </div>
+    </div>
+</body>

@@ -17,23 +17,23 @@ var VEHICLE_DATA = [
         name: 'Voiture 1',
         travel: {
             id: 1,
-            created_at: '2025-10-23T17:45:30',
+            createdAt: '2025-10-23T17:45:30',
             status: 'Terminé',
-            estimated_duration: 2,
+            estimatedDuration: 2,
             nodes : [
                 {
                     id: 1,
                     name: 'Parking 1',
-                    position_x: 1400,
-                    position_y: 885,
-                    point_of_interest: 1,
+                    positionX: 1400,
+                    positionY: 885,
+                    pointOfInterest: 1,
                 },
                 {
                     id: 2,
                     name: 'Parking 2',
-                    position_x: 220,
-                    position_y: 685,
-                    point_of_interest: 1,
+                    positionX: 220,
+                    positionY: 685,
+                    pointOfInterest: 1,
                 }
             ]
         },
@@ -41,8 +41,8 @@ var VEHICLE_DATA = [
             id: 15,
             speed: 35,
             angle: 180,
-            position_x: 1200,
-            position_y: 700
+            positionX: 1200,
+            positionY: 700
         }
     },
     {
@@ -50,23 +50,23 @@ var VEHICLE_DATA = [
         name: 'Voiture 2',
         travel: {
             id: 2,
-            created_at: '2025-10-23T17:50:30',
+            createdAt: '2025-10-23T17:50:30',
             status: 'En cours',
-            estimated_duration: 0,
+            estimatedDuration: 0,
             nodes : [
                 {
                     id: 2,
                     name: 'Parking 2',
-                    position_x: 220,
-                    position_y: 685,
-                    point_of_interest: 1,
+                    positionX: 220,
+                    positionY: 685,
+                    pointOfInterest: 1,
                 },
                 {
                     id: 3,
                     name: 'Gare',
-                    position_x: 970,
-                    position_y: 110,
-                    point_of_interest: 1,
+                    positionX: 970,
+                    positionY: 110,
+                    pointOfInterest: 1,
                 }
             ]
         },
@@ -74,8 +74,8 @@ var VEHICLE_DATA = [
             id: 15,
             speed: 35,
             angle: 0,
-            position_x: 600,
-            position_y: 170
+            positionX: 600,
+            positionY: 170
         }
     },
 ];
@@ -84,23 +84,23 @@ var MAP_DATA = [
     {
         id: 1,
         name: 'Parking 1',
-        position_x: 1400,
-        position_y: 885,
-        point_of_interest: 1
+        positionX: 1400,
+        positionY: 885,
+        pointOfInterest: 1
     },
     {
         id: 2,
         name: 'Parking 2',
-        position_x: 220,
-        position_y: 685,
-        point_of_interest: 1
+        positionX: 220,
+        positionY: 685,
+        pointOfInterest: 1
     },
     {
         id: 3,
         name: 'Gare',
-        position_x: 970,
-        position_y: 110,
-        point_of_interest: 1
+        positionX: 970,
+        positionY: 110,
+        pointOfInterest: 1
     }
 ];
 
@@ -251,7 +251,7 @@ var mapUtils = {
                 statusColor = '#f03030';
                 break;
             default:
-                statusColor = vehicle.status;
+                statusColor = '#777777';
                 break;
         }
 
@@ -290,7 +290,7 @@ var mapUtils = {
             iconAnchor: [0, 10]
         });
         var arrowMarker = L.marker(
-            [vehicle.state.position_y, vehicle.state.position_x],
+            [vehicle.state.positionY, vehicle.state.positionX],
             {icon: arrowIcon}
         );
         markers.push(arrowMarker);
@@ -298,7 +298,7 @@ var mapUtils = {
         // Véhicule (petite icone de voiture)
         const carIcon = mapUtils.createIcon(vehicle.id, 'car');
         const carMarker = mapUtils.createMarker(
-            [vehicle.state.position_y, vehicle.state.position_x],
+            [vehicle.state.positionY, vehicle.state.positionX],
             carIcon, 
             mapUtils.generateVehicleTooltip(vehicle),
             false,
@@ -316,7 +316,7 @@ var mapUtils = {
             const nodeIcon = mapUtils.createIcon(node.id, type, vehicle.id);
 
             let nodeMarker = mapUtils.createMarker(
-                [node.position_y, node.position_x],
+                [node.positionY, node.positionX],
                 nodeIcon, 
                 'Destination '+vehicle.name,
                 true // draggable
@@ -343,7 +343,7 @@ var mapUtils = {
      **/
     setupMapNodeArea: function (node) {
         
-        const circle = L.circle([node.position_y, node.position_x], {
+        const circle = L.circle([node.positionY, node.positionX], {
             color: 'red',
             fillColor: '#f03',
             fillOpacity: 0.3,
@@ -461,7 +461,7 @@ function setupVehicles(map, vehicleData, circles) {
                 statusColor = '#f03030';
                 break;
             default:
-                statusColor = vehicle.status;
+                statusColor = '#777777';
                 break;
         }
 
@@ -483,7 +483,7 @@ function setupMapNodes(map, mapData) {
     mapData.forEach(function(node) {
         const icon = mapUtils.createIcon(node.id, 'map');
         const marker = mapUtils.createMarker(
-            [node.position_y, node.position_x],
+            [node.positionY, node.positionX],
             icon,
             node.name
         );
@@ -511,9 +511,10 @@ function getVehiclesData() {
     /*
     $.ajax({
         type: 'GET',
-        dataType: 'json',
         url: window.API_URL+'/vehicles/informations',
-        data: {},
+        headers: {
+            'Authorization': 'Bearer '+sessionStorage.getItem('API_KEY'),
+        },
         success: function(data){
             vehiclesData = data;
         },
@@ -536,7 +537,7 @@ function getVehiclesData() {
 $(document).on('click', '#vehicleSelect .dropdown-item', function() {
 
     const vehicle = $(this).data('vehicle');
-    const destinations = vehicle.travel.nodes.filter(function(node) { return node.point_of_interest; });
+    const destinations = vehicle.travel.nodes.filter(function(node) { return node.pointOfInterest; });
 
     $('#stepsContainer').empty();
     $('#addStepBtn').prop('disabled', false);
@@ -623,4 +624,12 @@ $(document).on('click', "#calculTravelBtn", function() {
 */
 $(document).on('click', "#cancelTravelBtn", function() {
     //envoie put id trajet + status
+});
+
+/*
+* Logout de l'utilisateur
+*/
+$(document).on('click', '#logout', function() {
+    sessionStorage.removeItem('API_KEY');
+    window.location.href = 'login.html';
 });
