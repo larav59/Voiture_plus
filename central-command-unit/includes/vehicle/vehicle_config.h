@@ -8,9 +8,13 @@
 #define VEHICLE_CONFIG_H
 
 #include "core/config.h"
+#include <ini.h>
 
 typedef struct {
 	int vehicleId; /**< L'identifiant unique du véhicule dans le système */
+	int bauderate;   /**< La vitesse de communication UART (en bauds) */
+	char devicePath[256]; /**< Le chemin du périphérique UART (ex: /dev/ttyS0) */
+	int timeoutMs;  /**< Le délai d'attente pour les opérations UART (en millisecondes) */
 } vehicle_config_t;
 
 // typedef void (*service_config_parser_t)(const char* key, const char* value, void* serviceConfig);
