@@ -24,16 +24,16 @@ var VEHICLE_DATA = [
                 {
                     id: 1,
                     name: 'Parking 1',
-                    positionX: 1400,
-                    positionY: 885,
-                    pointOfInterest: 1,
+                    positionX: 4350,
+                    positionY: 3290,
+                    pointOfInterest: 1
                 },
                 {
                     id: 2,
                     name: 'Parking 2',
-                    positionX: 220,
-                    positionY: 685,
-                    pointOfInterest: 1,
+                    positionX: 610,
+                    positionY: 2530,
+                    pointOfInterest: 1
                 }
             ]
         },
@@ -41,8 +41,8 @@ var VEHICLE_DATA = [
             id: 15,
             speed: 35,
             angle: 180,
-            positionX: 1200,
-            positionY: 700
+            positionX: 3000,
+            positionY: 2550,
         }
     },
     {
@@ -57,16 +57,16 @@ var VEHICLE_DATA = [
                 {
                     id: 2,
                     name: 'Parking 2',
-                    positionX: 220,
-                    positionY: 685,
-                    pointOfInterest: 1,
+                    positionX: 610,
+                    positionY: 2530,
+                    pointOfInterest: 1
                 },
                 {
                     id: 3,
                     name: 'Gare',
-                    positionX: 970,
-                    positionY: 110,
-                    pointOfInterest: 1,
+                    positionX: 3290,
+                    positionY: 590,
+                    pointOfInterest: 1
                 }
             ]
         },
@@ -74,8 +74,8 @@ var VEHICLE_DATA = [
             id: 15,
             speed: 35,
             angle: 0,
-            positionX: 600,
-            positionY: 170
+            positionX: 2290,
+            positionY: 700
         }
     },
 ];
@@ -84,22 +84,22 @@ var MAP_DATA = [
     {
         id: 1,
         name: 'Parking 1',
-        positionX: 1400,
-        positionY: 885,
+        positionX: 4350,
+        positionY: 3290,
         pointOfInterest: 1
     },
     {
         id: 2,
         name: 'Parking 2',
-        positionX: 220,
-        positionY: 685,
+        positionX: 610,
+        positionY: 2530,
         pointOfInterest: 1
     },
     {
         id: 3,
         name: 'Gare',
-        positionX: 970,
-        positionY: 110,
+        positionX: 3290,
+        positionY: 590,
         pointOfInterest: 1
     }
 ];
@@ -281,6 +281,7 @@ var mapUtils = {
     createVehicleLayer: function (vehicle, map, circles) {
 
         let markers = [];
+        const position = mapUtils.realToLeaflet(vehicle.state.positionX, vehicle.state.positionY);
 
         // Flèche (direction et angle du véhicule)
         var arrowIcon = L.divIcon({
@@ -290,7 +291,7 @@ var mapUtils = {
             iconAnchor: [0, 10]
         });
         var arrowMarker = L.marker(
-            [vehicle.state.positionY, vehicle.state.positionX],
+            position,
             {icon: arrowIcon}
         );
         markers.push(arrowMarker);
@@ -298,7 +299,7 @@ var mapUtils = {
         // Véhicule (petite icone de voiture)
         const carIcon = mapUtils.createIcon(vehicle.id, 'car');
         const carMarker = mapUtils.createMarker(
-            [vehicle.state.positionY, vehicle.state.positionX],
+            position,
             carIcon, 
             mapUtils.generateVehicleTooltip(vehicle),
             false,
@@ -313,10 +314,11 @@ var mapUtils = {
             const isFinaleDestination = vehicle.travel.nodes.at(-1).id === node.id;
             const type = isFinaleDestination ? 'pin' : 'point';
 
+            const position = mapUtils.realToLeaflet(node.positionX, node.positionY);
             const nodeIcon = mapUtils.createIcon(node.id, type, vehicle.id);
 
             let nodeMarker = mapUtils.createMarker(
-                [node.positionY, node.positionX],
+                position,
                 nodeIcon, 
                 'Destination '+vehicle.name,
                 true // draggable
@@ -342,8 +344,10 @@ var mapUtils = {
      * @returns {L.Circle} Cercle Leaflet ajouté à la carte
      **/
     setupMapNodeArea: function (node) {
+
+        const position = mapUtils.realToLeaflet(node.positionX, node.positionY);
         
-        const circle = L.circle([node.positionY, node.positionX], {
+        const circle = L.circle(position, {
             color: 'red',
             fillColor: '#f03',
             fillOpacity: 0.3,
@@ -424,6 +428,34 @@ var mapUtils = {
                 pinMarker.setLatLng(lastValidPos);
             }
         });
+    },
+    /**
+     * Convertit des coordonnées réelles (mm) en coordonnées Leaflet (pixels)
+     * @param {number} realX - Position x réelle en mm
+     * @param {number} realY - Position y réelle en mm
+     * @returns {Array} [y, x]
+     */
+    realToLeaflet: function(realX, realY) {
+
+        const scale = {
+            base : {  // Point de référence (coin inférieur gauche parking 2)
+                real :{ x: 420, y: 2310 },
+                leaflet : { x: 158.58967, y: 638.19456 }
+            },
+            ratio : {  // pixels par mm
+                x: 0.3151964908675799,
+                y: 0.2866093559322034
+            },
+            offset : { // marvelmind décalées par rapport à la maquette + marges du plan
+                x: 100,
+                y: -190
+            }
+        }
+
+        const x = (realX + scale.offset.x) * scale.ratio.x;
+        const y = (realY + scale.offset.y) * scale.ratio.y;
+
+        return [y, x];
     }
 };
 
@@ -481,9 +513,11 @@ function setupMapNodes(map, mapData) {
     let circles = [];
     
     mapData.forEach(function(node) {
+        const position = mapUtils.realToLeaflet(node.positionX, node.positionY);
         const icon = mapUtils.createIcon(node.id, 'map');
+
         const marker = mapUtils.createMarker(
-            [node.positionY, node.positionX],
+            position,
             icon,
             node.name
         );
@@ -501,7 +535,7 @@ function setupMapNodes(map, mapData) {
     });
     $('#destinationSelect, #stepClonable .step-select').find('.dropdown-item:last').trigger('click');
     
-    return {'markers':markers, 'circles': circles};
+    return {'markers': markers, 'circles': circles};
 }
 
 function getVehiclesData() {
