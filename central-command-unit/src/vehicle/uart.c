@@ -54,7 +54,7 @@ int uart_open(const uart_config_t *config) {
 
 	if(config->timeoutMs > 0) {
 		tty.c_cc[VMIN] = 0;
-		tty.c_cc[VTIME] = config->timeoutMs / 100; // VTIME est en dixièmes de seconde
+		tty.c_cc[VTIME] = config->timeoutMs / 100;
 	} else if(config->timeoutMs == -1) {
 		tty.c_cc[VMIN] = 1;
 		tty.c_cc[VTIME] = 0;
@@ -71,49 +71,37 @@ int uart_open(const uart_config_t *config) {
 	return fd;
 }
 
-/**
- * @brief Lit des données depuis la connexion UART.
- * @param fd Descripteur de fichier de la connexion UART.
- * @param buffer Pointeur vers le tampon où les données lues seront stockées.
- * @param length Nombre d'octets à lire.
- * @return Nombre d'octets lus, ou -1 en cas d'erreur.
- */
 ssize_t uart_recv_frame(int fd, void *buffer, size_t length) {
-	// recevoir une trame complète START | DATA | END
-	uint8_t byte;
-	uint8_t *bufferU8 = (uint8_t *)buffer;
-	int maxNoiseBytes = MAX_NOISE_BYTES;
-	while(1) {
-		if(read(fd, &byte, 1) != 1) return -1;
-		if(byte == UART_START_BYTE) break;
-		if(--maxNoiseBytes <= 0) return -1;
-	}
-	uint8_t dataLength;
-	if(read(fd, &dataLength, 1) != 1) return -1;
+    uint8_t byte;
+    uint8_t *bufferU8 = (uint8_t *)buffer;
+    int maxNoiseBytes = MAX_NOISE_BYTES;
 
-	if(dataLength > length) {
-		return -1;
-	}
+    while(1) {
+        if(read(fd, &byte, 1) != 1) return -1;
+        if(byte == UART_START_BYTE) break;
+        if(--maxNoiseBytes <= 0) return -1;
+    }
 
-	size_t bytesRead = 0;
-	while(bytesRead < dataLength) {
-		ssize_t result = read(fd, bufferU8 + bytesRead, dataLength - bytesRead);
-		if(result <= 0) return -1;
-		bytesRead += result;
-	}
+    uint8_t dataLength;
+    if(read(fd, &dataLength, 1) != 1) return -1;
 
-	if(read(fd, &byte, 1) != 1) return -1;
-	if(byte != UART_END_BYTE) return -1;
+    if(dataLength > length) {
+        return -1; 
+    }
 
-	return bytesRead;
+    size_t bytesRead = 0;
+    while(bytesRead < dataLength) {
+        ssize_t result = read(fd, bufferU8 + bytesRead, dataLength - bytesRead);
+        if(result <= 0) return -1;
+        bytesRead += result;
+    }
+
+    return bytesRead;
 }
 
 /**
  * @brief Écrit des données vers la connexion UART.
- * @param fd Descripteur de fichier de la connexion UART.
- * @param buffer Pointeur vers le tampon contenant les données à écrire.
- * @param length Nombre d'octets à écrire.
- * @return Nombre d'octets écrits, ou -1 en cas d'erreur
+ * @details Modifié : N'envoie plus le byte de fin.
  */
 ssize_t uart_send_frame(int fd, const void *buffer, size_t length) {
     if (length > 255) return -1;
@@ -122,11 +110,8 @@ ssize_t uart_send_frame(int fd, const void *buffer, size_t length) {
     header[0] = UART_START_BYTE;
     header[1] = (uint8_t)length;
 
-    uint8_t end = UART_END_BYTE;
-
     if (write(fd, header, 2) != 2) return -1;
-	if (write(fd, buffer, length) != (ssize_t)length) return -1;
-    if (write(fd, &end, 1) != 1) return -1;
+    if (write(fd, buffer, length) != (ssize_t)length) return -1;
 
     return length;
 };

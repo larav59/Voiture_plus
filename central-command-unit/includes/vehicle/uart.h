@@ -14,8 +14,7 @@ typedef struct {
 	char *devicePath;
 } uart_config_t;
 
-#define UART_START_BYTE 0xFF ///< Octets de début de trame UART
-#define UART_END_BYTE   0xFF ///< Octets de fin de trame UART
+#define UART_START_BYTE 0x24 ///< Octets de début de trame UART
 #define MAX_NOISE_BYTES 512 //!< Nombre maximum d'octets de bruit à ignorer avant de considérer qu'il n'y a pas de trame valide
 
 
