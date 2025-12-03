@@ -1,3 +1,3 @@
 export * from "./GetVehiclesRequest";
 export * from "./CreateVehicleRequest";
-export * from "./UpdateVehicleRequest";
+export * from "./UpdateVehiclesRequest";

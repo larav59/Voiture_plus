@@ -22,15 +22,10 @@ export class CreateAlarmRequest extends BaseRequest<CreateAlarmRequest> {
 	}
 
 	static fromRequest(req: any): CreateAlarmRequest {
-		const body = req.body
-		body.description = body.description !== undefined ? String(body.description) : undefined;
-		body.type = body.type !== undefined ? parseInt(body.type) : undefined;
-		body.origin = body.origin !== undefined ? parseInt(body.origin) : undefined;
-
 		return new CreateAlarmRequest({
-			description: body.description,
-			type: body.type,
-			origin: body.origin,
+			description: req.body.description,
+			type: req.body.type,
+			origin: req.body.origin,
 		});
 	}
 }

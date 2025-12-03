@@ -8,11 +8,9 @@ import {
   PrimaryGeneratedColumn,
 } from "typeorm";
 import { Vehicles } from "./Vehicles";
-import { Users } from "./Users";
 import { TravelsNodes } from "./TravelsNodes";
 
 @Index("vehicle_id", ["vehicleId"], {})
-@Index("ordered_by", ["orderedBy"], {})
 @Entity("TRAVELS", { schema: "supervision" })
 export class Travels {
   @PrimaryGeneratedColumn({ type: "int", name: "id" })
@@ -34,8 +32,8 @@ export class Travels {
   @Column("int", { name: "vehicle_id", nullable: true })
   public vehicleId!: number | null;
 
-  @Column("int", { name: "ordered_by", nullable: true })
-  public orderedBy!: number | null;
+  @Column("varchar", { name: "ordered_by", nullable: true, length: 255 })
+  public orderedBy!: string | null;
 
   @ManyToOne(() => Vehicles, (vehicles) => vehicles.travels, {
     onDelete: "NO ACTION",
@@ -43,13 +41,6 @@ export class Travels {
   })
   @JoinColumn([{ name: "vehicle_id", referencedColumnName: "id" }])
   public vehicle!: Vehicles;
-
-  @ManyToOne(() => Users, (users) => users.travels, {
-    onDelete: "NO ACTION",
-    onUpdate: "NO ACTION",
-  })
-  @JoinColumn([{ name: "ordered_by", referencedColumnName: "id" }])
-  public orderedBy2!: Users;
 
   @OneToMany(() => TravelsNodes, (travelsNodes) => travelsNodes.travel)
   public travelsNodes!: TravelsNodes[];

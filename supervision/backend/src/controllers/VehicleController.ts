@@ -8,6 +8,7 @@ import {
 	UpdateVehicleRequest 
 } from "../domain/requests/Vehicles";
 import { VehicleService } from "../domain/services/VehicleService";
+import { VehiclesDTO } from "../domain/dtos/VehiclesDTO";
 
 export class VehicleController {
 	
@@ -23,8 +24,11 @@ export class VehicleController {
 		if (request.validate().hasErrors()) {
 			throw new NotFound("Invalid Request",request.validate().getErrors());
 		}
-		const vehicles = await vehicleService.getVehicles(request.id, request.name);
-		res.status(HttpStatusEnum.OK).json(vehicles);
+		const vehicles = await vehicleService.getVehicles(request.id ?? 0, request.name ?? "");
+		const vehiclesDTO = vehicles.map(v => VehiclesDTO.fromEntity(v));
+
+
+		res.status(HttpStatusEnum.OK).json(vehiclesDTO);
 		return;
 	}
 
@@ -38,7 +42,8 @@ export class VehicleController {
 		}
 
 		const vehicle = await vehicleService.createVehicle(request.name!);
-		res.status(HttpStatusEnum.OK).json(vehicle);
+		const vehicleDTO = VehiclesDTO.fromEntity(vehicle);
+		res.status(HttpStatusEnum.OK).json(vehicleDTO);
 		return;
 	}
 
@@ -51,11 +56,12 @@ export class VehicleController {
 			throw new NotFound("Invalid Request",request.validate().getErrors());
 		}
 
-		const vehicle = await vehicleService.updateVehicle(request.id, request.name)
+		const vehicle = await vehicleService.updateVehicle(request.id ?? 0, request.name ?? "")
 		if (!vehicle) {
 			throw res.status(HttpStatusEnum.NOT_FOUND).json({ message: "Vehicle not found" });
 		}
-		res.status(HttpStatusEnum.OK).json(vehicle);
+		const vehicleDTO = VehiclesDTO.fromEntity(vehicle);
+		res.status(HttpStatusEnum.OK).json(vehicleDTO);
 		return ;
 	}
 

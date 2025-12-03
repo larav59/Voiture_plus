@@ -9,7 +9,7 @@ export class NodesTypes {
   @Column("varchar", { name: "label", nullable: true, length: 255 })
   public label!: string | null;
 
-  @OneToMany(() => Nodes, (nodes) => nodes.nodeType2)
+  @OneToMany(() => Nodes, (nodes) => nodes.nodeType)
   public nodes!: Nodes[];
 
   public constructor(init?: Partial<NodesTypes>) {

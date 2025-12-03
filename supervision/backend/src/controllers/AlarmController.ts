@@ -8,6 +8,7 @@ import {
 	UpdateAlarmRequest
 } from "../domain/requests/Alarms";
 import { AlarmService } from "../domain/services/AlarmService";
+import { AlarmsDTO } from "../domain/dtos/AlarmsDTO";
 
 export class AlarmController {
 	
@@ -24,7 +25,8 @@ export class AlarmController {
 			throw new NotFound("Invalid Request",request.validate().getErrors());
 		}
 		const alarms = await alarmsService.getAlarms(request.originId, request.occuredAfter, request.occuredBefore, request.typeId);
-		res.status(HttpStatusEnum.OK).json(alarms);
+		const alarmsDTO = alarms.map(alarm => AlarmsDTO.fromEntity(alarm));
+		res.status(HttpStatusEnum.OK).json(alarmsDTO);
 		return;
 	}
 
@@ -38,7 +40,8 @@ export class AlarmController {
 		}
 
 		const alarm = await alarmService.createAlarm(request.description ?? "", request.type!, request.origin!);
-		res.status(HttpStatusEnum.OK).json(alarm);
+		const alarmDTO = AlarmsDTO.fromEntity(alarm);
+		res.status(HttpStatusEnum.OK).json(alarmDTO);
 		return;
 	}
 
@@ -55,7 +58,8 @@ export class AlarmController {
 		if (!alarm) {
 			throw res.status(HttpStatusEnum.NOT_FOUND).json({ message: "Alarm not found" });
 		}
-		res.status(HttpStatusEnum.OK).json(alarm);
+		const alarmDTO = AlarmsDTO.fromEntity(alarm);
+		res.status(HttpStatusEnum.OK).json(alarmDTO);
 		return ;
 	}
 

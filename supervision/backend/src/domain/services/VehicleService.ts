@@ -1,4 +1,4 @@
-import { Repository, Like } from "typeorm";
+import { Repository, Like , } from "typeorm";
 import { AppDataSource } from "../../infrastructure/database/AppDataSource";
 import { Vehicles } from "../entities/Vehicles";
 
@@ -10,15 +10,49 @@ export class VehicleService {
 	}
 
 	// Méthode pour récupérer les véhicules
-	async getVehicles(id: number | null, name: string | null): Promise<Vehicles[]> {
-		const query = this.vehicleRepository.find({
+	async getVehicles(id?: number, name?: string): Promise<Vehicles[]> {
+
+		const vehicles = await this.vehicleRepository.find({
 			where: {
-				...(id !== null ? { id: id } : {}),
-				...(name !== null ? { name: Like(`%${name}%`) } : {})
+				...(id ? { id } : {}),
+      			...(name ? { name: Like(`%${name}%`) } : {})
+			},
+			relations: {
+				states: true,
+				travels: {
+					travelsNodes: {
+						node : {
+							nodeType : true
+						}
+					}
+				},
+			},
+			relationLoadStrategy: "query",
+			order: {
+				states: { occuredAt: "DESC" }, 
+				travels: { createdAt: "DESC" },
 			}
 		});
-		return query;
+
+		return vehicles.map(v => {
+
+			// keep ONLY the most recent state
+			const latestState = v.states?.[0] ? [v.states[0]] : [];
+
+			// find ongoing travel / active trip
+			const ongoingTravel =
+			v.travels?.find(t => t.status === "ongoing") 
+			? [v.travels.find(t => t.status === "ongoing")!]
+			: [];
+
+			return {
+			...v,
+			states: latestState,
+			travels: ongoingTravel,
+			};
+		});
 	}
+
 
 	async createVehicle(name: string): Promise<Vehicles> {
 		const newVehicle = this.vehicleRepository.create({ name });

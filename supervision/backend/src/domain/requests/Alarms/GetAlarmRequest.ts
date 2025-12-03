@@ -26,17 +26,11 @@ export class GetAlarmRequest extends BaseRequest<GetAlarmRequest> {
 	}
 
 	static fromRequest(req: any): GetAlarmRequest {
-		const queryString = req.query;
-		queryString.originId = queryString.originId !== undefined ? parseInt(queryString.originId) : undefined;
-		queryString.occuredBefore = queryString.occuredBefore !== undefined ? new Date(queryString.occuredBefore) : undefined;
-		queryString.occuredAfter = queryString.occuredAfter !== undefined ? new Date(queryString.occuredAfter) : undefined;
-		queryString.typeId = queryString.typeId !== undefined ? parseInt(queryString.typeId) : undefined;
-
 		return new GetAlarmRequest({
-			originId: queryString.originId,
-			occuredBefore: queryString.occuredBefore,
-			occuredAfter: queryString.occuredAfter,
-			typeId: queryString.typeId,
+			originId: req.query.originId,
+			occuredBefore: req.query.occuredBefore,
+			occuredAfter: req.query.occuredAfter,
+			typeId: req.query.typeId,
 		});
 	}
 }

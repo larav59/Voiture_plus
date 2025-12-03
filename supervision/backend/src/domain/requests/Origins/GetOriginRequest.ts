@@ -2,11 +2,11 @@ import { Validator } from "../../../infrastructure/validator/Validator";
 import { BaseRequest } from "../BaseRequest";
 
 export class GetOriginRequest extends BaseRequest<GetOriginRequest> {
-	label : string | "";
+	label : string | null;
 
 	constructor(fields?: Partial<GetOriginRequest>) {
 		super();
-		this.label = fields?.label ?? "";
+		this.label = fields?.label ?? null;
 	}
 
 	// Méthode pour la validation
@@ -17,11 +17,9 @@ export class GetOriginRequest extends BaseRequest<GetOriginRequest> {
 	}
 
 	static fromRequest(req: any): GetOriginRequest {
-		const queryString = req.query;
-		queryString.label = queryString.label !== undefined ? String(queryString.label) : undefined;
-
+		const query = req.query;
 		return new GetOriginRequest({
-			label: queryString.label,
+			label: query.label,
 		});
 	}
 }

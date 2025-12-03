@@ -26,13 +26,8 @@ export class UpdateAlarmRequest extends BaseRequest<UpdateAlarmRequest> {
 	}
 
 	static fromRequest(req: any): UpdateAlarmRequest {
-		const body = req.body
 		const params = req.params;
-		params.id = params.id !== undefined ? parseInt(params.id) : undefined;
-		body.description = body.description !== undefined ? String(body.description) : undefined;
-		body.type = body.type !== undefined ? parseInt(body.type) : undefined;
-		body.origin = body.origin !== undefined ? parseInt(body.origin) : undefined;
-
+		const body = req.body;
 		return new UpdateAlarmRequest({
 			id: params.id,
 			description: body.description,

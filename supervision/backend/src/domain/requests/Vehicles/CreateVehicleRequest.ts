@@ -17,9 +17,7 @@ export class CreateVehiclesRequest extends BaseRequest<CreateVehiclesRequest> {
 	}
 
 	static fromRequest(req: any): CreateVehiclesRequest {
-		const body = req.body
-		body.name = body.name !== undefined ? String(body.name) : undefined;
-
+		const body = req.body;
 		return new CreateVehiclesRequest({
 			name: body.name,
 		});

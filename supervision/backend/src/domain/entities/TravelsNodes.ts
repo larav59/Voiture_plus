@@ -9,8 +9,8 @@ import {
 import { Travels } from "./Travels";
 import { Nodes } from "./Nodes";
 
-@Index("travel_id", ["travelId"], {})
 @Index("node_id", ["nodeId"], {})
+@Index("travel_id", ["travelId"], {})
 @Entity("TRAVELS_NODES", { schema: "supervision" })
 export class TravelsNodes {
   @PrimaryGeneratedColumn({ type: "int", name: "id" })

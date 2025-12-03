@@ -10,10 +10,10 @@ export class OriginService {
 	}
 
 	// Méthode pour récupérer les origines
-	async getOrigins(label: string | null): Promise<Origins[]> {
+	async getOrigins(label: string): Promise<Origins[]> {
 		const query = this.originRepository.find({
 			where: {
-				...(label !== null ? { label: Like(`%${label}%`) } : {})
+				...(label ? { label: Like(`%${label}%`) } : {})
 			}
 		});
 		return query;

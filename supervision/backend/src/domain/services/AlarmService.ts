@@ -18,6 +18,7 @@ export class AlarmService {
 	// Méthode pour récupérer les alarmes
 	async getAlarms(originId: number | null, occuredBefore : Date | null, occuredAfter: Date | null, typeId: number | null): Promise<Alarms[]> {
 		const query = this.alarmRepository.find({
+			relations : ['alarmType', 'origin'],
 			where: {
 				...(originId !== null ? { originId: originId } : {}),
 				...(occuredBefore !== null ? { occuredAt: LessThan(occuredBefore) } : {}),

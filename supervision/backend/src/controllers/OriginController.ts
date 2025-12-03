@@ -8,6 +8,7 @@ import {
 	UpdateOriginRequest
 } from "../domain/requests/Origins";
 import { OriginService } from "../domain/services/OriginService";
+import { OriginsDTO } from "../domain/dtos/OriginsDTO";
 
 export class OriginController {
 	
@@ -24,7 +25,8 @@ export class OriginController {
 			throw new NotFound("Invalid Request",request.validate().getErrors());
 		}
 		const origins = await originService.getOrigins(request.label ?? "");
-		res.status(HttpStatusEnum.OK).json(origins);
+		const originsDTO = origins.map(o => OriginsDTO.fromEntity(o));
+		res.status(HttpStatusEnum.OK).json(originsDTO);
 		return;
 	}
 
@@ -38,7 +40,8 @@ export class OriginController {
 		}
 
 		const origin = await originService.createOrigin(request.label ?? "");
-		res.status(HttpStatusEnum.OK).json(origin);
+		const originDTO = OriginsDTO.fromEntity(origin) !;
+		res.status(HttpStatusEnum.OK).json(originDTO);
 		return;
 	}
 
@@ -51,11 +54,12 @@ export class OriginController {
 			throw new NotFound("Invalid Request",request.validate().getErrors());
 		}
 
-		const origin = await originService.updateOrigin(request.id, request.label ?? "");
+		const origin = await originService.updateOrigin(request.id ?? 0, request.label ?? "");
 		if (!origin) {
 			throw res.status(HttpStatusEnum.NOT_FOUND).json({ message: "Origin not found" });
 		}
-		res.status(HttpStatusEnum.OK).json(origin);
+		const originDTO = OriginsDTO.fromEntity(origin) !;
+		res.status(HttpStatusEnum.OK).json(originDTO);
 		return ;
 	}
 

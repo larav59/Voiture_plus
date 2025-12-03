@@ -17,9 +17,7 @@ export class CreateOriginRequest extends BaseRequest<CreateOriginRequest> {
 	}
 
 	static fromRequest(req: any): CreateOriginRequest {
-		const body = req.body
-		body.label = body.label !== undefined ? String(body.label) : undefined;
-
+		const body = req.body;
 		return new CreateOriginRequest({
 			label: body.label,
 		});

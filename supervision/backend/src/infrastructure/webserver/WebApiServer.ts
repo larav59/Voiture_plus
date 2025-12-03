@@ -5,6 +5,7 @@ import cors from "cors";
 import { Logger } from "../loggers/Logger";
 import { NotFound } from "./errors/HttpError";
 import { DataSource } from "typeorm";
+import { GetAlarmRequest } from "../../domain/requests/Alarms";
 
 export interface WebApiServerOptions {
     port: number;
@@ -48,11 +49,12 @@ export class WebApiServer {
 
     private initialiseServer() {
         // Middlewares génériques
+        
         this.app.use(bodyParser.json());
         this.app.use(compression());
         this.app.use(express.urlencoded({ extended: true }));
+        //this.app.use(cors({origin : "*",methods : ["GET", "POST", "PUT","DELETE","OPTIONS"], allowedHeaders : ["Content-Type","Authorization"]}));
         this.app.use(cors());
-
         // Middlewares globaux injectables
         this.middlewares.forEach((mw) => this.app.use(mw));
 

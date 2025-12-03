@@ -11,7 +11,7 @@ import { Arcs } from "./Arcs";
 import { NodesTypes } from "./NodesTypes";
 import { TravelsNodes } from "./TravelsNodes";
 
-@Index("node_type", ["nodeType"], {})
+@Index("node_type_id", ["nodeTypeId"], {})
 @Entity("NODES", { schema: "supervision" })
 export class Nodes {
   @PrimaryGeneratedColumn({ type: "int", name: "id" })
@@ -35,21 +35,21 @@ export class Nodes {
   @Column("float", { name: "offset_y", nullable: true, precision: 12 })
   public offsetY!: number | null;
 
-  @Column("int", { name: "node_type", nullable: true })
-  public nodeType!: number | null;
+  @Column("int", { name: "node_type_id", nullable: true })
+  public nodeTypeId!: number | null;
 
-  @OneToMany(() => Arcs, (arcs) => arcs.originNode2)
+  @OneToMany(() => Arcs, (arcs) => arcs.originNode)
   public arcs!: Arcs[];
 
-  @OneToMany(() => Arcs, (arcs) => arcs.destinationNode2)
+  @OneToMany(() => Arcs, (arcs) => arcs.destinationNode)
   public arcs2!: Arcs[];
 
   @ManyToOne(() => NodesTypes, (nodesTypes) => nodesTypes.nodes, {
     onDelete: "NO ACTION",
     onUpdate: "NO ACTION",
   })
-  @JoinColumn([{ name: "node_type", referencedColumnName: "id" }])
-  public nodeType2!: NodesTypes;
+  @JoinColumn([{ name: "node_type_id", referencedColumnName: "id" }])
+  public nodeType!: NodesTypes;
 
   @OneToMany(() => TravelsNodes, (travelsNodes) => travelsNodes.node)
   public travelsNodes!: TravelsNodes[];
