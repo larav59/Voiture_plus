@@ -29,7 +29,7 @@ EXT_LIBS_MK    := $(wildcard $(MK_LIB_DIR)/*.mk)
 
 
 # Règles principales
-all: core services tests docs
+all: core services tests
 .PHONY: all debug release external-libs core services tests test-run clean distclean docs
 
 
