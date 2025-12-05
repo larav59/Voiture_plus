@@ -16,6 +16,7 @@ typedef struct {
 
 #define UART_START_BYTE 0x24 ///< Octets de début de trame UART
 #define MAX_NOISE_BYTES 512 //!< Nombre maximum d'octets de bruit à ignorer avant de considérer qu'il n'y a pas de trame valide
+#define UART_MAX_FRAME_SIZE 256 ///< Taille maximale d'une trame UART
 
 
 /**
