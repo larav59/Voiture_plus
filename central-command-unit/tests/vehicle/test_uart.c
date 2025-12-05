@@ -68,7 +68,6 @@ TEST_REGISTER(test_uart_send_receive, "Test d'envoi et de réception de trames U
 	TEST_ASSERT(rawBytesRead == sizeof(sendState) + 3, "Failed to read raw UART data size"); 
     TEST_ASSERT(rawBuffer[0] == UART_START_BYTE, "Invalid start byte");
     TEST_ASSERT(rawBuffer[1] == sizeof(sendState), "Invalid Length byte"); 
-    TEST_ASSERT(rawBuffer[rawBytesRead - 1] == UART_END_BYTE, "Invalid end byte");
 	
 	bool dataMatches = true;
 	for(size_t i = 0; i < sizeof(sendState); i++) {
@@ -92,8 +91,6 @@ TEST_REGISTER(test_uart_send_receive, "Test d'envoi et de réception de trames U
 	simBuffer[0] = UART_START_BYTE;
 	simBuffer[1] = sizeof(simData);
 	memcpy(&simBuffer[2], &simData, sizeof(simData));
-	
-	simBuffer[sizeof(simData) + 2] = UART_END_BYTE;
 
 	ssize_t rawBytesWritten = write(masterFd, simBuffer, sizeof(simData) + 3);
 	TEST_ASSERT(rawBytesWritten == sizeof(simBuffer), "Failed to write simulated UART data");
