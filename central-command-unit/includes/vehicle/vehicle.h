@@ -10,6 +10,10 @@
 
 #include "core/core.h"
 #include "vehicle/vehicle_config.h"
+#include "vehicle/vehicle_message_callback.h"
+#include "vehicle/uart.h"
+#include "vehicle/uart_proto.h"
+#include "vehicle/marvelmind_wrapper.h"	
 
 #define VEHICLE_VERSION "Vehicle v1.0.0"
 
