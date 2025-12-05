@@ -11,22 +11,21 @@
  * @return Le nombre d'octets envoyés, ou -1 en cas d'erreur.
  */
 int protocol_send_packet(int fd, uint8_t msg_id, void *payload, size_t payloadLen) {
-    size_t frameSize = 2 + payloadLen;
-    uint8_t frame[UART_MAX_FRAME_SIZE];
+	size_t frameSize = 2 + payloadLen;
+	uint8_t frame[UART_MAX_FRAME_SIZE];
 
-    // todo on pourrait faire un système d'envoie de plusieurs trames si la taille dépasse UART_MAX_FRAME_SIZE
-    if(frameSize > UART_MAX_FRAME_SIZE) {
-        return -1;
-    }
+	// todo on pourrait faire un système d'envoie de plusieurs trames si la taille dépasse UART_MAX_FRAME_SIZE
+	if(frameSize > UART_MAX_FRAME_SIZE) {
+		return -1;
+	}
 
-    frame[0] = UART_START_BYTE;
-    frame[1] = msg_id;
-    memcpy(&frame[2], payload, payloadLen);
+	frame[0] = UART_START_BYTE;
+	frame[1] = msg_id;
+	memcpy(&frame[2], payload, payloadLen);
 
-    ssize_t bytesSent = uart_send_frame(fd, frame, frameSize);
-    free(frame);
+	ssize_t bytesSent = uart_send_frame(fd, frame, frameSize);
 
-    return bytesSent;
+	return bytesSent;
 }
 
 /**
@@ -37,19 +36,15 @@ int protocol_send_packet(int fd, uint8_t msg_id, void *payload, size_t payloadLe
  * @param angle L'angle d'orientation.
  * @return 0 en succès, -1 en erreur.
  */
-int protocol_send_set_position(int fd, int16_t x, int16_t y, int16_t angle) {
-    position_data_t payload;
-    
-    payload.x = x;
-    payload.y = y;
-    payload.angle = angle;
+int protocol_send_set_position_command(int fd, int16_t x, int16_t y, int16_t angle) {
+	position_data_t data = {
+		.x = x,
+		.y = y,
+		.angle = angle
+	};
 
-    ssize_t sent = uart_send_frame(fd, &payload, sizeof(position_data_t));
-    if (sent > 0) {
-        return 0;
-    }
-
-    return -1;
+    // Gestion automatique : On passe MSG_CMD_SET_POSITION
+    return protocol_send_packet(fd, MSG_CMD_SET_POSITION, &data, sizeof(data));
 }
 
 /**
@@ -59,16 +54,9 @@ int protocol_send_set_position(int fd, int16_t x, int16_t y, int16_t angle) {
  * @return 0 en succès, -1 en erreur.
  */
 int protocol_send_set_speed(int fd, int16_t speed) {
-    speed_data_t payload;
-    
-    payload.speed = speed;
-
-    ssize_t sent = uart_send_frame(fd, &payload, sizeof(speed_data_t));
-
-    if (sent > 0) {
-        return 0;
-    }
-    return -1;
+	speed_data_t data;
+	data.speed = speed;
+	return protocol_send_packet(fd, MSG_CMD_SET_SPEED, &data, sizeof(data));
 }
 
 /**
@@ -78,12 +66,7 @@ int protocol_send_set_speed(int fd, int16_t speed) {
  * @return 0 en succès, -1 en erreur.
  */
 int protocol_send_stop(int fd) {
-    ssize_t sent = uart_send_frame(fd, NULL, 0);
-
-    if (sent > 0) {
-        return 0;
-    }
-    return -1;
+	return protocol_send_packet(fd, MSG_CMD_STOP, NULL, 0);
 }
 
 /**
@@ -94,35 +77,14 @@ int protocol_send_stop(int fd) {
  * @param angle L'angle d'orientation.
  * @return 0 en succès, -1 en erreur.
  */
-int protocol_send_position_telemetry(int fd, int16_t x, int16_t y, int16_t angle);
-
-/**
- * @brief Envoie une commande de position à l'Arduino.
- * @param fd Le descripteur de fichier UART.
- * @param x La position X (en mm ou cm par exemple).
- * @param y La position Y.
- * @return 0 en succès, -1 en erreur.
- */
-int protocol_send_position_telemetry(int fd, int16_t x, int16_t y, int16_t angle);
-
-/**
- * @brief Envoie une commande de position à l'Arduino.
- * @param fd Le descripteur de fichier UART.
- * @param x La position X (en mm ou cm par exemple).
- * @param y La position Y.
- * @return 0 en succès, -1 en erreur.
- */
-int protocol_send_position(int fd, int16_t x, int16_t y, int16_t angle) {
-    position_data_t payload;
-    
-    payload.x = x;
-    payload.y = y;
-    payload.angle = angle;
-
-    ssize_t sent = uart_send_frame(fd, &payload, sizeof(position_data_t));
-
-    if (sent != sizeof(position_data_t)) {
-        return -1;
-    }
-    return 0;
+int protocol_send_position_telemetry(int fd, int16_t x, int16_t y, int16_t angle) {
+	position_data_t data = {
+		.x = x,
+		.y = y,
+		.angle = angle
+	};
+	
+	return protocol_send_packet(fd, MSG_TELEMETRY_POS, &data, sizeof(data));
 }
+
+

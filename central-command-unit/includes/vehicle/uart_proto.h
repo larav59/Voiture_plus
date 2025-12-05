@@ -57,7 +57,7 @@ int protocol_send_packet(int fd, uint8_t msg_id, void *payload, size_t payload_l
  * @param angle L'angle d'orientation.
  * @return 0 en succès, -1 en erreur.
  */
-int protocol_send_set_position(int fd, int16_t x, int16_t y, int16_t angle);
+int protocol_send_set_position_command(int fd, int16_t x, int16_t y, int16_t angle);
 
 /**
  * @brief Envoie la consigne de vitesse (MSG_CMD_SET_SPEED).
