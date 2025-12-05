@@ -20,9 +20,15 @@ EXT_LIBS += -l$(INIH_NAME)
 # 4. On ajoute le dossier contenant les headers de la bibliothèque aux flags de compilation.
 EXT_CFLAGS += -I$(INIH_PATH)
 
-# 5. On fournit la règle (la "recette") pour construire notre .so.
+# 5. On fournit la règle pour construire notre .so.
 #    Cette règle sera découverte et utilisée par le Makefile principal.
 $(INIH_SO_TARGET): $(INIH_PATH)/ini.c
 	@mkdir -p $(LIB_DIR)
 	@echo "SO EXT $@"
 	@$(CC) $(CFLAGS) -fPIC -shared $< -o $@
+
+.PHONY: clean-$(INIH_NAME)
+
+clean-$(INIH_NAME):
+	@echo "CLEAN $(INIH_NAME)..."
+	@rm -f $(INIH_SO_TARGET)

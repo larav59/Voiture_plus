@@ -141,6 +141,9 @@ docs:
 clean:
 	rm -rf $(BIN_DIR) $(LIB_DIR) $(OBJ_DIR)
 
+distclean: clean clean-mosquitto clean-marvelmind clean-cjson
+	@echo "Cleaned external libraries."
+	
 # Pour le debug des variables Makefile
 print-%:
 	@echo '$*=$($*)'

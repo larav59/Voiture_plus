@@ -1,21 +1,33 @@
-# Nom de la lib
-MOSQ_NAME := mosquitto
+# Build configuration for Mosquitto
 
-# Dossier du submodule
+MOSQ_NAME := mosquitto
 MOSQ_PATH := $(EXTERNAL_DIR)/$(MOSQ_NAME)
 
-# Cible (lib partagée)
-MOSQ_SO_TARGET := $(LIB_DIR)/lib$(MOSQ_NAME).so
+MOSQ_SONAME      := lib$(MOSQ_NAME).so.1
+MOSQ_LINKER_NAME := lib$(MOSQ_NAME).so
 
-# Variables globales
-EXT_LIB_TARGETS += $(MOSQ_SO_TARGET)
-EXT_LIBS += -l$(MOSQ_NAME)
-EXT_CFLAGS += -I$(MOSQ_PATH)/include -I$(MOSQ_PATH)/lib
+MOSQ_TARGET_SONAME := $(LIB_DIR)/$(MOSQ_SONAME)
+MOSQ_TARGET_LINK   := $(LIB_DIR)/$(MOSQ_LINKER_NAME)
 
-# Règle de construction
-$(MOSQ_SO_TARGET):
-	@echo "SO EXT $@"
-	@$(MAKE) -C $(MOSQ_PATH)/lib WITH_SHARED_LIBRARIES=yes WITH_STATIC_LIBRARIES=no
+EXT_LIB_TARGETS += $(MOSQ_TARGET_SONAME) $(MOSQ_TARGET_LINK)
+
+EXT_LIBS   += -l$(MOSQ_NAME)
+EXT_CFLAGS += -I$(MOSQ_PATH)/include
+
+
+$(MOSQ_TARGET_SONAME):
+	@echo "SO EXT $(MOSQ_NAME)..."
+	@$(MAKE) -C $(MOSQ_PATH) binary WITH_SHARED_LIBRARIES=yes WITH_STATIC_LIBRARIES=no DOCS=no
 	@mkdir -p $(LIB_DIR)
-	@cp $(MOSQ_PATH)/lib/libmosquitto.so.* $(LIB_DIR)/ 2>/dev/null || true
-	@mv $(LIB_DIR)/libmosquitto.so.* $(LIB_DIR)/libmosquitto.so
+	@cp $(MOSQ_PATH)/lib/$(MOSQ_SONAME) $(MOSQ_TARGET_SONAME)
+
+$(MOSQ_TARGET_LINK): $(MOSQ_TARGET_SONAME)
+	@echo "LN   $(MOSQ_LINKER_NAME) -> $(MOSQ_SONAME)"
+	@cd $(LIB_DIR) && ln -sf $(MOSQ_SONAME) $(MOSQ_LINKER_NAME)
+
+
+.PHONY: clean-$(MOSQ_NAME)
+
+clean-$(MOSQ_NAME):
+	@echo "CLEAN $(MOSQ_NAME)..."
+	@$(MAKE) -C $(MOSQ_PATH) clean

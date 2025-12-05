@@ -20,3 +20,10 @@ $(CJSON_SO_TARGET): $(CJSON_PATH)/cJSON.c $(CJSON_PATH)/Makefile
 	@mkdir -p $(LIB_DIR)
 	cp $(CJSON_PATH)/libcjson.so.1 $(LIB_DIR)/ 2>/dev/null || true
 	mv $(LIB_DIR)/libcjson.so.1 $(LIB_DIR)/libcjson.so
+
+.PHONY: clean-$(CJSON_NAME)
+
+clean-$(CJSON_NAME):
+	@echo "CLEAN $(CJSON_NAME)..."
+	@$(_CJSON_MAKE_CMD) clean
+	@rm -f $(CJSON_SO_TARGET)

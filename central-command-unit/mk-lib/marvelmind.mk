@@ -13,3 +13,9 @@ $(MARVELMIND_SO_TARGET): $(MARVELMIND_SRC_DIR)/marvelmind.c
 	@mkdir -p $(LIB_DIR)
 	@echo "SO EXT  $< -> $@"
 	@$(CC) $(CFLAGS) -fPIC -shared $< -o $@
+
+.PHONY: clean-$(MARVELMIND_NAME)
+
+clean-$(MARVELMIND_NAME):
+	@echo "CLEAN $(MARVELMIND_NAME)..."
+	@rm -f $(MARVELMIND_SO_TARGET)
