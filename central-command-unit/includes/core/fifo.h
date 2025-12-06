@@ -51,6 +51,7 @@ void *fifo_pop(fifo_t *fifo);
  * @brief Libère les ressources associées à la file d'attente
  * @param fifo La file d'attente
  */
+void fifo_destroy(fifo_t *fifo);
 
 #endif // FIFO_H
 

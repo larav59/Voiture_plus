@@ -8,7 +8,7 @@
  */
 #include "core/fifo.h"
 
-sem_t *lockSem = NULL;
+sem_t lockSem;
 
 /**
  * @brief Initialise une file d'attente FIFO
@@ -17,8 +17,7 @@ void fifo_init(fifo_t *fifo) {
 	fifo->head = NULL;
 	fifo->tail = NULL;
 	fifo->size = 0;
-	
-	sem_init(lockSem, 0, 1);
+	sem_init(&lockSem, 0, 1);
 }
 
 /**
@@ -35,6 +34,7 @@ bool fifo_is_empty(fifo_t *fifo) {
  * @param data Le pointeur vers les données à ajouter
  */
 void fifo_push(fifo_t *fifo, void *data) {
+	sem_wait(&lockSem);
 	fifo_node_t *node = malloc(sizeof(fifo_node_t));
 	CHECK_ALLOC_RAW(node);
 	node->data = data;
@@ -49,6 +49,7 @@ void fifo_push(fifo_t *fifo, void *data) {
 		fifo->head = node;
 	}
 	fifo->size++;
+	sem_post(&lockSem);
 }
 
 /**
@@ -57,6 +58,7 @@ void fifo_push(fifo_t *fifo, void *data) {
  * @return Le pointeur vers les données de l'élément supprimé, ou NULL si la file est vide
  */
 void *fifo_pop(fifo_t *fifo) {
+	sem_wait(&lockSem);
     if (fifo->head == NULL) return NULL;
 
     fifo_node_t *node = fifo->head;
@@ -65,7 +67,25 @@ void *fifo_pop(fifo_t *fifo) {
     if (fifo->head == NULL) fifo->tail = NULL;
     free(node);
 	fifo->size--;
+	sem_post(&lockSem);
     return data;
+}
+
+/**
+ * @brief Libère les ressources associées à la file d'attente
+ * @param fifo La file d'attente
+ */
+void fifo_destroy(fifo_t *fifo) {
+	fifo_node_t *current = fifo->head;
+	while (current) {
+		fifo_node_t *next = current->next;
+		free(current);
+		current = next;
+	}
+	fifo->head = NULL;
+	fifo->tail = NULL;
+	fifo->size = 0;
+	sem_destroy(&lockSem);
 }
 
 
