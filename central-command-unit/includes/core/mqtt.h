@@ -93,4 +93,12 @@ int mqtt_subscribe(const char* topic, mqtt_qos_enum_t qos);
  */
 bool mqtt_is_connected(void);
 
+/**
+ * @brief intialise le last_will_topic et last_will_payload pour le LWT
+ * @param lwtTopic Topic sur lequel publier le LWT si la connexion est perdue
+ * @param lwtPayload Message du LWT
+ * @return 0 en cas de succès, -1 en cas d'échec.
+ */
+int mqtt_set_lwt(const char* lwtTopic, const char* lwtPayload);
+
 #endif // CCU_MQTT_H

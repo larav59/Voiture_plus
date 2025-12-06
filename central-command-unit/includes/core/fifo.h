@@ -6,9 +6,10 @@
  * @author Lukas Grando
  * @date 2025-10-18
  */
-
 #ifndef FIFO_H
 #define FIFO_H
+
+#include "core/common.h"
 
 typedef struct fifo_node {
 	void *data;
@@ -50,6 +51,7 @@ void *fifo_pop(fifo_t *fifo);
  * @brief Libère les ressources associées à la file d'attente
  * @param fifo La file d'attente
  */
+void fifo_destroy(fifo_t *fifo);
 
 #endif // FIFO_H
 

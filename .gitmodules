@@ -10,3 +10,6 @@
 [submodule "central-command-unit/external/uthash"]
 	path = central-command-unit/external/uthash
 	url = https://github.com/troydhanson/uthash.git
+[submodule "central-command-unit/external/marvelmind"]
+	path = central-command-unit/external/marvelmind
+	url = https://github.com/MarvelmindRobotics/marvelmind.c.git

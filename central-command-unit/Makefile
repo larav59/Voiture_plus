@@ -9,7 +9,7 @@ TEST_DIR       := tests
 MK_LIB_DIR     := mk-lib
 EXTERNAL_DIR   := external
 
-SERVICES       := heartbeat route-planner
+SERVICES       := heartbeat route-planner vehicle
 
 TARGET_LIBA    := $(LIB_DIR)/libcore.a
 TARGET_LIBSO   := $(LIB_DIR)/libcore.so
@@ -29,7 +29,7 @@ EXT_LIBS_MK    := $(wildcard $(MK_LIB_DIR)/*.mk)
 
 
 # Règles principales
-all: core services tests docs
+all: core services tests
 .PHONY: all debug release external-libs core services tests test-run clean distclean docs
 
 
@@ -141,6 +141,9 @@ docs:
 clean:
 	rm -rf $(BIN_DIR) $(LIB_DIR) $(OBJ_DIR)
 
+distclean: clean clean-mosquitto clean-marvelmind clean-cjson
+	@echo "Cleaned external libraries."
+	
 # Pour le debug des variables Makefile
 print-%:
 	@echo '$*=$($*)'

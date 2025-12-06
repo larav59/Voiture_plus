@@ -1,0 +1,20 @@
+[Unit]
+Description=CCU Vehicle Service
+After=network.target syslog.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/vehicle -c /etc/ccu/vehicle.ini
+
+Restart=always
+RestartSec=2s
+
+Environment="LD_LIBRARY_PATH=/usr/lib/ccu"
+
+User=root
+Group=root
+
+StandardError=append:/var/log/ccu/%N.error.log
+
+[Install]
+WantedBy=multi-user.target

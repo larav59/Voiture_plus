@@ -152,6 +152,7 @@ void logger_destroy(void) {
 	pthread_join(loggerThread, NULL);
 
 	CHECK_SEM_RAW(sem_destroy(&logSem));
+	fifo_destroy(&logFifo);
 	loggerInitialized = false;
 }
 

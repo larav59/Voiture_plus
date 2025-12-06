@@ -243,3 +243,25 @@ int mqtt_subscribe(const char* topic, mqtt_qos_enum_t qos) {
 bool mqtt_is_connected(void) {
 	return isConnected;
 }
+
+
+/**
+ * @brief intialise le last_will_topic et last_will_payload pour le LWT
+ * @param lwtTopic Topic sur lequel publier le LWT si la connexion est perdue
+ * @param lwtPayload Message du LWT
+ * @return 0 en cas de succès, -1 en cas d'échec.
+ */
+int mqtt_set_lwt(const char* lwtTopic, const char* lwtPayload) {
+	if(!mosq) {
+		LOG_ERROR_ASYNC("MQTT: Client not initialized.");
+		return -1;
+	}
+
+	int rc = mosquitto_will_set(mosq, lwtTopic, strlen(lwtPayload), lwtPayload, MQTT_QOS_EXACTLY_ONCE, true);
+	if(rc != MOSQ_ERR_SUCCESS) {
+		LOG_ERROR_ASYNC("MQTT: Failed to set LWT: %s", mosquitto_strerror(rc));
+		return -1;
+	}
+	LOG_DEBUG_ASYNC("MQTT: LWT set on topic '%s'.", lwtTopic);
+	return 0;
+}
