@@ -6,10 +6,9 @@
  * @author Lukas Grando
  * @date 2025-10-18
  */
-#include "core/common.h"
 #include "core/fifo.h"
-#include <stdlib.h>
-#include <stdbool.h>
+
+sem_t *lockSem = NULL;
 
 /**
  * @brief Initialise une file d'attente FIFO
@@ -18,6 +17,8 @@ void fifo_init(fifo_t *fifo) {
 	fifo->head = NULL;
 	fifo->tail = NULL;
 	fifo->size = 0;
+	
+	sem_init(lockSem, 0, 1);
 }
 
 /**

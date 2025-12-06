@@ -6,9 +6,10 @@
  * @author Lukas Grando
  * @date 2025-10-18
  */
-
 #ifndef FIFO_H
 #define FIFO_H
+
+#include "core/common.h"
 
 typedef struct fifo_node {
 	void *data;
