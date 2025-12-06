@@ -15,7 +15,7 @@
 #include "vehicle/uart_proto.h"
 #include "vehicle/marvelmind_wrapper.h"	
 
-#define VEHICLE_VERSION "Vehicle v1.0.0"
+#define VEHICLE_VERSION "Vehicle v0.1.0"
 
 
 #endif // VEHICLE_H
