@@ -13,7 +13,7 @@
 
 <script>
     /***** VARIABLES GLOBALES *****/
-    window.API_URL = "http://169.254.87.118:80/api/v1";
+    window.API_URL = "http://10.152.29.200:3001/api/v1";
 </script>
 
 <body>
@@ -60,13 +60,13 @@
                     <div class="mb-3 row">
                         <label class="form-label col-md-auto mt-2">Véhicule :</label>
                         <div class="dropdown col">
-                            <button class="btn dropdown-toggle border" type="button" data-bs-toggle="dropdown" aria-expanded="false"></button>
+                            <button id="vehicleSelectBtn" class="btn dropdown-toggle border" type="button" data-bs-toggle="dropdown" aria-expanded="false"></button>
                             <ul id="vehicleSelect" class="dropdown-menu">
                             </ul>
                         </div>
                     </div>
 
-                    <p class="fw-semibold">Trajet :</p>
+                    <p id="travel" class="fw-semibold">Trajet :</p>
 
                     <div class="mb-3 text-center">
 
@@ -93,7 +93,7 @@
                     <label class="form-label">Destination finale :</label>
                     <div class="mb-3">
                         <div class="dropdown">
-                            <button class="btn dropdown-toggle border w-100" type="button" data-bs-toggle="dropdown" aria-expanded="false"></button>
+                            <button id="destinationSelectBtn" class="btn dropdown-toggle border w-100" type="button" data-bs-toggle="dropdown" aria-expanded="false"></button>
                             <ul id="destinationSelect" class="dropdown-menu text-center w-100">
                             </ul>
                         </div>

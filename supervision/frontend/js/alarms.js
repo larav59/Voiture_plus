@@ -115,10 +115,10 @@ function getAlarms() {
 
     let alarms = null;
 
-    /*
     $.ajax({
         type: 'GET',
         url: window.API_URL+'/alarms',
+        async : false,
         headers: {
             'Authorization': 'Bearer '+sessionStorage.getItem('API_KEY'),
         },
@@ -129,9 +129,8 @@ function getAlarms() {
             console.error(e);
         }
     });
-    */
 
-    alarms = ALARMS;
+    //alarms = ALARMS;
 
     return alarms;
 }

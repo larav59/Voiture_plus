@@ -9,7 +9,7 @@ import 'leaflet/dist/leaflet.css';
 
 /************* DONNÉES GLOBALES (à remplacer par un appel API) *************/
 
-var COLORS = ['green', 'blue', 'yellow', 'red', 'orange'];
+var COLORS = ['green', 'blue', 'yellow', 'red', 'orange', 'green'];
 
 var VEHICLE_DATA = [
     {
@@ -136,7 +136,8 @@ $(document).ready(function () {
         map.fitBounds(bounds);
         map.setZoom(-0.5);
 
-        const mapNodes = setupMapNodes(map, MAP_DATA);
+        const mapData = getMapData();
+        const mapNodes = setupMapNodes(map, mapData);
 
         /*** Refresh de la map avec les véhicules ***/
 
@@ -236,29 +237,33 @@ var mapUtils = {
      */
     generateVehicleTooltip :function(vehicle) {
 
-        let statusColor = '';
-        switch (vehicle.travel.status) {
-            case 'En attente':
-                statusColor = '#e7dd55';
-                break;
-            case 'En cours':
-                statusColor = '#7cd1f5';
-                break;
-            case 'Terminé':
-                statusColor = '#a0e249ff';
-                break;
-            case 'Annulé':
-                statusColor = '#f03030';
-                break;
-            default:
-                statusColor = '#777777';
-                break;
+        let statusColor = '#777777';
+        let travel = vehicle.travel;
+
+        if(travel) {
+            switch (vehicle.travel.status) {
+                case 'En attente':
+                    statusColor = '#e7dd55';
+                    break;
+                case 'En cours':
+                    statusColor = '#7cd1f5';
+                    break;
+                case 'Terminé':
+                    statusColor = '#a0e249ff';
+                    break;
+                case 'Annulé':
+                    statusColor = '#f03030';
+                    break;
+                default:
+                    statusColor = '#777777';
+                    break;
+            }
         }
 
         return `
             <div class="card text-center">
                 <div class="card-header py-1 px-2">` +
-                    vehicle.name + `</span><span class="ms-2 pt-1 badge rounded-pill" style="background-color:`+statusColor+`">`+ vehicle.travel.status +`</span>
+                    vehicle.name + `</span><span class="ms-2 pt-1 badge rounded-pill" style="background-color:`+statusColor+`">`+ vehicle.travel?.status +`</span>
                 </div>
                 <div class="card-body px-2 py-1">
                     <div>
@@ -281,6 +286,8 @@ var mapUtils = {
     createVehicleLayer: function (vehicle, map, circles) {
 
         let markers = [];
+        if(!vehicle.state) return;
+
         const position = mapUtils.realToLeaflet(vehicle.state.positionX, vehicle.state.positionY);
 
         // Flèche (direction et angle du véhicule)
@@ -309,29 +316,31 @@ var mapUtils = {
         mapUtils.setupClickListener(carMarker, vehicle.id);
 
         // Noeuds du trajet
-        vehicle.travel.nodes.forEach(function(node) {
-            
-            const isFinaleDestination = vehicle.travel.nodes.at(-1).id === node.id;
-            const type = isFinaleDestination ? 'pin' : 'point';
+        if(vehicle.travel) {
+            vehicle.travel.nodes.forEach(function(node) {
+                
+                const isFinaleDestination = vehicle.travel.nodes.at(-1).id === node.id;
+                const type = isFinaleDestination ? 'pin' : 'point';
 
-            const position = mapUtils.realToLeaflet(node.positionX, node.positionY);
-            const nodeIcon = mapUtils.createIcon(node.id, type, vehicle.id);
+                const position = mapUtils.realToLeaflet(node.positionX, node.positionY);
+                const nodeIcon = mapUtils.createIcon(node.id, type, vehicle.id);
 
-            let nodeMarker = mapUtils.createMarker(
-                position,
-                nodeIcon, 
-                'Destination '+vehicle.name,
-                true // draggable
-            );
-            nodeMarker.type = type;
-            nodeMarker.id = node.id;
-            nodeMarker.vehicleId = vehicle.id;
-     
-            markers.push(nodeMarker);
+                let nodeMarker = mapUtils.createMarker(
+                    position,
+                    nodeIcon, 
+                    'Destination '+vehicle.name,
+                    true // draggable
+                );
+                nodeMarker.type = type;
+                nodeMarker.id = node.id;
+                nodeMarker.vehicleId = vehicle.id;
+        
+                markers.push(nodeMarker);
 
-            mapUtils.setupNodeDropListener(nodeMarker, map, circles, node.name);
-            mapUtils.setupClickListener(nodeMarker, vehicle.id);
-        });
+                mapUtils.setupNodeDropListener(nodeMarker, map, circles, node.name);
+                mapUtils.setupClickListener(nodeMarker, vehicle.id);
+            });
+        }
         
         return {
             layer: L.layerGroup(markers),
@@ -468,38 +477,45 @@ function setupVehicles(map, vehicleData, circles) {
         position: 'topright' 
     }).addTo(map);
     
+    $('#vehicleSelect').empty();
     let vehicleLayers = [];
     
     vehicleData.forEach(function(vehicle) {
         // Map
         const vehicleLayer = mapUtils.createVehicleLayer(vehicle, map, circles);
+        if(!vehicleLayer) return;
+
         vehicleLayer.layer.addTo(map);
         layerControl.addOverlay(vehicleLayer.layer, vehicleLayer.name);
         vehicleLayers.push(vehicleLayer);
 
         // Formulaire
         let statusColor = '';
-        switch (vehicle.travel.status) {
-            case 'En attente':
-                statusColor = '#e7dd55';
-                break;
-            case 'En cours':
-                statusColor = '#7cd1f5';
-                break;
-            case 'Terminé':
-                statusColor = '#a0e249ff';
-                break;
-            case 'Annulé':
-                statusColor = '#f03030';
-                break;
-            default:
-                statusColor = '#777777';
-                break;
+        let travel = vehicle.travel;
+
+        if(travel) {
+            switch (vehicle.travel.status) {
+                case 'En attente':
+                    statusColor = '#e7dd55';
+                    break;
+                case 'En cours':
+                    statusColor = '#7cd1f5';
+                    break;
+                case 'Terminé':
+                    statusColor = '#a0e249ff';
+                    break;
+                case 'Annulé':
+                    statusColor = '#f03030';
+                    break;
+                default:
+                    statusColor = '#777777';
+                    break;
+            }
         }
 
         const option = $('<li>').addClass('dropdown-item')
                                 .val(vehicle.id)
-                                .html(vehicle.name +'<span class="ms-3 badge rounded-pill" style="background-color:'+statusColor+'">'+ vehicle.travel.status +'</span>')
+                                .html(vehicle.name +'<span class="ms-3 badge rounded-pill" style="background-color:'+statusColor+'">'+ vehicle.travel?.status +'</span>')
                                 .data('vehicle', vehicle);
 
         $('#vehicleSelect').append(option);
@@ -538,14 +554,38 @@ function setupMapNodes(map, mapData) {
     return {'markers': markers, 'circles': circles};
 }
 
+
+function getMapData() {
+
+    let mapData = null;
+
+    $.ajax({
+        type: 'GET',
+        url: window.API_URL+'/nodes?isPointOfInterest=true',
+        async : false,
+        headers: {
+            'Authorization': 'Bearer '+sessionStorage.getItem('API_KEY'),
+        },
+        success: function(data){
+            mapData = data;
+        },
+        error: function(e) {
+            console.error(e);
+        }
+    });
+
+    //mapData = MAP_DATA;
+    return mapData;
+}
+
 function getVehiclesData() {
 
     let vehiclesData = null;
 
-    /*
     $.ajax({
         type: 'GET',
-        url: window.API_URL+'/vehicles/informations',
+        url: window.API_URL+'/vehicles',
+        async : false,
         headers: {
             'Authorization': 'Bearer '+sessionStorage.getItem('API_KEY'),
         },
@@ -556,10 +596,9 @@ function getVehiclesData() {
             console.error(e);
         }
     });
-    */
 
-    vehiclesData = VEHICLE_DATA;
-
+    //vehiclesData = VEHICLE_DATA;
+    console.log(vehiclesData);
     return vehiclesData;
 }
 
@@ -571,6 +610,8 @@ function getVehiclesData() {
 $(document).on('click', '#vehicleSelect .dropdown-item', function() {
 
     const vehicle = $(this).data('vehicle');
+    if(!vehicle || !vehicle.travel) return;
+
     const destinations = vehicle.travel.nodes.filter(function(node) { return node.pointOfInterest; });
 
     $('#stepsContainer').empty();
@@ -585,6 +626,7 @@ $(document).on('click', '#vehicleSelect .dropdown-item', function() {
             $('.step-select:last').find('.dropdown-item[value='+node.id+']').trigger('click');
         }
     }
+    $('#travel').data('id', vehicle.travel.id);
 
     if(vehicle.travel.status == 'Terminé' || vehicle.travel.status == 'Annulé'){
         $('#calculTravelBtn').show();
@@ -616,6 +658,7 @@ function selectVehicle(id) {
 $(document).on('click', '.dropdown-item', function() {
     const selectBtn =  $(this).closest('.dropdown').find('.dropdown-toggle');
     selectBtn.html($(this).html());
+    selectBtn.data('id', $(this).val());
 
     $(this).closest('.step-item').data('id', $(this).val());
 });
@@ -625,7 +668,7 @@ $(document).on('click', '.dropdown-item', function() {
 */
 $(document).on('click', '#addStepBtn', function() {
 
-    const maxStep = 1;
+    const maxStep = 2;
     let stepCount = $('#stepsContainer').find('.step-item').length;
     if (stepCount >= maxStep) return;
 
@@ -651,13 +694,91 @@ $(document).on('click', '.remove-step', function() {
 */
 $(document).on('click', "#calculTravelBtn", function() {
     //envoie post trajet
+
+    const vehicleId = $('#vehicleSelectBtn').data('id');
+    if (!vehicleId) {
+        alert('Veuillez sélectionner un véhicule');
+        return;
+    }
+
+    const nodes = [];
+    let order = 1;
+
+    // Étapes intermédiaires
+    $('#stepsContainer .step-item').each(function () {
+        const nodeId = $(this).data('id');
+        if (!nodeId) return;
+
+        nodes.push({
+            id: nodeId,
+            order: order++
+        });
+    });
+
+    // Destination finale
+    const destinationId = $('#destinationSelectBtn').data('id');
+
+    if (destinationId) {
+        nodes.push({
+            id: destinationId,
+            order: order
+        });
+    } else {
+        alert('Veuillez sélectionner une destination finale');
+        return;
+    }
+
+    const payload = {
+        vehicle: vehicleId,
+        nodes: nodes
+    };
+
+    console.log(payload);
+
+    // Envoi API
+    $.ajax({
+        type: 'POST',
+        url: window.API_URL + '/travels',
+        contentType: 'application/json',
+        data: JSON.stringify(payload),
+        headers: {
+            'Authorization': 'Bearer ' + sessionStorage.getItem('API_KEY')
+        },
+        success: function (res) {
+            console.log('trajet créé avec succès');
+            location.reload();
+        },
+        error: function (e) {
+            console.error(e);
+        }
+    });
 });
 
 /*
 * Annulation d'un trajet
 */
 $(document).on('click', "#cancelTravelBtn", function() {
-    //envoie put id trajet + status
+
+    const travelId = $('#travel').data('id');
+
+    $.ajax({
+        type: 'PUT',
+        url: window.API_URL + '/travels/' + travelId,
+        contentType: 'application/json',
+        data: JSON.stringify({
+            status: 'Annulé'
+        }),
+        headers: {
+            'Authorization': 'Bearer ' + sessionStorage.getItem('API_KEY')
+        },
+        success: function (res) {
+            console.log('trajet annulé avec succès');
+            location.reload();
+        },
+        error: function (e) {
+            console.error(e);
+        }
+    });
 });
 
 /*
