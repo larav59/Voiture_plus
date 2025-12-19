@@ -3,24 +3,24 @@ import { BaseRequest } from "../BaseRequest";
 
 export class UpdateNodeRequest extends BaseRequest<UpdateNodeRequest> {
 	id : number;
-	name : string | null;
-	type : number | null
-	positionX : number | null;
-	positionY : number | null;
-	offsetX : number | null;
-	offsetY : number | null;
-	isPointOfInterest : boolean | null;
+	name : string ;
+	type : number ;
+	positionX : number ;
+	positionY : number ;
+	offsetX : number ;
+	offsetY : number ;
+	isPointOfInterest : boolean ;
 
 	constructor(fields?: Partial<UpdateNodeRequest>) {
 		super();
-		this.id = fields?.id ?? 0;
-		this.positionX = fields?.positionX ?? null;
-		this.positionY = fields?.positionY ?? null;
-		this.offsetX = fields?.offsetX ?? null;
-		this.offsetY = fields?.offsetY ?? null;
-		this.isPointOfInterest = fields?.isPointOfInterest ?? false;
-		this.name = fields?.name ?? null;
-		this.type = fields?.type ?? null;
+		this.id = fields?.id !;
+		this.positionX = fields?.positionX !;
+		this.positionY = fields?.positionY !;
+		this.offsetX = fields?.offsetX !;
+		this.offsetY = fields?.offsetY !;
+		this.isPointOfInterest = fields?.isPointOfInterest !;
+		this.name = fields?.name !;
+		this.type = fields?.type !;
 	}
 
 	// Méthode pour la validation
@@ -41,14 +41,14 @@ export class UpdateNodeRequest extends BaseRequest<UpdateNodeRequest> {
 		const params = req.params
 		const body = req.query
 		return new UpdateNodeRequest({
-			id: params.id,
-			positionX : body.positionX,
-			positionY : body.positionY,
-			offsetX : body.offsetX,
-			offsetY : body.offsetY,
-			isPointOfInterest: body.isPointOfInterest,
+			id: Number(params.id),
+			positionX : Number(body.positionX),
+			positionY : Number(body.positionY),
+			offsetX : Number(body.offsetX),
+			offsetY : Number(body.offsetY),
+			isPointOfInterest: Boolean(body.isPointOfInterest),
 			name: body.name,
-			type: body.type
+			type: Number(body.type)
 		});
 	}
 }

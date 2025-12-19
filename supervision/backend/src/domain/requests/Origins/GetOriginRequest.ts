@@ -12,7 +12,7 @@ export class GetOriginRequest extends BaseRequest<GetOriginRequest> {
 	// Méthode pour la validation
 	public validate(): Validator<GetOriginRequest> {
 		const validator = new Validator<GetOriginRequest>(this);
-		validator.field("label").maxLength(100);
+		validator.field("label").maxLength(255);
 		return validator;
 	}
 

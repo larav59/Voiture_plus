@@ -1,8 +1,7 @@
-import { Nodes } from "../entities/Nodes";
-import { NodesTypes } from "../entities/NodesTypes";
 import { Travels } from "../entities/Travels";
 import { BaseEntityDTO } from "./BaseEntityDTO";
-import { NodesDTO } from "./NodesDTO";
+import { TravelsNodesDTO } from "./TravelsNodeDTO";
+import { VehiclesDTO } from "./VehiclesDTO";
 
 export class TravelsDTO extends Travels implements BaseEntityDTO<Travels> {
 	id!: number
@@ -10,9 +9,10 @@ export class TravelsDTO extends Travels implements BaseEntityDTO<Travels> {
 	status!: string | null;
 	estimatedDuration!: number | null;
 	orderedBy!: string | null;
-	nodes !: Nodes[] | null
+	nodes !: TravelsNodesDTO[] | null;
+	vehicle !: VehiclesDTO;
 
-	static fromEntity(entity: Travels | null): Travels | null {
+	static fromEntity(entity: Travels | null): TravelsDTO | null {
 		if (!entity) {
 			return null;
 		}
@@ -22,16 +22,17 @@ export class TravelsDTO extends Travels implements BaseEntityDTO<Travels> {
 		dto.status = entity.status;
 		dto.estimatedDuration = entity.estimatedDuration;
 		dto.orderedBy = entity.orderedBy;
-		for (const tn of entity.travelsNodes ?? []) {
-			if (tn.node) {
-				if (!dto.nodes) {
-					dto.nodes = [];
+		dto.vehicle = VehiclesDTO.fromEntity(entity.vehicle) !;
+		dto.nodes = [];
+		if (entity.travelsNodes && entity.travelsNodes.length > 0) {
+			for (const travelNode of entity.travelsNodes) {
+				const nodeDTO = TravelsNodesDTO.fromEntity(travelNode);
+				if (nodeDTO) {
+					dto.nodes.push(nodeDTO);
 				}
-				const nodeDTO = NodesDTO.fromEntity(tn.node) !;
-				dto.nodes.push(nodeDTO);
 			}
 		}
-
+		dto.nodes = dto.nodes.sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
 		return dto;
 	}
 }

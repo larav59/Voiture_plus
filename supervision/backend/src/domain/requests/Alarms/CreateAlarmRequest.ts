@@ -3,29 +3,30 @@ import { BaseRequest } from "../BaseRequest";
 
 export class CreateAlarmRequest extends BaseRequest<CreateAlarmRequest> {
 	description : string | null;
-	type : number | null;
-	origin : number | null;
+	type : number;
+	origin : number;
 
 	constructor(fields?: Partial<CreateAlarmRequest>) {
 		super();
-		this.description = fields?.description ?? null;
-		this.type = fields?.type ?? null;
-		this.origin = fields?.origin ?? null;
+		this.description = fields?.description!;
+		this.type = fields?.type!;
+		this.origin = fields?.origin!;
 	}
 
 	// Méthode pour la validation
 	public validate(): Validator<CreateAlarmRequest> {
 		const validator = new Validator<CreateAlarmRequest>(this);
-		validator.field("type").isNumber().greaterThan(0);
+		validator.field("type").isRequired().isNumber().greaterThan(0);
 		validator.field("origin").isRequired().isNumber().greaterThan(0);
 		return validator;
 	}
 
 	static fromRequest(req: any): CreateAlarmRequest {
+		const body = req.body;
 		return new CreateAlarmRequest({
-			description: req.body.description,
-			type: req.body.type,
-			origin: req.body.origin,
+			description: body.description,
+			type: Number(body.type),
+			origin: Number(body.origin),
 		});
 	}
 }

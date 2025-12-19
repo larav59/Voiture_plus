@@ -22,11 +22,11 @@ export class NodeTypeService {
     }
 
     async createNodeType(label: string): Promise<NodesTypes> {
-        const newTravelNode = this.nodeTypeRepository.create({
+        const newNodeType = this.nodeTypeRepository.create({
             label: label
+            
         });
-        return this.nodeTypeRepository.save(newTravelNode);
-        
+        return this.nodeTypeRepository.save(newNodeType);      
     }
 
     async updateNodeType(id: number, label: string): Promise<NodesTypes> {

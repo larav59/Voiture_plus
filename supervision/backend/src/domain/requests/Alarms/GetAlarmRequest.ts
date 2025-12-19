@@ -26,11 +26,12 @@ export class GetAlarmRequest extends BaseRequest<GetAlarmRequest> {
 	}
 
 	static fromRequest(req: any): GetAlarmRequest {
+		const query = req.query;
 		return new GetAlarmRequest({
-			originId: req.query.originId,
-			occuredBefore: req.query.occuredBefore,
-			occuredAfter: req.query.occuredAfter,
-			typeId: req.query.typeId,
+			originId: query.originId ? Number(query.originId) : null,
+			occuredBefore: query.occuredBefore ? new Date(query.occuredBefore) : null,
+			occuredAfter: query.occuredAfter ? new Date(query.occuredAfter) : null,
+			typeId: query.typeId ? Number(query.typeId) : null,
 		});
 	}
 }

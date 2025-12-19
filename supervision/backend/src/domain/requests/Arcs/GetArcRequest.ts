@@ -2,27 +2,32 @@ import { Validator } from "../../../infrastructure/validator/Validator";
 import { BaseRequest } from "../BaseRequest";
 
 export class GetArcRequest extends BaseRequest<GetArcRequest> {
-	origineId : number | null;
-	destinationId : number | null;
+	originNode !: number | null;
+	destinationNode !: number | null;
+	type !: number | null;
 
 	constructor(fields?: Partial<GetArcRequest>) {
 		super();
-		this.origineId = fields?.origineId ?? null;
-		this.destinationId = fields?.destinationId ?? null;
+		this.originNode = fields?.originNode ?? null;
+		this.destinationNode = fields?.destinationNode ?? null;
+		this.type = fields?.type ?? null;
 	}
 
 	// Méthode pour la validation
 	public validate(): Validator<GetArcRequest> {
 		const validator = new Validator<GetArcRequest>(this);
-		validator.field("origineId").isNumber().greaterThan(0);
-		validator.field("destinationId").isNumber().greaterThan(0);
+		validator.field("originNode").isNumber().greaterThan(0);
+		validator.field("destinationNode").isNumber().greaterThan(0);
+		validator.field("type").isRequired().isNumber();
 		return validator;
 	}
 
 	static fromRequest(req: any): GetArcRequest {
+		const query = req.query;
 		return new GetArcRequest({
-			origineId: req.query.origineId,
-			destinationId: req.query.destinationId,
+			originNode: query.originNode ? Number(query.originNode) : null,
+			destinationNode: query.destinationNode ? Number(query.destinationNode) : null,
+			type: query.type ? Number(query.type) : null
 		});
 	}
 }

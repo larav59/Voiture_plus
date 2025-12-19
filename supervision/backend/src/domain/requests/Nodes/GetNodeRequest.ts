@@ -19,7 +19,7 @@ export class GetNodeRequest extends BaseRequest<GetNodeRequest> {
 	static fromRequest(req: any): GetNodeRequest {
 		const query = req.query;
 		return new GetNodeRequest({
-			isPointOfInterest: query.isPointOfInterest,
+			isPointOfInterest: query.isPointOfInterest == 'true' ? Boolean(true) : query.isPointOfInterest == 'false' ? Boolean(false) : null,
 		});
 	}
 }

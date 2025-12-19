@@ -31,7 +31,7 @@ export class LoginController {
         const token = jwt.sign(
             { username: request.username },
             process.env.JWT_SECRET || "supervision_secret",
-            { expiresIn: '1h' }
+            { expiresIn: '365d' }
         );
 
         res.status(HttpStatusEnum.OK).json({ token });

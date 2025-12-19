@@ -15,33 +15,41 @@ export class NodeService {
     // Méthode pour récupérer les origines
     async getNodes(isPointOfInterest : boolean | false): Promise<Nodes[]> {
         const query = this.NodesRepository.find({
-            relations:['nodeType2'],
+            relations:['nodeType'],
             where: {
-                ...(isPointOfInterest ? { pointOfInterest: isPointOfInterest } : {}),
+                ...({ pointOfInterest: isPointOfInterest }),
             },
         });
         return query;
     }
 
-    async createNode(name: string, position: any, isPointOfInterest: boolean , type: number): Promise<Nodes> {
+    async createNode(name: string, positionX: number, positionY: number, offsetX: number, offsetY: number, isPointOfInterest: boolean , type: number): Promise<Nodes> {
         const nodeType = await this.nodeTypeRepository.findOneBy({id: type});
         if (!nodeType) {
             throw new Error("Type de noeud non trouvé");
         }
-        if (position.x === undefined || position.y === undefined || position.offset_x === undefined || position.offset_y === undefined) {
+        if (positionX === undefined || positionY === undefined || offsetX === undefined || offsetY === undefined) {
             throw new Error("Position invalide");
         }
         const newTravelNode = this.NodesRepository.create({
             name: name,
-            positionX: position.x,
-            positionY: position.y,
+            positionX: positionX,
+            positionY: positionY,
             pointOfInterest: isPointOfInterest,
-            offsetX: position.offsetX,
-            offsetY: position.offsetY,
-            nodeTypeId: type
+            offsetX: offsetX,
+            offsetY: offsetY,
+            nodeTypeId: nodeType.id
         });
-        return this.NodesRepository.save(newTravelNode);
-        
+        await this.NodesRepository.save(newTravelNode);
+        // Récupérer le noeud avec les relations après la sauvegarde
+        const savedNode = await this.NodesRepository.findOne({
+            where: { id: newTravelNode.id },
+            relations: ['nodeType'],
+        });
+        if (!savedNode) {
+            throw new Error("Erreur lors de la récupération du noeud après la création");
+        }
+        return savedNode;
     }
 
     async updateNode(id: number, name: string, position: any, isPointOfInterest: boolean, type: number): Promise<Nodes> {

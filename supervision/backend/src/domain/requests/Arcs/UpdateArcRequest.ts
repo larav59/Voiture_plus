@@ -1,35 +1,42 @@
 import { Validator } from "../../../infrastructure/validator/Validator";
 import { BaseRequest } from "../BaseRequest";
 
-export class UpdateAlarmRequest extends BaseRequest<UpdateAlarmRequest> {
+export class UpdateArcRequest extends BaseRequest<UpdateArcRequest> {
 	id : number;
-	weight : number | null;
-	origineId : number | null;
-	destinationId : number | null;
+	weight : number;
+	originNode : number;
+	destinationNode : number;
+	type : number | null;
 
-	constructor(fields?: Partial<UpdateAlarmRequest>) {
+	constructor(fields?: Partial<UpdateArcRequest>) {
 		super();
-		this.id = fields?.id ?? 0;
-		this.weight = fields?.weight ?? null;
-		this.origineId = fields?.origineId ?? 0;
-		this.destinationId = fields?.destinationId ?? 0;
+		this.id = fields?.id !;
+		this.weight = fields?.weight !;
+		this.originNode = fields?.originNode !;
+		this.destinationNode = fields?.destinationNode !;
+		this.type = fields?.type ?? null;
 	}
 
 	// Méthode pour la validation
-	public validate(): Validator<UpdateAlarmRequest> {
-		const validator = new Validator<UpdateAlarmRequest>(this);
+	public validate(): Validator<UpdateArcRequest> {
+		const validator = new Validator<UpdateArcRequest>(this);
 		validator.field("id").isRequired().isNumber().greaterThan(0);
-		validator.field("origineId").isNumber().greaterThan(0);
-		validator.field("destinationId").isNumber().greaterThan(0);
+		validator.field("originNode").isNumber().greaterThan(0);
+		validator.field("destinationNode").isNumber().greaterThan(0);
+		validator.field("weight").isRequired().isNumber().greaterThan(0);
+		validator.field("type").isRequired().isNumber();
 		return validator;
 	}
 
-	static fromRequest(req: any): UpdateAlarmRequest {
-		return new UpdateAlarmRequest({
-			id: req.params.id,
-			weight: req.body.weight,
-			origineId: req.body.origineId,
-			destinationId: req.body.destinationId
+	static fromRequest(req: any): UpdateArcRequest {
+		const params = req.params;
+		const body = req.body;
+		return new UpdateArcRequest({
+			id: Number(params.id),
+			weight: body.weight,
+			originNode: Number(body.originNode),
+			destinationNode: Number(body.destinationNode),
+			type: Number(body.type)
 		});
 	}
 }

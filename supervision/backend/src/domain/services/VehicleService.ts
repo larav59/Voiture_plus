@@ -13,19 +13,10 @@ export class VehicleService {
 	async getVehicles(id?: number, name?: string): Promise<Vehicles[]> {
 
 		const vehicles = await this.vehicleRepository.find({
+			relations : ["states", "travels", "travels.travelsNodes", "travels.travelsNodes.node", "travels.travelsNodes.node.nodeType"],
 			where: {
 				...(id ? { id } : {}),
       			...(name ? { name: Like(`%${name}%`) } : {})
-			},
-			relations: {
-				states: true,
-				travels: {
-					travelsNodes: {
-						node : {
-							nodeType : true
-						}
-					}
-				},
 			},
 			relationLoadStrategy: "query",
 			order: {
@@ -33,22 +24,16 @@ export class VehicleService {
 				travels: { createdAt: "DESC" },
 			}
 		});
-
+		
 		return vehicles.map(v => {
 
 			// keep ONLY the most recent state
 			const latestState = v.states?.[0] ? [v.states[0]] : [];
-
-			// find ongoing travel / active trip
-			const ongoingTravel =
-			v.travels?.find(t => t.status === "ongoing") 
-			? [v.travels.find(t => t.status === "ongoing")!]
-			: [];
-
+			const latestTravel = v.travels?.[0] ? [v.travels[0]] : [];
 			return {
 			...v,
 			states: latestState,
-			travels: ongoingTravel,
+			travels: latestTravel,
 			};
 		});
 	}

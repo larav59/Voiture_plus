@@ -9,10 +9,10 @@ export class UpdateAlarmRequest extends BaseRequest<UpdateAlarmRequest> {
 
 	constructor(fields?: Partial<UpdateAlarmRequest>) {
 		super();
-		this.id = fields?.id ?? 0;
-		this.description = fields?.description ?? "";
-		this.type = fields?.type ?? 0;
-		this.origin = fields?.origin ?? 0;
+		this.id = fields?.id !;
+		this.description = fields?.description !;
+		this.type = fields?.type !;
+		this.origin = fields?.origin !;
 	}
 
 	// Méthode pour la validation
@@ -20,8 +20,8 @@ export class UpdateAlarmRequest extends BaseRequest<UpdateAlarmRequest> {
 		const validator = new Validator<UpdateAlarmRequest>(this);
 		validator.field("id").isRequired().isNumber().greaterThan(0);
 		validator.field("type").isNumber().greaterThan(0);
-		validator.field("origin").isRequired().isNumber().greaterThan(0);
-		validator.field("description").isRequired().maxLength(255);
+		validator.field("origin").isNumber().greaterThan(0);
+		validator.field("description").maxLength(255);
 		return validator;
 	}
 
@@ -29,10 +29,10 @@ export class UpdateAlarmRequest extends BaseRequest<UpdateAlarmRequest> {
 		const params = req.params;
 		const body = req.body;
 		return new UpdateAlarmRequest({
-			id: params.id,
+			id: Number(params.id),
 			description: body.description,
-			type: body.type,
-			origin: body.origin
+			type: Number(body.type),
+			origin: Number(body.origin)
 		});
 	}
 }

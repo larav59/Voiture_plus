@@ -11,7 +11,7 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
   },
-  "include": ["src/**/*.ts", "*.ts", "src/global.d.ts", "src/generate-models.ts"],
+  "include": ["src/**/*.ts", "*.ts", "src/global.d.ts", "src/generate-models.ts", "src/domain/services/MqttClientService.ts"],
 
   "exclude": ["node_modules"]
 }

@@ -24,7 +24,7 @@ export class VehicleController {
 		if (request.validate().hasErrors()) {
 			throw new NotFound("Invalid Request",request.validate().getErrors());
 		}
-		const vehicles = await vehicleService.getVehicles(request.id ?? 0, request.name ?? "");
+		const vehicles = await vehicleService.getVehicles(request.vehicleId ?? 0, request.name ?? "");
 		const vehiclesDTO = vehicles.map(v => VehiclesDTO.fromEntity(v));
 
 

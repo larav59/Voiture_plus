@@ -20,10 +20,10 @@ export class AlarmService {
 		const query = this.alarmRepository.find({
 			relations : ['alarmType', 'origin'],
 			where: {
-				...(originId !== null ? { originId: originId } : {}),
-				...(occuredBefore !== null ? { occuredAt: LessThan(occuredBefore) } : {}),
-				...(occuredAfter !== null ? { occuredAt: MoreThan(occuredAfter) } : {}),
-				...(typeId !== null ? { typeId: typeId } : {})
+				...(originId ? { originId } : {}),
+				...(occuredBefore ? { createdAt: MoreThan(occuredBefore) } : {}),
+				...(occuredAfter ? { createdAt: LessThan(occuredAfter) } : {}),
+				...(typeId ? { alarmTypeId: typeId } : {})
 			}
 		});
 		return query;
@@ -38,7 +38,11 @@ export class AlarmService {
 			originId: origin?.id ?? null,
 			createdAt: new Date()
 		});
-		return this.alarmRepository.save(newAlarm);
+		await this.alarmRepository.save(newAlarm);
+		return this.alarmRepository.findOne({
+			where: { id: newAlarm.id },
+			relations : ['alarmType', 'origin']
+		}) as Promise<Alarms>;
 	}
 
 	async updateAlarm(id: number, description: string, typeId: number, originId: number): Promise<Alarms | null> {

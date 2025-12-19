@@ -24,7 +24,7 @@ export class NodeController {
 		if (request.validate().hasErrors()) {
 			throw new NotFound("Invalid Request",request.validate().getErrors());
 		}
-		const nodes = await nodeService.getNodes(request.isPointOfInterest ?? false);
+		const nodes = await nodeService.getNodes(request.isPointOfInterest !);
 		const nodesDTO = nodes.map(n => NodesDTO.fromEntity(n));
 		res.status(HttpStatusEnum.OK).json(nodesDTO);
 		return;
@@ -39,14 +39,15 @@ export class NodeController {
 			throw new NotFound("Invalid Request",request.validate().getErrors());
 		}
 
-		const position = {
-			"positionX" : request.positionX,
-			"positionY" : request.positionY,
-			"offsetX" : request.offsetX,
-			"offsetY" : request.offsetY,
-		}
-
-		const node = await nodeService.createNode(request.name !,position, request.isPointOfInterest!, request.type!);
+		const node = await nodeService.createNode(
+			request.name,
+			request.positionX,
+			request.positionY,
+			request.offsetX,
+			request.offsetY,
+			request.isPointOfInterest,
+			request.type
+		);
 		const nodeDTO = NodesDTO.fromEntity(node) !;
 		res.status(HttpStatusEnum.OK).json(nodeDTO);
 		return;

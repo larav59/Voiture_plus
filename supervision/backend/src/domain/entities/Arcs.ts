@@ -24,6 +24,9 @@ export class Arcs {
   @Column("int", { name: "destination_node_id", nullable: true })
   public destinationNodeId!: number | null;
 
+  @Column("int", { name: "type", nullable: true })
+  public type!: number | null;
+
   @ManyToOne(() => Nodes, (nodes) => nodes.arcs, {
     onDelete: "NO ACTION",
     onUpdate: "NO ACTION",

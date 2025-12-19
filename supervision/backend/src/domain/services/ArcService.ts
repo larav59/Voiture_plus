@@ -13,38 +13,40 @@ export class ArcService {
 	}
 
 	// Méthode pour récupérer les alarmes
-	async getArcs(originNode : number, destinationNode : number): Promise<Arcs[]> {
+	async getArcs(originNode : number, destinationNode : number,type : number | null): Promise<Arcs[]> {
 		const query = this.arcsRepository.find({
-			relations : ['originNode2', 'destinationNode2'],
+			relations : ['originNode', 'destinationNode','destinationNode.nodeType','originNode.nodeType'],
             where: {
                 ...(originNode ? {originNodeId : originNode} : {}),
-				...(destinationNode ? { destinationNodeId : destinationNode} : {})
+				...(destinationNode ? { destinationNodeId : destinationNode} : {}),
+				...(type ? { type : type} : {})
             }
         });
         return query;
 		
 	}
 
-	async createArc(weight: number, originNodeId: number, destinationNodeId : number): Promise<Arcs> {
+	async createArc(weight: number, originNodeId: number, destinationNodeId : number, type: number | null): Promise<Arcs> {
 		const originNode = this.nodesRepository.findOneBy({id: originNodeId});
 		if (originNode == null ) throw new Error("Noeud d'origine non trouvé");
 		const destinationNode = this.nodesRepository.findOneBy({id: destinationNodeId});
 		if (destinationNode == null ) throw new Error("Noeud de destination non trouvé");
-		
 		const newArc = this.arcsRepository.create({
 			weight : weight,
 			originNodeId : originNodeId,
-			destinationNodeId : destinationNodeId
+			destinationNodeId : destinationNodeId,
+			type : type
 		});
-		return newArc ;
+		return this.arcsRepository.save(newArc);
 	}
 
-	async updateArc(id: number, weight: number, originNodeId: number, destinationNodeId : number): Promise<Arcs> {
+	async updateArc(id: number, weight: number, originNodeId: number, destinationNodeId : number, type: number | null): Promise<Arcs> {
 		const arc = await this.arcsRepository.findOneBy({ id : id });
 		if (arc == null) throw new Error("Arc spécifié non trouvé");
 		arc.originNodeId = originNodeId;
 		arc.destinationNodeId = destinationNodeId;
 		arc.weight = weight;
+		arc.type = type;
 		return this.arcsRepository.save(arc);
 	}
 }

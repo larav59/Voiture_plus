@@ -2,11 +2,11 @@ import { Validator } from "../../../infrastructure/validator/Validator";
 import { BaseRequest } from "../BaseRequest";
 
 export class CreateNodeTypeRequest extends BaseRequest<CreateNodeTypeRequest> {
-	label : string | null;
-
+	label : string
+	
 	constructor(fields?: Partial<CreateNodeTypeRequest>) {
 		super();
-		this.label = fields?.label ?? null;
+		this.label = fields?.label !;
 	}
 
 	// Méthode pour la validation
@@ -19,7 +19,7 @@ export class CreateNodeTypeRequest extends BaseRequest<CreateNodeTypeRequest> {
 	static fromRequest(req: any): CreateNodeTypeRequest {
 		const body = req.body
 		return new CreateNodeTypeRequest({
-			label: body.label
+			label: body.label,
 		});
 	}
 }

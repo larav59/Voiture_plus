@@ -9,8 +9,8 @@ export class AlarmsTypes {
   @Column("varchar", { name: "label", nullable: true, length: 255 })
   public label!: string | null;
 
-  @Column("int", { name: "criticity", nullable: true })
-  public criticity!: number | null;
+  @Column("varchar", { name: "criticity", nullable: true, length: 255 })
+  public criticity!: string | null;
 
   @OneToMany(() => Alarms, (alarms) => alarms.alarmType)
   public alarms!: Alarms[];

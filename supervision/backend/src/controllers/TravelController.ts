@@ -8,6 +8,7 @@ import {
 	UpdateTravelRequest
 } from "../domain/requests/Travels";
 import { TravelService } from "../domain/services/TravelService";
+import { TravelsDTO } from "../domain/dtos/TravelsDTO";
 
 export class TravelController {
 	
@@ -23,8 +24,14 @@ export class TravelController {
 		if (request.validate().hasErrors()) {
 			throw new NotFound("Invalid Request",request.validate().getErrors());
 		}
-		const travels = await travelService.getTravels(request.vehicle ?? 0, request.createdBefore ?? "", request.createdAfter ?? "", request.status);
-		res.status(HttpStatusEnum.OK).json(travels);
+		const travels = await travelService.getTravels(
+			request.vehicleId ?? 0,
+			request.createdBefore ?? "",
+			request.createdAfter ?? "", 
+			request.status
+		);
+		const travelsDTO = travels.map(t => TravelsDTO.fromEntity(t));
+		res.status(HttpStatusEnum.OK).json(travelsDTO);
 		return;
 	}
 
@@ -37,7 +44,8 @@ export class TravelController {
 			throw new NotFound("Invalid Request",request.validate().getErrors());
 		}
 		const travel = await travelService.createTravel(request.vehicle, request.nodes, req.identity.username);
-		res.status(HttpStatusEnum.OK).json(travel);
+		const travelDTO = TravelsDTO.fromEntity(travel) !;
+		res.status(HttpStatusEnum.OK).json(travelDTO);
 		return;
 	}
 
@@ -54,7 +62,8 @@ export class TravelController {
 		if (!travel) {
 			throw res.status(HttpStatusEnum.NOT_FOUND).json({ message: "Travel not found" });
 		}
-		res.status(HttpStatusEnum.OK).json(travel);
+		const travelDTO = TravelsDTO.fromEntity(travel) !;
+		res.status(HttpStatusEnum.OK).json(travelDTO);
 		return ;
 	}
 
