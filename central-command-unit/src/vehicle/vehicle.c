@@ -73,7 +73,7 @@ int main(int argc, char **argv) {
     }
 
     marvelmind_start_acquisition();
-
+	
 	signal_wait_for_shutdown();
 
 	LOG_INFO_ASYNC("Shutdown signal received. Stopping Vehicle Service...");

@@ -10,9 +10,8 @@
  * @param payload Payload du message reçu.
  */
 void vehicle_message_callback(const char* topic, const char* payload) {
-    // C'est bien, mais attention : payload n'est pas toujours NULL-terminated selon la lib MQTT.
-    // Souvent, on reçoit aussi la longueur (payload_len). Vérifie la signature de ta lib.
-    LOG_DEBUG_ASYNC("Received message on topic: %s | Payload: %s", topic, payload);
+    LOG_DEBUG_SYNC("Received message on topic: %s", topic);
+
 }
 
 /**
