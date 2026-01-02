@@ -44,6 +44,10 @@ void vehicle_service_config_parser(const char *key, const char *value, void *ser
     else if (strcmp(key, "uart_timeout_ms") == 0) {
         config->timeoutMs = atoi(value);
     }
+    else if (strcmp(key, "uart_marvelmind_port") == 0) {
+        strncpy(config->marvelmindPort, value, sizeof(config->marvelmindPort) - 1);
+        config->marvelmindPort[sizeof(config->marvelmindPort) - 1] = '\0';
+    }
     else {
         LOG_WARNING_ASYNC("Unknown key in [Service]: %s", key);
     }

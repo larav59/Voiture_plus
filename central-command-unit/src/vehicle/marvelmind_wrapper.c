@@ -10,18 +10,40 @@
 static struct MarvelmindHedge *g_hedge = NULL;
 static marvelmind_pos_callback_t g_user_callback = NULL;
 
-/**
- * @brief Type de fonction de callback pour la réception des positions Marvelmind.
- * @param x Position X en millimètres.
- * @param y Position Y en millimètres.
- * @param angle Angle en degrés.
- */
-typedef void (*marvelmind_pos_callback_t)(int32_t x, int32_t y, double angle);
+static pthread_t g_threadId;
+static sem_t g_dataSem;
+static volatile bool g_threadRunning = false;
+static bool g_IsInitialized = false;
 
-static void marvelmind_internal_callback(struct PositionValue position) {
-    if (g_user_callback) {
-        g_user_callback(position.x, position.y, position.angle);
-    }
+/**
+ * @brief Callback interne pour signaler la réception de nouveaux paquets.
+ * @details Cette fonction est assignée à `anyInputPacketCallback` de MarvelmindHedge.
+ * Afin d'appeler notre thread de travail uniquement lorsqu'un nouveau paquet est reçu réduisant l'utilisation CPU.
+ */
+static void internal_sem_callback(void) {
+	sem_post(&g_dataSem);
+}
+
+/**
+ * @brief Thread de travail qui récupère la position.
+ */
+static void* marvelmind_worker_thread(void* arg) {
+	UNUSED(arg);
+
+	struct PositionValue pos;
+	bool havePosition;
+	
+	while (g_threadRunning) {
+		int s = sem_wait(&g_dataSem);
+		if (s == 0 && g_threadRunning && g_hedge != NULL) {
+			havePosition = getPositionFromMarvelmindHedge(g_hedge, &pos);
+			if (havePosition && g_user_callback) {
+				//LOG_DEBUG_ASYNC("Marvelmind: Received position: x=%d, y=%d, angle=%.2f", pos.x, pos.y, pos.angle);
+				g_user_callback(pos.x, pos.y, pos.angle);
+			}
+		}
+	}
+	return NULL;
 }
 
 /**
@@ -31,25 +53,30 @@ static void marvelmind_internal_callback(struct PositionValue position) {
  * @return 0 en cas de succès, -1 en cas d'erreur.
  */
 int marvelmind_init(const char* ttyDevice, marvelmind_pos_callback_t callback) {
-	if (g_hedge != NULL) {
-		LOG_ERROR_ASYNC("Marvelmind: Déjà initialisé.");
-		return -1;
+	if (g_IsInitialized) {
+		return 0;
 	}
 
 	g_hedge = createMarvelmindHedge();
 	if (g_hedge == NULL) {
-		LOG_ERROR_ASYNC("Marvelmind: Échec de la création de MarvelmindHedge.");
+		LOG_ERROR_ASYNC("Marvelmind: Memory allocation failed.");
+		return -1;
+	}
+
+	if (sem_init(&g_dataSem, 0, 0) != 0) {
+		LOG_ERROR_ASYNC("Marvelmind: Semaphore initialization failed.");
+		destroyMarvelmindHedge(g_hedge);
 		return -1;
 	}
 
 	g_user_callback = callback;
 	g_hedge->ttyFileName = ttyDevice;
-	g_hedge->receiveDataCallback = marvelmind_internal_callback;
-	g_hedge->pause = true;
+	g_hedge->anyInputPacketCallback = internal_sem_callback;
 
 	startMarvelmindHedge(g_hedge);
-
-	LOG_INFO_ASYNC("Marvelmind initialisé avec succès sur %s.", ttyDevice);
+	
+	g_IsInitialized = true;
+	LOG_DEBUG_ASYNC("Marvelmind: Initialized on %s", ttyDevice);
 	return 0;
 }
 
@@ -59,13 +86,23 @@ int marvelmind_init(const char* ttyDevice, marvelmind_pos_callback_t callback) {
  * @return 0 en cas de succès, -1 en cas d'erreur.
  */
 int marvelmind_start_acquisition(void) {
-	if (g_hedge == NULL) {
-		LOG_ERROR_ASYNC("Marvelmind: Non initialisé.");
+	if (!g_IsInitialized) {
+		LOG_ERROR_ASYNC("Marvelmind: Not initialized.");
+		return -1;
+	}
+	
+	if (g_threadRunning) return 0;
+	g_hedge->pause = false;
+	g_threadRunning = true;
+
+	int ret = pthread_create(&g_threadId, NULL, marvelmind_worker_thread, NULL);
+	if (ret != 0) {
+		LOG_ERROR_ASYNC("Marvelmind: Unable to create thread.");
+		g_threadRunning = false;
 		return -1;
 	}
 
-	g_hedge->pause = false;
-	LOG_INFO_ASYNC("Acquisition Marvelmind démarrée.");
+	LOG_DEBUG_ASYNC("Marvelmind: Started acquisition thread.");
 	return 0;
 }
 
@@ -75,13 +112,17 @@ int marvelmind_start_acquisition(void) {
  * @return 0 en cas de succès, -1 en cas d'erreur.
  */
 int marvelmind_stop_acquisition(void) {
-	if (g_hedge == NULL) {
-		LOG_ERROR_ASYNC("Marvelmind: Non initialisé.");
-		return -1;
-	}
+	if (!g_IsInitialized || !g_threadRunning) return 0;
 
+	LOG_DEBUG_ASYNC("Marvelmind: Stopping thread...");
+	
 	g_hedge->pause = true;
-	LOG_INFO_ASYNC("Acquisition Marvelmind arrêtée.");
+	g_threadRunning = false;
+
+	sem_post(&g_dataSem);
+	pthread_join(g_threadId, NULL);
+	
+	LOG_DEBUG_ASYNC("Marvelmind: Thread stopped.");
 	return 0;
 }
 
@@ -90,8 +131,16 @@ int marvelmind_stop_acquisition(void) {
  * @details Libère la mémoire et ferme le port série.
  */
 void marvelmind_cleanup(void) {
+	marvelmind_stop_acquisition();
+
 	if (g_hedge != NULL) {
+		stopMarvelmindHedge(g_hedge);
 		destroyMarvelmindHedge(g_hedge);
 		g_hedge = NULL;
+	}
+	
+	if (g_IsInitialized) {
+		sem_destroy(&g_dataSem);
+		g_IsInitialized = false;
 	}
 }

@@ -13,7 +13,6 @@
 int g_fd = -1;
 
 static void on_position_received(int32_t x, int32_t y, double angle) {
-    LOG_DEBUG_ASYNC("Position reçue de Marvelmind: x=%d mm, y=%d mm, angle=%.2f°", x, y, angle);
     while (angle > 180.0) angle -= 360.0;
     while (angle < -180.0) angle += 360.0;
 
@@ -57,7 +56,7 @@ int main(int argc, char **argv) {
 		.devicePath = vehicle_config.devicePath
 	};
 
-    int g_fd = uart_open(&uart_conf);
+    g_fd = uart_open(&uart_conf);
     if (g_fd < 0) {
         LOG_FATAL_SYNC("Impossible d'ouvrir l'UART pour le test.");
         core_shutdown();
@@ -65,7 +64,7 @@ int main(int argc, char **argv) {
         return EXIT_FAILURE;
     }
 
-    if(marvelmind_init(vehicle_config.devicePath, on_position_received) != 0) {
+    if(marvelmind_init(vehicle_config.marvelmindPort, on_position_received) != 0) {
         LOG_FATAL_SYNC("Échec de l'initialisation de Marvelmind.");
         core_shutdown();
         signal_cleanup();
