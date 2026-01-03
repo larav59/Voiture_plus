@@ -16,9 +16,9 @@ static void on_camera_objects_received(const camera_detected_object_t* objects, 
 	UNUSED(context);
 	LOG_INFO_ASYNC("Camera: Received %d objects.", count);
 	for (int i = 0; i < count; i++) {
-		LOG_INFO_ASYNC(" - Object %d: Category=%d, Confidence=%.2f, Box=(x=%.2f,y=%.2f,w=%.2f,h=%.2f)",
+		LOG_INFO_ASYNC(" - Object %d: Category=%s, Confidence=%.2f, Box=(x=%.2f,y=%.2f,w=%.2f,h=%.2f)",
 			i,
-			objects[i].category,
+			camera_category_to_string(objects[i].category),
 			objects[i].confidence,
 			objects[i].box.x,
 			objects[i].box.y,
