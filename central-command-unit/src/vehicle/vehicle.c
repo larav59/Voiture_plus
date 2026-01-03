@@ -96,13 +96,13 @@ int main(int argc, char **argv) {
 		return EXIT_FAILURE;
 	}
 
-	/*if (camera_server_start(&cam_socket) != 0) {
+	if (camera_server_start(&cam_socket) != 0) {
 		LOG_FATAL_SYNC("Échec du démarrage du serveur caméra.");
 		camera_server_cleanup(&cam_socket);
 		core_shutdown();
 		signal_cleanup();
 		return EXIT_FAILURE;
-	}*/
+	}
 	
 	signal_wait_for_shutdown();
 
