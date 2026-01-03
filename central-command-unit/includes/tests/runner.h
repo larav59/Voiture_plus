@@ -80,8 +80,6 @@ void test_run(void);
     do { \
         if (!(cond)) { \
             fprintf(stderr, COLOR_RED"[FAIL] %s (at %s:%d)"COLOR_RESET"\n", msg, __FILE__, __LINE__); \
-        } else { \
-            fprintf(stdout, COLOR_GREEN"[PASS] %s"COLOR_RESET"\n", msg);\
         } \
     } while(0)
 

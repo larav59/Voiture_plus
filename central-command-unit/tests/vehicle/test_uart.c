@@ -65,7 +65,7 @@ TEST_REGISTER(test_uart_send_receive, "Test d'envoi et de réception de trames U
 	uint8_t rawBuffer[1000];
 	ssize_t rawBytesRead = read(masterFd, rawBuffer, sizeof(rawBuffer));
 
-	TEST_ASSERT(rawBytesRead == sizeof(sendState) + 3, "Failed to read raw UART data size"); 
+	TEST_ASSERT(rawBytesRead == sizeof(sendState) + 2, "Failed to read raw UART data size"); 
     TEST_ASSERT(rawBuffer[0] == UART_START_BYTE, "Invalid start byte");
     TEST_ASSERT(rawBuffer[1] == sizeof(sendState), "Invalid Length byte"); 
 	

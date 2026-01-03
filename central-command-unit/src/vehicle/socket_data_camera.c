@@ -1,7 +1,29 @@
-#include "socket_data_camera.h"
+#include "vehicle/socket_data_camera.h"
 #include "core/logger.h"
 
 #define INITIAL_BUFFER_SIZE 4096
+
+/**
+ * @brief Convertit une chaîne de caractères en catégorie de caméra.
+ * @param str Chaîne de caractères représentant la catégorie.
+ * @return Catégorie de caméra.
+ */
+static camera_category_t string_to_category(const char *str) {
+    if (!str) return CAM_CAT_UNKNOWN;
+
+    if (strcmp(str, "yield") == 0) return CAM_CAT_YIELD;
+    if (strcmp(str, "straight_forward") == 0) return CAM_CAT_STRAIGHT_FORWARD;
+    if (strcmp(str, "priority_road") == 0) return CAM_CAT_PRIORITY_ROAD;
+    if (strcmp(str, "parking") == 0) return CAM_CAT_PARKING;
+    if (strcmp(str, "speed_limit_30") == 0) return CAM_CAT_SPEED_LIMIT_30;
+    if (strcmp(str, "end_speed_limit_30") == 0) return CAM_CAT_END_SPEED_LIMIT_30;
+    if (strcmp(str, "railroad_crossing") == 0) return CAM_CAT_RAILROAD_CROSSING;
+    if (strcmp(str, "roundabout") == 0) return CAM_CAT_ROUNDABOUT;
+    if (strcmp(str, "black_line") == 0) return CAM_CAT_BLACK_LINE;
+    if (strcmp(str, "cars") == 0) return CAM_CAT_CARS;
+
+    return CAM_CAT_UNKNOWN;
+}
 
 /**
  * @brief Convertit le JSON reçu en structures C et appelle le callback.
@@ -34,10 +56,9 @@ static void process_json_payload(camera_socket_t *sock, const char *jsonStr) {
 				cJSON *box = cJSON_GetObjectItem(item, "box"); 
 
 				if (cat && cat->valuestring) {
-					strncpy(objects[idx].category, cat->valuestring, 254);
-					objects[idx].category[254] = '\0';
+					objects[idx].category = string_to_category(cat->valuestring);
 				} else {
-					strcpy(objects[idx].category, "unknown");
+					objects[idx].category = CAM_CAT_UNKNOWN;
 				}
 
 				objects[idx].confidence = (conf) ? (float)conf->valuedouble : 0.0f;
@@ -302,4 +323,25 @@ void camera_server_cleanup(camera_socket_t* cameraSocket) {
 		free(cameraSocket->recvBuffer);
 		cameraSocket->recvBuffer = NULL;
 	}
+}
+
+/**
+ * @brief Convertit une catégorie de caméra en chaîne de caractères.
+ * @param cat Catégorie de la caméra.
+ * @return Chaîne de caractères représentant la catégorie.
+ */
+const char* camera_category_to_string(camera_category_t cat) {
+    switch(cat) {
+        case CAM_CAT_YIELD: return "yield";
+        case CAM_CAT_STRAIGHT_FORWARD: return "straight_forward";
+        case CAM_CAT_PRIORITY_ROAD: return "priority_road";
+        case CAM_CAT_PARKING: return "parking";
+        case CAM_CAT_SPEED_LIMIT_30: return "speed_limit_30";
+        case CAM_CAT_END_SPEED_LIMIT_30: return "end_speed_limit_30";
+        case CAM_CAT_RAILROAD_CROSSING: return "railroad_crossing";
+        case CAM_CAT_ROUNDABOUT: return "roundabout";
+        case CAM_CAT_BLACK_LINE: return "black_line";
+        case CAM_CAT_CARS: return "cars";
+        default: return "unknown";
+    }
 }

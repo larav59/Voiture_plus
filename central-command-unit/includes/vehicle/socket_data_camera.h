@@ -6,11 +6,25 @@
 
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <arpa/inet.h>
 #include <pthread.h>
 #include <semaphore.h>
 #include <stdbool.h>
 #include <errno.h>
 
+typedef enum {
+    CAM_CAT_UNKNOWN = 0,
+    CAM_CAT_YIELD,
+    CAM_CAT_STRAIGHT_FORWARD,
+    CAM_CAT_PRIORITY_ROAD,
+    CAM_CAT_PARKING,
+    CAM_CAT_SPEED_LIMIT_30,
+    CAM_CAT_END_SPEED_LIMIT_30,
+    CAM_CAT_RAILROAD_CROSSING,
+    CAM_CAT_ROUNDABOUT,
+    CAM_CAT_BLACK_LINE,
+    CAM_CAT_CARS
+} camera_category_t;
 
 typedef struct {
     float x;
@@ -20,7 +34,7 @@ typedef struct {
 } camera_bounding_box_t;
 
 typedef struct {
-    char category[255];
+    camera_category_t category;
     float confidence;
     camera_bounding_box_t box;
 } camera_detected_object_t;
@@ -75,5 +89,12 @@ void camera_server_stop(camera_socket_t* cameraSocket);
  * @param cameraSocket Pointeur vers la structure de la socket caméra.
  */
 void camera_server_cleanup(camera_socket_t* cameraSocket);
+
+/**
+ * @brief Convertit une catégorie de caméra en chaîne de caractères.
+ * @param cat Catégorie de la caméra.
+ * @return Chaîne de caractères représentant la catégorie.
+ */
+const char* camera_category_to_string(camera_category_t cat);
 
 #endif // SOCKET_DATA_CAMERA_H
