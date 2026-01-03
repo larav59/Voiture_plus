@@ -12,6 +12,21 @@
 
 int g_fd = -1;
 
+static void on_camera_objects_received(const camera_detected_object_t* objects, int count, void* context) {
+	UNUSED(context);
+	LOG_INFO_ASYNC("Camera: Received %d objects.", count);
+	for (int i = 0; i < count; i++) {
+		LOG_INFO_ASYNC(" - Object %d: Category=%d, Confidence=%.2f, Box=(x=%.2f,y=%.2f,w=%.2f,h=%.2f)",
+			i,
+			objects[i].category,
+			objects[i].confidence,
+			objects[i].box.x,
+			objects[i].box.y,
+			objects[i].box.w,
+			objects[i].box.h);
+	}
+}
+
 static void on_position_received(int32_t x, int32_t y, double angle) {
     while (angle > 180.0) angle -= 360.0;
     while (angle < -180.0) angle += 360.0;
@@ -72,6 +87,22 @@ int main(int argc, char **argv) {
     }
 
     marvelmind_start_acquisition();
+
+	camera_socket_t cam_socket;
+	if (camera_server_init(&cam_socket, vehicle_config.cameraSocketBindIp, vehicle_config.cameraSocketPort, on_camera_objects_received, NULL) != 0) {
+		LOG_FATAL_SYNC("Échec de l'initialisation du serveur caméra.");
+		core_shutdown();
+		signal_cleanup();
+		return EXIT_FAILURE;
+	}
+
+	/*if (camera_server_start(&cam_socket) != 0) {
+		LOG_FATAL_SYNC("Échec du démarrage du serveur caméra.");
+		camera_server_cleanup(&cam_socket);
+		core_shutdown();
+		signal_cleanup();
+		return EXIT_FAILURE;
+	}*/
 	
 	signal_wait_for_shutdown();
 
@@ -80,5 +111,7 @@ int main(int argc, char **argv) {
 	signal_cleanup();	
     marvelmind_stop_acquisition();
     marvelmind_cleanup();
+	camera_server_stop(&cam_socket);
+	camera_server_cleanup(&cam_socket);
 	return 0;
 }

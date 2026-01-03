@@ -13,7 +13,8 @@
 #include "vehicle/vehicle_message_callback.h"
 #include "vehicle/uart.h"
 #include "vehicle/uart_proto.h"
-#include "vehicle/marvelmind_wrapper.h"	
+#include "vehicle/marvelmind_wrapper.h"
+#include "vehicle/socket_data_camera.h"
 
 #define VEHICLE_VERSION "Vehicle v0.1.0"
 

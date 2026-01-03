@@ -12,7 +12,7 @@ import time
 import struct
 import math
 
-SERIAL_PORT = '/dev/ttyFAKE_PYTHON'
+SERIAL_PORT = '/dev/ttyAMA0_PY'
 BAUDRATE = 9600 
 
 def calculate_crc_modbus(data):

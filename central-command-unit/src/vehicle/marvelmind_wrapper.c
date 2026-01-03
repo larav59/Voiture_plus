@@ -38,7 +38,7 @@ static void* marvelmind_worker_thread(void* arg) {
 		if (s == 0 && g_threadRunning && g_hedge != NULL) {
 			havePosition = getPositionFromMarvelmindHedge(g_hedge, &pos);
 			if (havePosition && g_user_callback) {
-				//LOG_DEBUG_ASYNC("Marvelmind: Received position: x=%d, y=%d, angle=%.2f", pos.x, pos.y, pos.angle);
+				LOG_DEBUG_ASYNC("Marvelmind: Received position: x=%d, y=%d, angle=%.2f", pos.x, pos.y, pos.angle);
 				g_user_callback(pos.x, pos.y, pos.angle);
 			}
 		}

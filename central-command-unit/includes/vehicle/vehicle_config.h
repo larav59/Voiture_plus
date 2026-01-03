@@ -16,7 +16,8 @@ typedef struct {
 	char devicePath[256]; /**< Le chemin du périphérique UART (ex: /dev/ttyS0) */
 	int timeoutMs;  /**< Le délai d'attente pour les opérations UART (en millisecondes) */
 	char marvelmindPort[256]; /**< Le port série pour Marvelmind (ex: /dev/ttyACM0) */
-	
+	int cameraSocketPort; /**< Le port TCP pour la communication avec la caméra */
+	char cameraSocketBindIp[16]; /**< L'adresse IP à lier pour la communication avec la caméra */
 } vehicle_config_t;
 
 // typedef void (*service_config_parser_t)(const char* key, const char* value, void* serviceConfig);
