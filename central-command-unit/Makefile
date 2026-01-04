@@ -38,7 +38,7 @@ all: core services tests
 
 $(info External Libraries to build: $(EXT_LIB_TARGETS))
 
-PROJECT_LIBS   := -lpthread -lcore $(EXT_LIBS)
+PROJECT_LIBS   := -lpthread -lcore -lm $(EXT_LIBS)
 PROJECT_CFLAGS := -I$(INC_DIR) $(EXT_CFLAGS) -MMD -MP -fPIC
 
 

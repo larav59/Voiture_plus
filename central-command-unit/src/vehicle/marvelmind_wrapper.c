@@ -14,6 +14,7 @@ static pthread_t g_threadId;
 static sem_t g_dataSem;
 static volatile bool g_threadRunning = false;
 static bool g_IsInitialized = false;
+void *g_context = NULL;
 
 /**
  * @brief Callback interne pour signaler la réception de nouveaux paquets.
@@ -39,7 +40,7 @@ static void* marvelmind_worker_thread(void* arg) {
 			havePosition = getPositionFromMarvelmindHedge(g_hedge, &pos);
 			if (havePosition && g_user_callback) {
 				LOG_DEBUG_ASYNC("Marvelmind: Received position: x=%d, y=%d, angle=%.2f", pos.x, pos.y, pos.angle);
-				g_user_callback(pos.x, pos.y, pos.angle);
+				g_user_callback(pos.x, pos.y, pos.angle, g_context);
 			}
 		}
 	}
@@ -52,10 +53,11 @@ static void* marvelmind_worker_thread(void* arg) {
  * @param callback La fonction à appeler à chaque nouvelle position.
  * @return 0 en cas de succès, -1 en cas d'erreur.
  */
-int marvelmind_init(const char* ttyDevice, marvelmind_pos_callback_t callback) {
+int marvelmind_init(const char* ttyDevice, marvelmind_pos_callback_t callback, void* context) {
 	if (g_IsInitialized) {
 		return 0;
 	}
+	g_context = context;
 
 	g_hedge = createMarvelmindHedge();
 	if (g_hedge == NULL) {

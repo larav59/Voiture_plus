@@ -9,9 +9,6 @@
 
 #include "vehicle/vehicle.h"
 
-
-int g_fd = -1;
-
 static void on_camera_objects_received(const camera_detected_object_t* objects, int count, void* context) {
 	UNUSED(context);
 	LOG_INFO_ASYNC("Camera: Received %d objects.", count);
@@ -25,14 +22,20 @@ static void on_camera_objects_received(const camera_detected_object_t* objects, 
 			objects[i].box.w,
 			objects[i].box.h);
 	}
+
+	on_camera_objects_logic(objects, count);
 }
 
-static void on_position_received(int32_t x, int32_t y, double angle) {
+static void on_position_received(int32_t x, int32_t y, double angle, void* context) {
+	int fd = *((int*)context);
     while (angle > 180.0) angle -= 360.0;
     while (angle < -180.0) angle += 360.0;
 
     int16_t angle_int = (int16_t)(angle * 100);
-    protocol_send_position_telemetry(g_fd, (int16_t)x, (int16_t)y, angle_int);
+    protocol_send_position_telemetry(fd, (int16_t)x, (int16_t)y, angle_int);
+
+	// Pour l'instant aucun moyen de récupérer la vitesse du véhicule 
+	on_vehicle_telemetry_logic((int16_t)x, (int16_t)y, angle_int, 0);
 }
 
 int main(int argc, char **argv) {
@@ -60,32 +63,37 @@ int main(int argc, char **argv) {
 		LOG_FATAL_SYNC("Failed to set LWT for Vehicle service. Exiting.");
 		return EXIT_FAILURE;
 	}
-
 	LOG_INFO_ASYNC("Vehicle started successfully.");
 
-	mqtt_set_message_callback(vehicle_message_callback);
+	char vehicleTopic[255];
+	snprintf(vehicleTopic, sizeof(vehicleTopic), "vehicles/%d/request", vehicle_config.vehicleId);
+	mqtt_subscribe(vehicleTopic, MQTT_QOS_EXACTLY_ONCE);
+	
+	snprintf(vehicleTopic, sizeof(vehicleTopic), "vehicles/%d/response", vehicle_config.vehicleId);
+	mqtt_subscribe(vehicleTopic, MQTT_QOS_EXACTLY_ONCE);
 
-    uart_config_t uart_conf = {
+	uart_config_t uart_conf = {
 		.baudrate = vehicle_config.bauderate,
 		.timeoutMs = vehicle_config.timeoutMs,
 		.devicePath = vehicle_config.devicePath
 	};
 
-    g_fd = uart_open(&uart_conf);
-    if (g_fd < 0) {
+    int uartFd = uart_open(&uart_conf);
+    if (uartFd < 0) {
         LOG_FATAL_SYNC("Impossible d'ouvrir l'UART pour le test.");
         core_shutdown();
 		signal_cleanup();
         return EXIT_FAILURE;
     }
 
-    if(marvelmind_init(vehicle_config.marvelmindPort, on_position_received) != 0) {
+    if(marvelmind_init(vehicle_config.marvelmindPort, on_position_received, (void*) &uartFd) != 0) {
         LOG_FATAL_SYNC("Échec de l'initialisation de Marvelmind.");
         core_shutdown();
         signal_cleanup();
         return EXIT_FAILURE;
     }
 
+	vehicle_init_state(uartFd, vehicle_config.vehicleId);
     marvelmind_start_acquisition();
 
 	camera_socket_t cam_socket;
@@ -103,7 +111,8 @@ int main(int argc, char **argv) {
 		signal_cleanup();
 		return EXIT_FAILURE;
 	}
-	
+
+	mqtt_set_message_callback(vehicle_message_callback);
 	signal_wait_for_shutdown();
 
 	LOG_INFO_ASYNC("Shutdown signal received. Stopping Vehicle Service...");

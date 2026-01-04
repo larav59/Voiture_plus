@@ -20,8 +20,9 @@
  * @param x Position X en millimètres.
  * @param y Position Y en millimètres.
  * @param angle Angle en degrés.
+ * @param context Contexte utilisateur (peut être NULL).
  */
-typedef void (*marvelmind_pos_callback_t)(int32_t x, int32_t y, double angle);
+typedef void (*marvelmind_pos_callback_t)(int32_t x, int32_t y, double angle, void* context);
 
 
 /**
@@ -30,7 +31,7 @@ typedef void (*marvelmind_pos_callback_t)(int32_t x, int32_t y, double angle);
  * 
  * @param callback La fonction à appeler à chaque nouvelle position.
  */
-int marvelmind_init(const char* ttyDevice, marvelmind_pos_callback_t callback);
+int marvelmind_init(const char* ttyDevice, marvelmind_pos_callback_t callback, void* context);
 
 /**
  * @brief Démarre l'acquisition des données de Marvelmind.
