@@ -14,8 +14,21 @@ La CCU est structurée autour des principaux micro-services suivants :
 - Fonction : Indique aux véhicules les noeuds à atteindre pour suivre l'itinéraire et réajuste le trajet en cas d'obstacles ou de changements.
 
 ### Gestionnaire de conflit (Conflict Manager)
-- Fonction : Permet aux véhicules de demander l’autorisation pour dépasser ou s’engager sur des zones critiques afin d’éviter les collisions. 
+- Objectif : Calculer les itinéraires optimaux pour les véhicules à l'aide de l'algorithme de Dijkstra. Il transforme une demande de trajet en instruction de points à atteindre pour le véhicule.
 
+Au démarrage, ce service récupère la topologie du réseau auprès de l'API.
+
+Il écoute les topics suivants :
+- `services/route_manager/request` : Pour recevoir les demandes de trajets et les changement de mode.
+
+Selon l'action demandée, il effectue les traitements suivants :
+
+- **Planification d'itinéraire** :
+  - Valide l'existence des noeuds demandés sur la carte.
+  - Calcule l'itinéraire optimal segment par segment en utilisant l'algorithme de Dijkstra.
+  - Couvertit le chemin en une liste de points navigables.
+  - Publie l'itinéraire calculé sur le topic `vehicles/<vehicle_id>/request`.
+  - Renvoie le chemin planifié à l'API 
  
 ### Moniteur de présence (Heartbeat)
 
@@ -60,9 +73,12 @@ Le code source de la CCU est organisé en plusieurs répertoires principaux :
 - `external/` : Contient les bibliothèques tierces utilisées par la CCU.
 - `bin/` : Répertoire de sortie pour les exécutables compilés.
 - `lib/` : Répertoire de sortie pour les bibliothèques dynamiques compilées.
+- `mk-lib/` : Contient les Makefiles pour la compilation des bibliothèques externes.
+- `services/` : Contient les fichiers de configuration systemd pour chaque micro-service.
 - `config_model/` : Contient des exemples de fichiers de configuration INI pour les services.
 - `tests/` : Contient les tests unitaires et d'intégration pour les différents modules.
 - `docs/` : Contient la documentation du projet.
+
 
 ### Organisation du code
 
@@ -93,6 +109,12 @@ Les dépendances du répertoire `external/` sont compilées automatiquement et g
 
 ## Compilation et exécution
 
+Tout d'abord veillez à récupérer les submodules git si ce n'est pas déjà fait. Sans cela, la compilation échouera car les dépendances ne seront pas présentes.
+
+```bash
+git submodule update --init --recursive
+```
+
 Les variables d'environnement suivantes peuvent être configurées :
 
 - `CC` : Le compilateur à utiliser (par défaut `gcc`)
@@ -119,32 +141,81 @@ Vérifier bien que la variable d'environnement `LD_LIBRARY_PATH` inclut le répe
 export LD_LIBRARY_PATH=$(pwd)/lib:$LD_LIBRARY_PATH
 ```
 
-## Démarrage des services
+## Système de déploiement et d'installation
 
-Il est récommandé de créer un script de démarrage pour chaque service afin de faciliter leur lancement avec systemd ou un autre gestionnaire de services.
+Le projet dispose désormais d'un système de déploiement automatisé via des scripts bash (`deploy.sh` et `install.sh`). 
 
-Voici un exemple de script de démarrage pour le service `heartbeat` avec systemd :
+Ces scripts gèrent la compilation, l'installation des bibliothèques, la configuration et l'enregistrement des services systemd.
 
-```ini
-[Unit]
-Description=Heartbeat Service for Central Command Unit
-After=network.target
-[Service]
-ExecStart=/path/to/central-command-unit/bin/heartbeat -c /path/to/config.ini
-Restart=always
-[Install]
-WantedBy=multi-user.target
-```
+### Déploiement à distance
 
-Note : Remplacez `/path/to/central-command-unit/` et `/path/to/config.ini` par les chemins réels sur votre système.
+Le script `deploy.sh` permet de déployer la CCU sur une machine distante via SSH.
 
-Lancez le service avec les commandes suivantes :
+Usage :
 
 ```bash
-sudo systemctl daemon-reload
-sudo systemctl start heartbeat.service
-sudo systemctl enable heartbeat.service
+./deploy.sh -h <ip_cible> -p <mot_de_passe> -u <utilisateur> -s <service1> [service2 ...]
 ```
+Arguments :
+- `-h <ip_cible>` : Adresse IP de la machine distante
+- `-p <mot_de_passe>` : Mot de passe SSH pour l'utilisateur
+- `-u <utilisateur>` : Nom d'utilisateur SSH
+- `-s <service1> [service2 ...]` : Liste des services à déployer (exemple : `heartbeat route_manager`)
+- `-f` : Forcer l'écrasement des fichiers de configuration existants sur la machine distante
+
+Par exemple, pour déployer les services Heartbeat et Route Manager sur une machine distante :
+
+```bash
+./deploy.sh -h 192.168.1.10 -p raspberry -s heartbeat route_manager
+```
+
+### Installation locale
+
+Le script `install.sh` permet d'installer les services de la CCU en tant que services systemd sur la machine locale. Vous devez exécuter ce script avec des privilèges root car il installe les fichiers dans des répertoires système et enregistre les services systemd.
+
+Usage :
+
+```bash
+sudo ./install.sh <service1> [service2 ...]
+```
+
+Exemple pour installer les services Heartbeat et Route Manager :
+
+```bash
+sudo ./install.sh heartbeat route_manager
+```
+
+### Emplacement des fichiers
+
+Une fois installés, les fichiers sur le système se trouvent aux emplacements suivants :
+
+- Binaires des services : `/usr/local/bin/`
+- Blibliothèques partagées : `/usr/local/lib/`
+- Fichiers de configuration : `/etc/ccu/`
+- Fichiers de logs : `/var/log/ccu/`
+- Fichiers de services systemd : `/etc/systemd/system/`
+
+### Gestion des services systemd
+
+Après l'installation, vous pouvez gérer les services de la CCU comme n'importe quel autre service systemd.
+
+```bash
+# Démarrer un service
+sudo systemctl start <service>.service
+# Arrêter un service
+sudo systemctl stop <service>.service
+# Redémarrer un service
+sudo systemctl restart <service>.service
+# Vérifier le statut d'un service
+sudo systemctl status <service>.service
+# Activer un service au démarrage
+sudo systemctl enable <service>.service
+# Désactiver un service au démarrage
+sudo systemctl disable <service>.service
+# Voir les logs d'un service
+sudo journalctl -u <service>.service -f
+```
+
 
 ## Configuration des services
 
