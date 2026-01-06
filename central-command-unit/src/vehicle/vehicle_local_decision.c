@@ -29,6 +29,48 @@ void on_camera_objects_logic(const camera_detected_object_t* objects, int count)
 					speedLimitSeen = true;
 				}
 				break;
+			case CAM_CAT_RAILROAD_CROSSING:
+				if(objects[i].confidence > DETECTION_CONFIDENCE_THRESHOLD) {
+					newSpeedLimit = SPEED_LIMIT_SLOW;
+					speedLimitSeen = true;
+					// TODO: Train camera to detect actual trains
+				}
+				break;
+			case CAM_CAT_PRIORITY_ROAD:
+				if(objects[i].confidence > DETECTION_CONFIDENCE_THRESHOLD) {
+					newSpeedLimit = SPEED_LIMIT_DEFAULT;
+					speedLimitSeen = true;
+				}
+				break;
+			case CAM_CAT_YIELD:
+				if(objects[i].confidence > DETECTION_CONFIDENCE_THRESHOLD) {
+					newSpeedLimit = SPEED_LIMIT_SLOW;
+					speedLimitSeen = true;
+				}
+				break;
+			case CAM_CAT_ROUNDABOUT: 
+				if(objects[i].confidence > DETECTION_CONFIDENCE_THRESHOLD) {
+					newSpeedLimit = SPEED_LIMIT_SLOW;
+					speedLimitSeen = true;
+				}
+				break;
+			case CAM_CAT_PARKING:
+				if(objects[i].confidence > DETECTION_CONFIDENCE_THRESHOLD) {
+					newSpeedLimit = SPEED_LIMIT_30;
+					speedLimitSeen = true;
+					// TODO: Enter in parking and implement car maneuvering
+				}
+				break;
+			case CAM_CAT_STRAIGHT_FORWARD:
+				if(objects[i].confidence > DETECTION_CONFIDENCE_THRESHOLD) {
+					newSpeedLimit = SPEED_LIMIT_30;
+					speedLimitSeen = true;
+				}
+				break;
+			case CAM_CAT_BLACK_LINE:
+				// TODO: Implement black ligne script 
+				// Define placement of the car based on black line detection
+				break;
 			default: break;
 		}
 	}

@@ -5,8 +5,9 @@
 #include "vehicle/uart.h"
 #include "core/mqtt_messages/set_waypoints_request.h"
 
-#define SPEED_LIMIT_DEFAULT 50
-#define SPEED_LIMIT_30 30
+#define SPEED_LIMIT_DEFAULT 6
+#define SPEED_LIMIT_30 4
+#define SPEED_LIMIT_SLOW 3
 
 /**
  * @brief Structure représentant l'état du véhicule.
