@@ -11,6 +11,7 @@
  * @return Le nombre d'octets envoyés, ou -1 en cas d'erreur.
  */
 int protocol_send_packet(int fd, uint8_t msg_id, void *payload, size_t payloadLen) {
+	LOG_DEBUG_ASYNC("UART Proto: Sending packet ID 0x%02X with payload length %zu", msg_id, payloadLen);
     size_t frameSize = 1 + payloadLen; 
     uint8_t frame[UART_MAX_FRAME_SIZE];
 

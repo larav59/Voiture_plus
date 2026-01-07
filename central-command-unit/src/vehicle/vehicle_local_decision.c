@@ -130,7 +130,7 @@ void on_vehicle_telemetry_logic(int16_t x, int16_t y, int16_t angle, int16_t spe
 
         if (state->currentWpIndex < state->routeLen) {
             waypoint_t *next = &state->route[state->currentWpIndex];
-            LOG_INFO_ASYNC("Vehicle: Moving to next waypoint %d (%d, %d)", state->currentWpIndex, (int)next->x, (int)next->y);
+            LOG_INFO_ASYNC("Vehicle: Moving to next waypoint %d (%d, %d) distance: %.2f", state->currentWpIndex, (int)next->x, (int)next->y, distance);
             protocol_send_set_position_command(state->uartFd, (int16_t)next->x, (int16_t)next->y, 0);
         } else {
             LOG_INFO_ASYNC("Vehicle: Destination reached");
@@ -138,6 +138,9 @@ void on_vehicle_telemetry_logic(int16_t x, int16_t y, int16_t angle, int16_t spe
             state->isNavigating = false;
         }
     }
+	else {
+		LOG_INFO_ASYNC("Vehicle: Current position (%d, %d), target waypoint (%d, %d), distance: %.2f", x, y, (int)target->x, (int)target->y, distance);
+	}
 
 	vehicle_state_message_t stateMessage = {
 		.carId = state->carId,

@@ -97,6 +97,11 @@ void vehicle_message_callback(const char* topic, const char* payload) {
 		else if(strcmp(header.action, ACTION_START_ROUTE) == 0) {
 			on_start_route_request();
 		}
+		else if(strcmp(header.action, "ACTION_STOP_ROUTE") == 0) {
+			vehicleState->isNavigating = false;
+			protocol_send_set_speed(vehicleState->uartFd, 0);
+			LOG_INFO_ASYNC("Vehicle: Stopping navigation as per request.");
+		}
 		else {
 			LOG_ERROR_ASYNC("Unknown action received: %s", header.action);
 		}
