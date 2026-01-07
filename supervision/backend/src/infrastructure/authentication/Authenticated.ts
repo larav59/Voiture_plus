@@ -1,4 +1,5 @@
 import { Request } from "express";
+import { Unauthorized } from "../webserver/errors/HttpError";
 
 /**
  * Options pour le décorateur d'authentification.
@@ -35,7 +36,7 @@ export function createAuthenticatedDecorator<T>(options: AuthDecoratorOptions<T>
 
 				const identity = extractIdentity(req);
 				if (!identity) {
-					throw createError?.() ?? new Error("Unauthorized");
+					throw createError?.() ?? new Unauthorized("Invalid Token");
 				}
 
 				req.identity = identity;
