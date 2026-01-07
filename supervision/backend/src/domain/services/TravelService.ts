@@ -5,6 +5,7 @@ import { Nodes } from "../entities/Nodes";
 import { Vehicles } from "../entities/Vehicles";
 import { Users } from "../entities/Users";
 import { TravelsNodes } from "../entities/TravelsNodes";
+import { States } from "../entities/States";
 
 export class TravelService {
 	private travelRepository: Repository<Travels>;
@@ -42,6 +43,26 @@ export class TravelService {
 		const nodeList : Nodes[] = [];
 		if (vehicle !== null && !vehicleId) {
 			throw new Error("Véhicule non trouvé");
+		}
+		// ajoute un noeud qui correspond au noeud le plus proche de la position actuelle du véhicule
+		// recupere le dernier état du véhicule
+		const states = await AppDataSource.getRepository(States).find({
+			where: { vehicleId: vehicle !== null ? Number(vehicle) : 0 },
+			order: { occuredAt: "DESC" },
+			take: 1,
+		});
+		if (states.length > 0 && nodes !== null) {
+			const lastState = states[0];
+			const closestNode = await this.nodesRepository
+				.createQueryBuilder("node")
+				.orderBy(`SQRT(POWER(node.positionX - :x, 2) + POWER(node.positionY - :y, 2))`, "ASC") 
+				.setParameters({ x: lastState.positionX, y: lastState.positionY })
+				.getOne();
+			if (closestNode) {
+				nodes.unshift({ id: closestNode.id, order: 0 });
+			}
+		} else if (nodes !== null) {
+			return Promise.reject(new Error("Le véhicule n'a pas d'état enregistré pour déterminer la position actuelle. Il est donc impossible d'ajouter le noeud le plus proche."));
 		}
 		for (const node of nodes !== null ? nodes : []) {
 			const Node = await this.nodesRepository.findOneBy({id: node.id});
