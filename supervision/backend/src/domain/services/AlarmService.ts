@@ -24,7 +24,8 @@ export class AlarmService {
 				...(occuredBefore ? { createdAt: MoreThan(occuredBefore) } : {}),
 				...(occuredAfter ? { createdAt: LessThan(occuredAfter) } : {}),
 				...(typeId ? { alarmTypeId: typeId } : {})
-			}
+			},
+			order: { createdAt: "DESC" }
 		});
 		return query;
 	}

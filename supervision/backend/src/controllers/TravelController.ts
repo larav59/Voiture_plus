@@ -9,6 +9,7 @@ import {
 } from "../domain/requests/Travels";
 import { TravelService } from "../domain/services/TravelService";
 import { TravelsDTO } from "../domain/dtos/TravelsDTO";
+import { MqttClientService } from "../domain/services/MqttClientService";
 
 export class TravelController {
 	
@@ -46,6 +47,22 @@ export class TravelController {
 		const travel = await travelService.createTravel(request.vehicle, request.nodes, req.identity.username);
 		const travelDTO = TravelsDTO.fromEntity(travel) !;
 		res.status(HttpStatusEnum.OK).json(travelDTO);
+
+		const nodeList : any[] = [];
+		travel.travelsNodes.forEach(node => {
+			nodeList.push(node.node.id);
+		});
+
+		const mqttClientService = new MqttClientService();
+		const MqttRequest = {
+			commandId: 'REQ_PLAN_' + new Date().getTime(),
+			action : `PLAN_ROUTE_REQUEST`,
+			carId : travel.vehicleId,
+			nodeList : nodeList,
+			replyTopic : `services/api/response`
+		} 
+		mqttClientService.publish('services/api/request', JSON.stringify(MqttRequest));
+		mqttClientService.addToQueue(MqttRequest);
 		return;
 	}
 
