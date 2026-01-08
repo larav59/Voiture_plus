@@ -26,3 +26,8 @@ Le superviseur industriel est une application web développée en JavaScript, HT
 
 - Base de données : MariaDB
 
+## Documentation 
+
+Chaque sous répertoire contient un fichier README.md avec des informations spécifiques sur son contenu et son utilisation.
+
+
