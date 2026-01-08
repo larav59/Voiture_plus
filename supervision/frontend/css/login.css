@@ -1,0 +1,55 @@
+body {
+  background-color: #e8e8e8 !important;
+}
+
+.form {
+  width: 550px;
+  border-radius: 20px;
+  background-color: white;
+  position: absolute;
+  top: 28vh;
+  left: 72vh;
+}
+
+.label {
+  color: #151717;
+  font-weight: 600;
+}
+
+.inputForm {
+  border: 1.5px solid #ecedec;
+  border-radius: 10px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  padding-left: 10px;
+  transition: 0.2s ease-in-out;
+}
+
+.input {
+  margin-left: 10px;
+  border-radius: 10px;
+  border: none;
+  width: 85%;
+  height: 100%;
+}
+
+.input:focus {
+  outline: none;
+}
+
+.inputForm:focus-within {
+  border: 1.5px solid #f3a72d;
+}
+
+#connexionBtn {
+  background-color: #f4cd8f;
+}
+
+#connexionBtn:hover {
+  background-color: #f3a72d;
+}
+
+#loginIncorrect {
+  display: none;
+}

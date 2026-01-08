@@ -27,6 +27,10 @@ while [[ $# -gt 0 ]]; do
 			USER="$2"
 			shift 2
 			;;
+		-f|--force)
+            FORCE_CONFIG=true
+            shift
+            ;;
 		-s|--services)
 			shift
 			while [[ $# -gt 0 ]] && [[ ! "$1" =~ ^- ]]; do
@@ -64,6 +68,11 @@ sshpass -p "$PASS" scp -o StrictHostKeyChecking=no "$ARCHIVE_NAME" "$USER@$HOST:
 
 rm "$ARCHIVE_NAME"
 
+INSTALL_CMD="./install.sh"
+if [ "$FORCE_CONFIG" = true ]; then
+    INSTALL_CMD="$INSTALL_CMD -f"
+fi
+INSTALL_CMD="$INSTALL_CMD ${SERVICES[*]}"
 
 echo "REMOTE DEPLOYMENT ..."
 # 1. On supprime des eventuels résidus de déploiements précédents, on crée le dossier de déploiement
@@ -80,7 +89,7 @@ tar -xzf ~/$ARCHIVE_NAME -C $REMOTE_DIR && \
 rm ~/$ARCHIVE_NAME && \
 cd $REMOTE_DIR && \
 chmod +x install.sh && \
-echo '$PASS' | sudo -S ./install.sh ${SERVICES[*]}
+echo '$PASS' | sudo -S $INSTALL_CMD
 "
 
 sshpass -p "$PASS" ssh -t -o StrictHostKeyChecking=no "$USER@$HOST" "$REMOTE_CMD"

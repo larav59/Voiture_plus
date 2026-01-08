@@ -1,0 +1,15 @@
+<head>
+    <meta charset="utf-8">
+    <title>Superviseur Voiture +</title>
+</head>
+
+<script>
+    /***** ROUTER *****/
+    window.API_KEY = sessionStorage.getItem('API_KEY'); // Récupère depuis le storage
+
+    if (!window.API_KEY) {
+        window.location.href = 'login.html';
+    } else {
+        window.location.href = 'main.html';
+    }
+</script>
