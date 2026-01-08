@@ -21,7 +21,7 @@
 
 #include <math.h>
 
-#define WAYPOINT_REACHED_THRESHOLD_MM 80  //!< Seuil pour considérer qu'un waypoint est atteint (en mm)
+#define WAYPOINT_REACHED_THRESHOLD_MM 200  //!< Seuil pour considérer qu'un waypoint est atteint (en mm)
 #define DETECTION_CONFIDENCE_THRESHOLD 0.50f //!< Seuil de confiance pour détecter un objet
 
 /**

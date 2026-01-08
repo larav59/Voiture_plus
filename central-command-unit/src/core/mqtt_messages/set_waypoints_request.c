@@ -141,10 +141,30 @@ int set_waypoints_request_data_deserialize(cJSON *root, set_waypoints_request_t 
  * @internal
  */
 int convert_path_to_waypoints(const path_t *path, waypoint_t **waypoints, int *waypointCount, graph_t *map) {
+	// FIXTURE
+	if(path->length == 1) {
+		*waypoints = (waypoint_t*)malloc(sizeof(waypoint_t));
+		if(!*waypoints) {
+			*waypointCount = 0;
+			return -1;
+		}
+
+		node_t* onlyNode = path->nodes[0];
+		(*waypoints)[0].nodeId = onlyNode->id;
+		(*waypoints)[0].laneRule = LANE_RULE_ONE_WAY;
+		(*waypoints)[0].x = onlyNode->x;
+		(*waypoints)[0].y = onlyNode->y;
+		(*waypoints)[0].type = onlyNode->type;
+
+		*waypointCount = 1;
+		return 0;
+	}
+
 	int nodeCount = path->length - 1;
     if (nodeCount <= 0) {
         *waypoints = NULL;
         *waypointCount = 0;
+		LOG_WARNING_SYNC("No waypoints to convert: path length is %d.", path->length);
         return 0; 
     }
 
@@ -159,9 +179,9 @@ int convert_path_to_waypoints(const path_t *path, waypoint_t **waypoints, int *w
         node_t* currentNode = path->nodes[i];
         node_t* nextNode = path->nodes[i + 1];
 
-        edge_t* foundEdge = graph_get_edge(map, currentNode->id, nextNode->id);
+        edge_t* foundEdge = graph_get_edge(map, currentNode->index, nextNode->index);
         if (!foundEdge) {
-            LOG_ERROR_SYNC("Path/Graph mismatch: No edge from node %d to %d.", currentNode->id, nextNode->id);
+            LOG_ERROR_SYNC("Path/Graph mismatch: No edge from node %d to %d.", currentNode->index, nextNode->index);
             free(newWaypoints);
             return -1;
         }

@@ -95,6 +95,7 @@ int get_map_response_data_deserialize(cJSON *root, get_map_response_t *msg) {
 
 
 	cJSON *nodeJson = NULL;
+	int index = 0;
 	cJSON_ArrayForEach(nodeJson, nodesArray) {
 		cJSON *idItem = cJSON_GetObjectItem(nodeJson, "id");
 		cJSON *xItem = cJSON_GetObjectItem(nodeJson, "x");
@@ -104,7 +105,9 @@ int get_map_response_data_deserialize(cJSON *root, get_map_response_t *msg) {
 		if (cJSON_IsNumber(idItem) && cJSON_IsNumber(xItem) && cJSON_IsNumber(yItem)) {
 			graph_init_node(msg->map, idItem->valueint, xItem->valuedouble, yItem->valuedouble, (node_type_t)typeItem->valueint);
 		}
-
+		msg->map->nodes[index].id = idItem->valueint;
+		index++;
+		LOG_DEBUG_ASYNC("Deserialized node ID %d at index %d", idItem->valueint, index - 1);
 		// Remplissage des arêtes
 		cJSON *edgesArray = cJSON_GetObjectItem(nodeJson, "edges");
 		cJSON *edgeJson = NULL;
@@ -114,11 +117,7 @@ int get_map_response_data_deserialize(cJSON *root, get_map_response_t *msg) {
 			cJSON *ruleItem = cJSON_GetObjectItem(edgeJson, "rule");
 
 			if (cJSON_IsNumber(targetItem) && cJSON_IsNumber(weightItem)) {
-				graph_add_edge(msg->map, 
-							   idItem->valueint,
-							   targetItem->valueint,
-							   (int)weightItem->valuedouble,
-							   (lane_rule_t)ruleItem->valueint);
+				graph_add_edge(msg->map, idItem->valueint,targetItem->valueint,(int)weightItem->valuedouble,(lane_rule_t)ruleItem->valueint);
 			}
 		}
 	}

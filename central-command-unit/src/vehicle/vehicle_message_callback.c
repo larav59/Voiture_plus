@@ -4,7 +4,7 @@
  */
 #include "vehicle/vehicle_message_callback.h"
 
-static void on_start_route_request(void) {
+static void on_start_route_request(command_header_t header) {
 	vehicle_state_t* vehicleState = vehicle_get_state();
 	if (!vehicleState) {
 		LOG_ERROR_ASYNC("Vehicle state is not initialized.");
@@ -20,6 +20,16 @@ static void on_start_route_request(void) {
 	waypoint_t *wp = &vehicleState->route[vehicleState->currentWpIndex];
 	protocol_send_set_position_command(vehicleState->uartFd, (int16_t)wp->x, (int16_t)wp->y, 0);
 	LOG_INFO_ASYNC("Vehicle: Starting navigation on route with %d waypoints", vehicleState->routeLen);
+
+	command_response_header_t responseHeader = create_command_response_header(header.commandId, true, NULL);
+	char *json = command_response_header_serialize(&responseHeader);
+	if (json) {
+		mqtt_publish(header.replyTopic, json, MQTT_QOS_AT_LEAST_ONCE, false);
+		free(json);
+	} else {
+		LOG_ERROR_ASYNC("Vehicle: Failed to serialize command response header.");
+	}
+
 }
 
 static void on_set_waypoints_request(const set_waypoints_request_t* request) {
@@ -95,7 +105,7 @@ void vehicle_message_callback(const char* topic, const char* payload) {
 			}
 		}
 		else if(strcmp(header.action, ACTION_START_ROUTE) == 0) {
-			on_start_route_request();
+			on_start_route_request(header);
 		}
 		else if(strcmp(header.action, "ACTION_STOP_ROUTE") == 0) {
 			vehicleState->isNavigating = false;

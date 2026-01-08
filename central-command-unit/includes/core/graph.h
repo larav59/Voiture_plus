@@ -57,6 +57,7 @@ struct _Node {
     double x, y; //!< Coordonnées du noeud sur la carte
     node_type_t type; //!< Type de noeud (intersection, waypoint, rond-point, etc.)
     edge_t* edges; //!< Liste chaînée des arcs partant de ce noeud
+    int index; //!< Index du noeud dans le tableau des noeuds du graphe
 };
 
 /**
