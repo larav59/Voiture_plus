@@ -27,3 +27,9 @@ Assurez-vous d’avoir les composants suivants installés :
 ```bash
 npm install
 ```
+
+### RESTE A FAIRE
+
+- Implémentation des codes erreurs API
+- Gestion de fin de trajet et annulation via MQTT a implémenter
+- Graphe en base à corriger pour le rendre cohérent (points intérmédiaire)
