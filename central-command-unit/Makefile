@@ -9,7 +9,7 @@ TEST_DIR       := tests
 MK_LIB_DIR     := mk-lib
 EXTERNAL_DIR   := external
 
-SERVICES       := heartbeat route-planner vehicle
+SERVICES       := heartbeat route-planner vehicle conflict-manager
 
 TARGET_LIBA    := $(LIB_DIR)/libcore.a
 TARGET_LIBSO   := $(LIB_DIR)/libcore.so
