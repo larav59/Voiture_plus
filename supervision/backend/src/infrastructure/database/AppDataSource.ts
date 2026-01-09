@@ -23,7 +23,7 @@ const AppDataSource = new DataSource({
 	charset: mysqlConfig.charset,
 	synchronize: false,
 	entitySkipConstructor: true,
-	logging: mysqlConfig.logging,
+	logging: false , //mysqlConfig.logging,
 	entities: [
 		Alarms,
 		AlarmsTypes,

@@ -28,7 +28,7 @@ export interface MqttTravelRequest extends MqttRequest {
 
 export interface MqttResponse {
     commandId: string
-    status: string // "OK" si la commande a réussi, "ERROR" sinon 
+    success: boolean // "OK" si la commande a réussi, "ERROR" sinon 
     message?: string // Message d'erreur si status est "ERROR"
 }
 
@@ -59,7 +59,7 @@ export class MqttClientService {
     private clientId: string = 'mqtt_client_' + Math.random().toString(16).substr(2, 8);
     private username: string = "";
     private password: string = "";
-    private brokerUrl: string = 'mqtt://10.57.224.106';
+    private brokerUrl: string = 'mqtt://10.152.29.190';
     private static mqttQueue: any[] = [] ;
 
     constructor(username?: string, password?: string, clientId?: string, brokerUrl?: string) {
@@ -83,14 +83,14 @@ export class MqttClientService {
             console.error('MQTT Connection Error:', error);
         });
 
-                this.onMessage('services/api/request', (topic, message) => {
-                    logger.info(`Message received on ${topic}: ${message.toString()}`);
-                    // message is a json string containing commandId and message
-                    const request: MqttRequest = JSON.parse(message.toString());
+        this.onMessage('services/api/request', (topic, message) => {
+            logger.info(`Message received on ${topic}: ${message.toString()}`);
+            // message is a json string containing commandId and message
+            const request: MqttRequest = JSON.parse(message.toString());
         
-                    logger.info(`Processing commandId: ${request.commandId}, action: ${request.action}`);
+            logger.info(`Processing commandId: ${request.commandId}, action: ${request.action}`);
 
-                    switch (request.action) {
+            switch (request.action) {
                         case 'GET_MAP_REQUEST':
                             // Here you would typically call a service to get the nodes
                             const nodesQuery = AppDataSource.getRepository(Nodes).find({relations: ['nodeType']});
@@ -98,7 +98,7 @@ export class MqttClientService {
                             Promise.all([nodesQuery, arcsQuery]).then(([nodes, arcs]) => {
                                 this.publish(request.replyTopic, JSON.stringify({
                                     commandId: request.commandId,
-                                    status: 'true',
+                                    success: true,
                                     timestampSec: Math.floor(Date.now() / 1000),
                                     timestampNsec: (Date.now() % 1000) * 1e6,
                                     nodes : nodes.map((node) => ({
@@ -135,94 +135,72 @@ export class MqttClientService {
                     }
                 });
 
-                const vehicules =  AppDataSource.getRepository(Vehicles).find();
-                vehicules.then((vehicles) => {
-                    vehicles.forEach((vehicle) => {
-                        this.onMessage(`vehicles/${vehicle.id}/state`, (topic, message) => {
-                            //logger.info(`State update for vehicle ${vehicle.id} on topic ${topic}: ${message.toString()}`);
-                            const state: MqttStateUpdate = JSON.parse(message.toString());
-                            const newState = AppDataSource.getRepository(States).create({
-                                vehicleId : state.carId,
-                                occuredAt : state.timestamp,
-                                positionX : state.x,
-                                positionY : state.y,
-                                angle : state.angle,
-                                speed : state.speed
-                            });
-                            AppDataSource.getRepository(States).save(newState);
-
-                            if (!state.isNavigating) {
-                                // get vehicle last travel 
-                                const lastTravel = AppDataSource.getRepository(Travels).findOne({
-                                    where: { vehicleId: state.carId, status: 'En cours' },
-                                    order: { createdAt: "DESC" },
-                                });
-                                if (lastTravel) {
-                                    lastTravel.then((travel) => {
-                                        if (travel) {
-                                            travel.status = 'Terminé';
-                                            AppDataSource.getRepository(Travels).save(travel);
-                                        }
-                                    });
-                                } 
-                            }
-
+                this.setupVehicleStateSubscriptions(this).then(() => {
+                    logger.info('Vehicle state subscriptions set up successfully.');
+                    this.onMessage('system/alerts', async (topic, message) => {
+                        const alert: MqttAlerts = JSON.parse(message.toString());
+                        const type = await AppDataSource.getRepository(AlarmsTypes).findOneBy({ criticity : alert.level });
+                        const origin = await AppDataSource.getRepository(Origins).findOneBy({ label : alert.origin });
+                        const newAlarm = AppDataSource.getRepository(Alarms).create({
+                            description: alert.message,
+                            alarmTypeId: type?.id ?? null,
+                            originId: origin?.id ?? null,
+                            createdAt: new Date()
                         });
+                        AppDataSource.getRepository(Alarms).save(newAlarm);
                     });
-                })
         
-                this.onMessage('system/alerts', async (topic, message) => {
-                    const alert: MqttAlerts = JSON.parse(message.toString());
-                    logger.info(`ALERT from ${alert.origin} at ${new Date(alert.timestamp * 1000).toISOString()} [${alert.level}]: ${alert.message}`);
-                    const type = await AppDataSource.getRepository(AlarmsTypes).findOneBy({ criticity : alert.level });
-                    const origin = await AppDataSource.getRepository(Origins).findOneBy({ label : alert.origin });
-                    const newAlarm = AppDataSource.getRepository(Alarms).create({
-                        description: alert.message,
-                        alarmTypeId: type?.id ?? null,
-                        originId: origin?.id ?? null,
-                        createdAt: new Date()
-                    });
-		            AppDataSource.getRepository(Alarms).save(newAlarm);
-                });
-        
-                this.onMessage('services/api/response', async (topic, message) => {
-                    logger.info(`Response received on ${topic}: ${message.toString()}`);
-                    const response: MqttResponse = JSON.parse(message.toString());
-                    logger.info(`Response for commandId: ${response.commandId}, status: ${response.status}, message: ${response.message ?? 'N/A'}`);
-                    if (response.status === 'OK') {
-                        logger.info(`Command ${response.commandId} executed successfully.`);
-                        //check if commandid like   REQ_PLAN_VehicleId
-                        if (response.commandId.startsWith('REQ_PLAN_')) {
-                            const requestIndex = MqttClientService.mqttQueue.findIndex(req => req.commandId === response.commandId);
-                            if (requestIndex !== -1) {
-                                const request = MqttClientService.mqttQueue[requestIndex] as MqttTravelRequest;
-                                const vehicleId = request.carId;
-                                if (!isNaN(vehicleId)) {
-                                    const travel = await AppDataSource.getRepository(Travels).findOne({
-                                        where: { vehicleId: vehicleId, status: 'En attente' },
-                                        order: { createdAt: "DESC" },
-                                    });
-                                    if (travel) {
-                                        travel.status = 'En cours';
-                                        await AppDataSource.getRepository(Travels).save(travel);
-                                        logger.info(`Travel ${travel.id} for vehicle ${vehicleId} set to 'En cours'`);
+                    this.onMessage('services/api/response', async (topic, message) => {
+                        logger.info(`Response received on ${topic}: ${message.toString()}`);
+                        const response: MqttResponse = JSON.parse(message.toString());
+                        logger.info(`Response for commandId: ${response.commandId}, status: ${response.success}, message: ${response.message ?? 'N/A'}`);
+                        if (response.success == true) {
+                            logger.info(`Command ${response.commandId} executed successfully.`);
+                            //check if commandid like   REQ_PLAN_VehicleId
+                            if (response.commandId.startsWith('REQ_PLAN_')) {
+                                const requestIndex = MqttClientService.mqttQueue.findIndex(req => req.commandId === response.commandId);
+                                if (requestIndex !== -1) {
+                                    const request = MqttClientService.mqttQueue[requestIndex] as MqttTravelRequest;
+                                    const vehicleId = request.carId;
+                                    if (!isNaN(vehicleId)) {
+                                        const travel = await AppDataSource.getRepository(Travels).findOne({
+                                            where: { vehicleId: vehicleId, status: 'En attente' },
+                                            order: { createdAt: "DESC" },
+                                        });
+                                        if (travel) {
+                                            travel.status = 'En cours';
+                                            await AppDataSource.getRepository(Travels).save(travel);
+                                            logger.info(`Travel ${travel.id} for vehicle ${vehicleId} set to 'En cours'`);
+                                            // on envoi START_ROUTE command to vehicle
+                                            const MqttStartRouteCommand = {
+                                                commandId: 'START_ROUTE_' + new Date().getTime(),
+                                                action : `START_ROUTE`,
+                                                replyTopic : `services/api/response`
+                                            } 
+                                            this.publish(`vehicles/${vehicleId}/request`, JSON.stringify(MqttStartRouteCommand));
+                                        } else {
+                                            logger.error(`No pending travel found for vehicleId: ${vehicleId}`);
+                                        }
+                                        // remove from queue
+                                        MqttClientService.mqttQueue.splice(requestIndex, 1);
                                     } else {
-                                        logger.error(`No pending travel found for vehicleId: ${vehicleId}`);
+                                        logger.error(`Invalid vehicleId extracted from commandId: ${response.commandId}`);
                                     }
-                                    // remove from queue
-                                    MqttClientService.mqttQueue.splice(requestIndex, 1);
-                                } else {
-                                    logger.error(`Invalid vehicleId extracted from commandId: ${response.commandId}`);
                                 }
-                            }
-                        }                     
-                    } else {
-                        logger.error(`Command ${response.commandId} failed with message: ${response.message}`);
-                    }
-                });
+                            }                     
+                        } else {
+                            logger.error(`Command ${response.commandId} failed with message: ${response.message}`);
+                        }
+                    });
 
+                // print each subscribed topic
+                for (const topic of this.topicList) {
+                    logger.info(`Subscribed to topic: ${topic}`);
+                }
                 this.subscribeToTopics();
-        
+                }).catch((error) => {
+                    logger.error(`Error setting up vehicle state subscriptions: ${error.message}`);
+                });
     }
 
     publish(topic: string, message: string): void {
@@ -251,8 +229,46 @@ export class MqttClientService {
         });
     }
 
+    async setupVehicleStateSubscriptions(client : MqttClientService ) : Promise<void> {
+        const vehicles = await AppDataSource.getRepository(Vehicles).find();
+        logger.info(`Subscribing to state updates for vehicles`);
+        vehicles.forEach((vehicle) => {
+            logger.info(`Subscribing to vehicle ${vehicle.id} state updates on topic vehicles/${vehicle.id}/state`);
+            client.onMessage(`vehicles/${vehicle.id}/state`, async (topic, message) => {
+                logger.info(`State update for vehicle ${vehicle.id} on topic ${topic}: ${message.toString()}`);
+                const state: MqttStateUpdate = JSON.parse(message.toString());
+                const newState = AppDataSource.getRepository(States).create({
+                    vehicleId : state.carId,
+                    occuredAt : new Date(state.timestamp),
+                    positionX : state.x,
+                    positionY : state.y,
+                    angle : state.angle,
+                    speed : state.speed
+                });
+                await AppDataSource.getRepository(States).save(newState)
+                logger.info(`State for vehicle ${vehicle.id} saved to database.`);
+                /*if (!state.isNavigating) {
+                        // get vehicle last travel 
+                        const lastTravel = AppDataSource.getRepository(Travels).findOne({
+                            where: { vehicleId: state.carId, status: 'En cours' },
+                            order: { createdAt: "DESC" },
+                        });
+                        if (lastTravel) {
+                            lastTravel.then((travel) => {
+                                if (travel) {
+                                    travel.status = 'Terminé';
+                                    AppDataSource.getRepository(Travels).save(travel);
+                                }
+                            });
+                        } 
+                } */
+                });
+            });
+    }
+
     onMessage(topic: string, handler: (topic: string, message: Buffer) => void): void {
         this.messageHandlers[topic] = handler;
+        this.topicList.push(topic);
     }
     
     subscribe(topic: string, messageHandler: (topic: string, message: Buffer) => void): void {

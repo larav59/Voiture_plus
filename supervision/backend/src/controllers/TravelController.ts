@@ -61,7 +61,7 @@ export class TravelController {
 			nodeList : nodeList,
 			replyTopic : `services/api/response`
 		} 
-		mqttClientService.publish('services/api/request', JSON.stringify(MqttRequest));
+		mqttClientService.publish('services/route-planner/request', JSON.stringify(MqttRequest));
 		mqttClientService.addToQueue(MqttRequest);
 		return;
 	}
