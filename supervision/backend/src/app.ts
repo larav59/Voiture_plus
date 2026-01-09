@@ -6,10 +6,12 @@ import { WebApiServer } from "./infrastructure/webserver/WebApiServer";
 import { AppDataSource } from "./infrastructure/database/AppDataSource";
 import { logger } from "./infrastructure/loggers";
 import { expressConfig } from "./config";
+import {MqttClientService} from "./domain/services/MqttClientService";
 
 
 import apiRoutes from "./routes/index";
 import { errorHandlerMiddleware } from "./middlewares/errorHandlerMiddleware";
+import mqtt from "mqtt/*";
 
 
 const app = express();
@@ -33,6 +35,11 @@ AppDataSource.initialize()
             logger.error("Error starting server:", error.message);
             process.exit(1);
         });
+
+        // Initialisation du client MQTT
+        const mqttClient = new MqttClientService();
+
+        
     })
     .catch((error) => {
         logger.error("Error initializing database:", error.message);

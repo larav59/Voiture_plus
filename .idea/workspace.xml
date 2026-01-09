@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="b6bc6421-a2e3-4fef-8adc-38bb1bf41406" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources.local.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources.local.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/supervision/backend/src/app.ts" beforeDir="false" afterPath="$PROJECT_DIR$/supervision/backend/src/app.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/supervision/backend/src/controllers/LoginController.ts" beforeDir="false" afterPath="$PROJECT_DIR$/supervision/backend/src/controllers/LoginController.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/supervision/backend/src/controllers/NodeController.ts" beforeDir="false" afterPath="$PROJECT_DIR$/supervision/backend/src/controllers/NodeController.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/supervision/backend/src/controllers/TravelController.ts" beforeDir="false" afterPath="$PROJECT_DIR$/supervision/backend/src/controllers/TravelController.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/supervision/backend/src/controllers/VehicleController.ts" beforeDir="false" afterPath="$PROJECT_DIR$/supervision/backend/src/controllers/VehicleController.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/supervision/backend/src/domain/dtos/NodesDTO.ts" beforeDir="false" afterPath="$PROJECT_DIR$/supervision/backend/src/domain/dtos/NodesDTO.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/supervision/backend/src/domain/dtos/TravelsDTO.ts" beforeDir="false" afterPath="$PROJECT_DIR$/supervision/backend/src/domain/dtos/TravelsDTO.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/supervision/backend/src/domain/dtos/VehiclesDTO.ts" beforeDir="false" afterPath="$PROJECT_DIR$/supervision/backend/src/domain/dtos/VehiclesDTO.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/supervision/backend/src/domain/entities/AlarmsTypes.ts" beforeDir="false" afterPath="$PROJECT_DIR$/supervision/backend/src/domain/entities/AlarmsTypes.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/supervision/backend/src/domain/entities/Arcs.ts" beforeDir="false" afterPath="$PROJECT_DIR$/supervision/backend/src/domain/entities/Arcs.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/supervision/backend/src/domain/requests/Alarms/CreateAlarmRequest.ts" beforeDir="false" afterPath="$PROJECT_DIR$/supervision/backend/src/domain/requests/Alarms/CreateAlarmRequest.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/supervision/backend/src/domain/requests/Alarms/GetAlarmRequest.ts" beforeDir="false" afterPath="$PROJECT_DIR$/supervision/backend/src/domain/requests/Alarms/GetAlarmRequest.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/supervision/backend/src/domain/requests/Alarms/UpdateAlarmRequest.ts" beforeDir="false" afterPath="$PROJECT_DIR$/supervision/backend/src/domain/requests/Alarms/UpdateAlarmRequest.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/supervision/backend/src/domain/requests/Arcs/CreateArcRequest.ts" beforeDir="false" afterPath="$PROJECT_DIR$/supervision/backend/src/domain/requests/Arcs/CreateArcRequest.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/supervision/backend/src/domain/requests/Arcs/GetArcRequest.ts" beforeDir="false" afterPath="$PROJECT_DIR$/supervision/backend/src/domain/requests/Arcs/GetArcRequest.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/supervision/backend/src/domain/requests/Arcs/UpdateArcRequest.ts" beforeDir="false" afterPath="$PROJECT_DIR$/supervision/backend/src/domain/requests/Arcs/UpdateArcRequest.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/supervision/backend/src/domain/requests/NodeTypes/CreateNodeTypeRequest.ts" beforeDir="false" afterPath="$PROJECT_DIR$/supervision/backend/src/domain/requests/NodeTypes/CreateNodeTypeRequest.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/supervision/backend/src/domain/requests/Nodes/CreateNodeRequest.ts" beforeDir="false" afterPath="$PROJECT_DIR$/supervision/backend/src/domain/requests/Nodes/CreateNodeRequest.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/supervision/backend/src/domain/requests/Nodes/GetNodeRequest.ts" beforeDir="false" afterPath="$PROJECT_DIR$/supervision/backend/src/domain/requests/Nodes/GetNodeRequest.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/supervision/backend/src/domain/requests/Nodes/UpdateNodeRequest.ts" beforeDir="false" afterPath="$PROJECT_DIR$/supervision/backend/src/domain/requests/Nodes/UpdateNodeRequest.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/supervision/backend/src/domain/requests/Origins/CreateOriginRequest.ts" beforeDir="false" afterPath="$PROJECT_DIR$/supervision/backend/src/domain/requests/Origins/CreateOriginRequest.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/supervision/backend/src/domain/requests/Origins/GetOriginRequest.ts" beforeDir="false" afterPath="$PROJECT_DIR$/supervision/backend/src/domain/requests/Origins/GetOriginRequest.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/supervision/backend/src/domain/requests/Origins/UpdateOriginRequest.ts" beforeDir="false" afterPath="$PROJECT_DIR$/supervision/backend/src/domain/requests/Origins/UpdateOriginRequest.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/supervision/backend/src/domain/requests/Travels/GetTravelRequest.ts" beforeDir="false" afterPath="$PROJECT_DIR$/supervision/backend/src/domain/requests/Travels/GetTravelRequest.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/supervision/backend/src/domain/requests/Travels/UpdateTravelRequest.ts" beforeDir="false" afterPath="$PROJECT_DIR$/supervision/backend/src/domain/requests/Travels/UpdateTravelRequest.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/supervision/backend/src/domain/requests/Vehicles/GetVehiclesRequest.ts" beforeDir="false" afterPath="$PROJECT_DIR$/supervision/backend/src/domain/requests/Vehicles/GetVehiclesRequest.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/supervision/backend/src/domain/requests/Vehicles/UpdateVehiclesRequest.ts" beforeDir="false" afterPath="$PROJECT_DIR$/supervision/backend/src/domain/requests/Vehicles/UpdateVehiclesRequest.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/supervision/backend/src/domain/services/AlarmService.ts" beforeDir="false" afterPath="$PROJECT_DIR$/supervision/backend/src/domain/services/AlarmService.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/supervision/backend/src/domain/services/ArcService.ts" beforeDir="false" afterPath="$PROJECT_DIR$/supervision/backend/src/domain/services/ArcService.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/supervision/backend/src/domain/services/NodeService.ts" beforeDir="false" afterPath="$PROJECT_DIR$/supervision/backend/src/domain/services/NodeService.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/supervision/backend/src/domain/services/NodeTypeService.ts" beforeDir="false" afterPath="$PROJECT_DIR$/supervision/backend/src/domain/services/NodeTypeService.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/supervision/backend/src/domain/services/TravelService.ts" beforeDir="false" afterPath="$PROJECT_DIR$/supervision/backend/src/domain/services/TravelService.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/supervision/backend/src/domain/services/VehicleService.ts" beforeDir="false" afterPath="$PROJECT_DIR$/supervision/backend/src/domain/services/VehicleService.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/supervision/backend/src/domain/services/index.ts" beforeDir="false" afterPath="$PROJECT_DIR$/supervision/backend/src/domain/services/index.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/supervision/backend/src/infrastructure/authentication/Authenticated.ts" beforeDir="false" afterPath="$PROJECT_DIR$/supervision/backend/src/infrastructure/authentication/Authenticated.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/supervision/backend/src/routes/v1/index.ts" beforeDir="false" afterPath="$PROJECT_DIR$/supervision/backend/src/routes/v1/index.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/supervision/backend/src/routes/v1/vehicleRoute.ts" beforeDir="false" afterPath="$PROJECT_DIR$/supervision/backend/src/routes/v1/vehicleRoute.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/supervision/backend/tsconfig.json" beforeDir="false" afterPath="$PROJECT_DIR$/supervision/backend/tsconfig.json" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;customColor&quot;: &quot;&quot;,
+  &quot;associatedIndex&quot;: 3
+}</component>
+  <component name="ProjectId" id="361K6pgolLZU1bVkKmwbzjsQJbV" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;dev-supervision-backend&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/home/alexandre&quot;
+  },
+  &quot;keyToStringList&quot;: {
+    &quot;DatabaseDriversLRU&quot;: [
+      &quot;mysql&quot;
+    ]
+  }
+}</component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="b6bc6421-a2e3-4fef-8adc-38bb1bf41406" name="Changes" comment="" />
+      <created>1764168472810</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1764168472810</updated>
+    </task>
+    <servers />
+  </component>
+</project>

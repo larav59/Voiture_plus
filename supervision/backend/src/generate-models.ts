@@ -24,7 +24,7 @@ parameters.set('-u', mysqlConfig.user);
 parameters.set('-x', mysqlConfig.password);
 parameters.set('-p', mysqlConfig.port.toString());
 parameters.set('-e', 'mysql');
-parameters.set('-o', path.resolve(__dirname, 'data/entities'));
+parameters.set('-o', path.resolve(__dirname, 'domain/entities'));
 parameters.set('--noConfig', 'true');
 parameters.set('--property-visibility', 'public');
 parameters.set('--strictMode', '!');
@@ -42,8 +42,8 @@ parameters.forEach((value, key) => {
 });
 
 const command = `npx typeorm-model-generator ${args}`;
-
 exec.exec(command, (err, stdout, stderr) => {
+
     if (err) {
         console.error(err);
         return;

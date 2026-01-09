@@ -1,6 +1,6 @@
 export class UserIdentity {
 	constructor(
-		public id: string,
+		public username: string,
 	) {}
 
 	/**
@@ -8,7 +8,7 @@ export class UserIdentity {
 	 */
 	static fromPayload(payload: any): UserIdentity {
 		return new UserIdentity(
-			payload.uid
+			payload.username
 		);
 	}
 }
