@@ -1,0 +1,2 @@
+# You need to convert the model into IMX500 RPK format before running this script.
+/usr/bin/python3 imx500_object_detection.py --model supercool/network.rpk/network.rpk --labels supercool/labels.txt --fps 16 --bbox-normalization --ignore-dash-labels --bbox-order xy

@@ -9,16 +9,33 @@
 
 #include "vehicle/vehicle.h"
 
+static void on_camera_objects_received(const camera_detected_object_t* objects, int count, void* context) {
+	UNUSED(context);
+	//LOG_DEBUG_ASYNC("Camera: Received %d objects.", count);
+	for (int i = 0; i < count; i++) {
+		LOG_DEBUG_ASYNC(" - Object %d: Category=%s, Confidence=%.2f, Box=(x=%.2f,y=%.2f,w=%.2f,h=%.2f)",
+			i,
+			camera_category_to_string(objects[i].category),
+			objects[i].confidence,
+			objects[i].box.x,
+			objects[i].box.y,
+			objects[i].box.w,
+			objects[i].box.h);
+	}
 
-int g_fd = -1;
+	on_camera_objects_logic(objects, count);
+}
 
-static void on_position_received(int32_t x, int32_t y, double angle) {
-    LOG_DEBUG_ASYNC("Position reçue de Marvelmind: x=%d mm, y=%d mm, angle=%.2f°", x, y, angle);
+static void on_position_received(int32_t x, int32_t y, double angle, void* context) {
+	int fd = *((int*)context);
     while (angle > 180.0) angle -= 360.0;
     while (angle < -180.0) angle += 360.0;
 
     int16_t angle_int = (int16_t)(angle * 100);
-    protocol_send_position_telemetry(g_fd, (int16_t)x, (int16_t)y, angle_int);
+    protocol_send_position_telemetry(fd, (int16_t)x, (int16_t)y, angle_int);
+
+	// Pour l'instant aucun moyen de récupérer la vitesse du véhicule 
+	on_vehicle_telemetry_logic((int16_t)x, (int16_t)y, angle_int, 0);
 }
 
 int main(int argc, char **argv) {
@@ -46,34 +63,56 @@ int main(int argc, char **argv) {
 		LOG_FATAL_SYNC("Failed to set LWT for Vehicle service. Exiting.");
 		return EXIT_FAILURE;
 	}
-
 	LOG_INFO_ASYNC("Vehicle started successfully.");
 
-	mqtt_set_message_callback(vehicle_message_callback);
+	char vehicleTopic[255];
+	snprintf(vehicleTopic, sizeof(vehicleTopic), "vehicles/%d/request", vehicle_config.vehicleId);
+	mqtt_subscribe(vehicleTopic, MQTT_QOS_EXACTLY_ONCE);
+	
+	snprintf(vehicleTopic, sizeof(vehicleTopic), "vehicles/%d/response", vehicle_config.vehicleId);
+	mqtt_subscribe(vehicleTopic, MQTT_QOS_EXACTLY_ONCE);
 
-    uart_config_t uart_conf = {
+	uart_config_t uart_conf = {
 		.baudrate = vehicle_config.bauderate,
 		.timeoutMs = vehicle_config.timeoutMs,
 		.devicePath = vehicle_config.devicePath
 	};
 
-    int g_fd = uart_open(&uart_conf);
-    if (g_fd < 0) {
+    int uartFd = uart_open(&uart_conf);
+    if (uartFd < 0) {
         LOG_FATAL_SYNC("Impossible d'ouvrir l'UART pour le test.");
         core_shutdown();
 		signal_cleanup();
         return EXIT_FAILURE;
     }
 
-    if(marvelmind_init(vehicle_config.devicePath, on_position_received) != 0) {
+    if(marvelmind_init(vehicle_config.marvelmindPort, on_position_received, (void*) &uartFd) != 0) {
         LOG_FATAL_SYNC("Échec de l'initialisation de Marvelmind.");
         core_shutdown();
         signal_cleanup();
         return EXIT_FAILURE;
     }
 
+	vehicle_init_state(uartFd, vehicle_config.vehicleId);
     marvelmind_start_acquisition();
 
+	camera_socket_t cam_socket;
+	if (camera_server_init(&cam_socket, vehicle_config.cameraSocketBindIp, vehicle_config.cameraSocketPort, on_camera_objects_received, NULL) != 0) {
+		LOG_FATAL_SYNC("Échec de l'initialisation du serveur caméra.");
+		core_shutdown();
+		signal_cleanup();
+		return EXIT_FAILURE;
+	}
+
+	if (camera_server_start(&cam_socket) != 0) {
+		LOG_FATAL_SYNC("Échec du démarrage du serveur caméra.");
+		camera_server_cleanup(&cam_socket);
+		core_shutdown();
+		signal_cleanup();
+		return EXIT_FAILURE;
+	}
+
+	mqtt_set_message_callback(vehicle_message_callback);
 	signal_wait_for_shutdown();
 
 	LOG_INFO_ASYNC("Shutdown signal received. Stopping Vehicle Service...");
@@ -81,5 +120,7 @@ int main(int argc, char **argv) {
 	signal_cleanup();	
     marvelmind_stop_acquisition();
     marvelmind_cleanup();
+	camera_server_stop(&cam_socket);
+	camera_server_cleanup(&cam_socket);
 	return 0;
 }

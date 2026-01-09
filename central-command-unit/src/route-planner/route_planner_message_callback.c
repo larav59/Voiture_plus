@@ -125,6 +125,8 @@ static void on_plan_route_request(const plan_route_request_t* request) {
 		return;
 	}
 
+	
+
 	char *jsonPayload = set_waypoints_request_serialize(&waypointRequest);
 	if(!jsonPayload) {
 		LOG_ERROR_ASYNC("Could not serialize set_waypoints_request message to JSON for carId %d", request->carId);
@@ -140,6 +142,7 @@ static void on_plan_route_request(const plan_route_request_t* request) {
 		.nodeCount = 0,
 		.carId = request->carId
 	};
+	response.header.success = true;
 
 	int pathNodeIds[totalPath.length];    
 	for(int i = 0; i < totalPath.length; i++) {
@@ -177,6 +180,7 @@ void on_get_map_response(const cJSON *root, const command_response_header_t *hea
 	
 	g_map = mapResponse.map;
 	LOG_INFO_ASYNC("Map received with %d nodes.", g_map->numNodes);
+
 }
 
 void route_planner_message_callback(const char* topic, const char* payload) {

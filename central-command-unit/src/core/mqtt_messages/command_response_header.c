@@ -50,10 +50,20 @@ command_response_header_t create_command_response_header(const char *originalCom
  * @return 0 en cas de succès, -1 en cas d'échec.
  */
 int command_response_header_to_json(const command_response_header_t *header, cJSON *root) {
-	if(!cJSON_AddStringToObject(root, "commandId", header->commandId)) 
-	if(!cJSON_AddBoolToObject(root, "success", header->success))
-	if(!cJSON_AddNumberToObject(root, "timestampSec", (double) header->timestamp.tv_sec)) 
-	if(!cJSON_AddNumberToObject(root, "timestampNsec", (double) header->timestamp.tv_nsec)) return -1;	
+	LOG_DEBUG_ASYNC("Serializing command_response_header_t to JSON: commandId=%s, success=%d, errorMessage=%s, timestamp=(%ld,%ld)",
+		header->commandId, header->success, header->errorMessage, header->timestamp.tv_sec, header->timestamp.tv_nsec);
+	if(!cJSON_AddStringToObject(root, "commandId", header->commandId)) {
+		return -1;
+	}
+	if(!cJSON_AddBoolToObject(root, "success", header->success ? cJSON_True : cJSON_False)) {
+		return -1;
+	}
+	if(!cJSON_AddNumberToObject(root, "timestampSec", (double) header->timestamp.tv_sec)) {
+		return -1;
+	}
+	if(!cJSON_AddNumberToObject(root, "timestampNsec", (double) header->timestamp.tv_nsec)) {
+		return -1;
+	}
 
 	if (!header->success) {
 		if (!cJSON_AddStringToObject(root, "errorMessage", header->errorMessage)) return -1;
@@ -91,13 +101,19 @@ char *command_response_header_serialize(const command_response_header_t *header)
  */
 int command_response_header_deserialize(const cJSON *root, command_response_header_t *header) {
 	const cJSON *commandItem = cJSON_GetObjectItemCaseSensitive(root, "commandId");
-	if (!cJSON_IsString(commandItem) || (commandItem->valuestring == NULL)) return -1;
+	if (!cJSON_IsString(commandItem) || (commandItem->valuestring == NULL)) {
+		LOG_DEBUG_ASYNC("command_response_header_deserialize: commandId missing or not a string");
+		return -1;
+	}
 
 	strncpy(header->commandId, commandItem->valuestring, COMMAND_ID_LENGTH - 1);
 	header->commandId[COMMAND_ID_LENGTH - 1] = '\0';
 
 	const cJSON *successItem = cJSON_GetObjectItemCaseSensitive(root, "success");
-	if (!cJSON_IsBool(successItem)) return -1;
+	if (!cJSON_IsBool(successItem)) {
+		LOG_DEBUG_ASYNC("command_response_header_deserialize: success missing or not a boolean");
+		return -1;
+	}
 
 	header->success = cJSON_IsTrue(successItem);
 
@@ -115,7 +131,11 @@ int command_response_header_deserialize(const cJSON *root, command_response_head
 
 	const cJSON *timestampSItem = cJSON_GetObjectItemCaseSensitive(root, "timestampSec");
 	const cJSON *timestampNsItem = cJSON_GetObjectItemCaseSensitive(root, "timestampNsec");
-	if (!cJSON_IsNumber(timestampSItem) || !cJSON_IsNumber(timestampNsItem)) return -1;
+	if (!cJSON_IsNumber(timestampSItem) || !cJSON_IsNumber(timestampNsItem)) {
+		header->timestamp.tv_sec = 0;
+		header->timestamp.tv_nsec = 0;
+		return 0;
+	}
 
 	header->timestamp.tv_sec = (time_t) timestampSItem->valuedouble;
 	header->timestamp.tv_nsec = (long) timestampNsItem->valuedouble;

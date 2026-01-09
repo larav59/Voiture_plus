@@ -237,3 +237,27 @@ Chaque service utilise un système de journalisation (logging) pour enregistrer 
 - `log_topic` : Topic MQTT pour les messages de log (exemple : `system/logs/`)
 - `log_level` : Niveau de log (exemple : `DEBUG`, `INFO`, `WARNING`, `ERROR`)
 
+### Todo
+
+## Heatbeat Service
+- Rendre la logique plus robuste sur la vérification des états des services et véhicules.
+- Actuellement lorsqu'un service est down il envoie plusieurs requêtes à plusieurs services. Sauf que si une requete échoue, les suivantes ne sont pas envoyées.
+- Le service envoie les requetes sans vérifier si elles ont bien été reçues ou exécutées. Implémenter un système de confirmation de réception et d'exécution des commandes.
+
+## Route Planner Service
+- Un probleme et de positionner le véhicule sur un noeud du graphe. Actuellement c'est l'api qui determine la position du véhicule et l'envoie au route planner or ce n'est pas le role de l'api. Il faudrait que le vehicle envoie sa position au route planner directement.
+
+- Un fixture à été mise en place dans le cas d'un segment de longueur 1. Il faudrait modifier le code actuel pour le rendre plus générique et éviter d'avoir des cas particuliers.
+
+
+### Vehicle Service
+- Implementer un système pour que l'arduino de la voiture puisse envoyer des messages au service Vehicle de la CCU.
+- Implementer une logique plus intelligente pour la prise de décision locale du véhicule.
+- Le véhicule dévie de son trajet suite à un erreur niveau angle du gyroscope. Il faudrait revoir l'asservissement et de trouver un moyen de calibrer l'angle avec le marvelmind.
+- Pouvoir se garer et faire des manoeuvres de stationnement autonome.
+
+## Railway Synchronizer Service
+- Rien n'a été implémenté pour l'instant.
+
+## Conflict Manager Service
+- Une base de code a été commencée mais rien n'a été testé ou finalisé pour l'instant.

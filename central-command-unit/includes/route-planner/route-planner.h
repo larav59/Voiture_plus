@@ -11,7 +11,7 @@
 #include "core/core.h"
 #include "route-planner/route_planner_message_callback.h"
 
-#define ROUTE_PLANNER_SERVICE_VERSION "Route Planner v1.1.0"
+#define ROUTE_PLANNER_SERVICE_VERSION "Route Planner v1.1.1"
 
 
 #endif // ROUTE_PLANNER_H

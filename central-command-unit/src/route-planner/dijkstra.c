@@ -74,16 +74,16 @@ path_t dijkstra_find_path(graph_t *graph, node_t *start, node_t *end) {
 	for(int i = 0; i < graph->numNodes; i++) {
 		data[i].gCost = DIJKSTRA_INFINITY;
 	}
-	data[start->id].gCost = 0.0;
+	data[start->index].gCost = 0.0;
 	pq_push(pq, start, 0);
 
 	while(!pq_is_empty(pq)) {
 		node_t *current = (node_t *) pq_pop(pq);
 
-		if(data[current->id].visited) {
+		if(data[current->index].visited) {
 			continue;
 		}
-		data[current->id].visited = true;
+		data[current->index].visited = true;
 
 		if(current == end) {
 			path_t path = reconstruct_path(end, data);
@@ -96,12 +96,12 @@ path_t dijkstra_find_path(graph_t *graph, node_t *start, node_t *end) {
 		while(edge != NULL) {
 			node_t *neighbor = edge->targetNode;
 
-			if(!data[neighbor->id].visited) {
-				double newCost = data[current->id].gCost + edge->weight;
+			if(!data[neighbor->index].visited) {
+				double newCost = data[current->index].gCost + edge->weight;
 
-				if(newCost < data[neighbor->id].gCost) {
-					data[neighbor->id].gCost = newCost;
-					data[neighbor->id].previous = current;
+				if(newCost < data[neighbor->index].gCost) {
+					data[neighbor->index].gCost = newCost;
+					data[neighbor->index].previous = current;
 					pq_push(pq, neighbor, (int)newCost);
 				}
 			}

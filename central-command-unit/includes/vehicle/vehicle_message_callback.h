@@ -14,6 +14,8 @@
 #include "core/graph.h"
 #include "core/request_manager.h"
 #include "core/action_codes.h"
+#include "vehicle/vehicle_context.h"
+#include "vehicle/uart_proto.h"
 
 
 #define VEHICLE_REPLY_TOPIC "services/vehicle/response"

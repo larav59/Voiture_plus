@@ -32,6 +32,7 @@ graph_t* graph_create(int numNodes) {
 		graph->nodes[i].y = 0.0;
 		graph->nodes[i].type = NODE_TYPE_WAYPOINT;
 		graph->nodes[i].edges = NULL;
+		graph->nodes[i].index = i;
 	}
 
 	return graph;
@@ -88,13 +89,12 @@ void graph_init_node(graph_t* graph, int nodeId, double x, double y, node_type_t
  * @return true si succès, false en cas d'erreur (ex: ID de noeud invalide).
  */
 bool graph_add_edge(graph_t* graph, int originNodeId, int targetNodeId, double weight, lane_rule_t rule) {
-	if(originNodeId < 0 || originNodeId >= graph->numNodes ||
-	   targetNodeId < 0 || targetNodeId >= graph->numNodes) {
+	node_t* originNode = graph_get_node_by_id(graph, originNodeId);
+	node_t* targetNode = graph_get_node_by_id(graph, targetNodeId);
+
+	if (!originNode || !targetNode) {
 		return false;
 	}
-
-	node_t* originNode = &graph->nodes[originNodeId];
-	node_t* targetNode = &graph->nodes[targetNodeId];
 
 	edge_t* newEdge = (edge_t*)malloc(sizeof(edge_t));
 	if (!newEdge) {

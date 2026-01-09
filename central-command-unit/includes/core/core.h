@@ -73,4 +73,10 @@ void core_set_service_version(const char* serviceVersion);
  */
 void core_shutdown(void);
 
+/**
+ * @brief Obtient le timestamp actuel en millisecondes depuis le démarrage du programme.
+ * @return Timestamp actuel en millisecondes.
+ */
+long core_get_current_timestamp_ms(void);
+
 #endif // CCU_CORE_H
